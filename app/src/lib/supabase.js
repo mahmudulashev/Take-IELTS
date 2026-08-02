@@ -285,6 +285,13 @@ export async function saveTestResult({ testType, testId, score, totalQuestions =
   results.unshift(newResult)
   localStorage.setItem(STORAGE_KEYS.RESULTS, JSON.stringify(results))
 
+  // AuthContext'ga xabar beramiz — dashboard va hisobotlar darhol
+  // yangilanadi, foydalanuvchi sahifani qayta yuklamasligi kerak.
+  // (`storage` hodisasi faqat BOSHQA tablarda ishlaydi, shu tabda emas.)
+  try {
+    window.dispatchEvent(new CustomEvent('ielts:results-updated'))
+  } catch (e) { /* SSR yoki eski brauzer */ }
+
   // Avtomatik bulutga yozish — test tugagan zahoti
   if (isSupabaseConfigured && supabase && user?.id) {
     try {
@@ -456,4 +463,9 @@ export async function clearTestHistory() {
       console.warn('Supabase delete history error:', e)
     }
   }
+
+  // Barcha ochiq ko'rinishlar (dashboard, hisobotlar) darhol tozalansin
+  try {
+    window.dispatchEvent(new CustomEvent('ielts:results-updated'))
+  } catch (e) { /* SSR yoki eski brauzer */ }
 }

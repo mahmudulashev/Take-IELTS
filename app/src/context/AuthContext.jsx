@@ -107,6 +107,75 @@ export function AuthProvider({ children }) {
     return () => { cancelled = true }
   }, [user])
 
+  // ------------------------------------------------------------------
+  // Natijalar boshqa joyda o'zgarganda darhol ko'rinsin.
+  //
+  // Muammo: natija uch xil joyda saqlanadi —
+  //   1. React test sahifasi (/test/reading)  → saveTestResult()
+  //   2. Statik HTML testlar                  → to'g'ridan-to'g'ri localStorage
+  //   3. Boshqa tab                            → localStorage
+  // Ilgari `results` faqat `user` o'zgarganda yangilanardi, shuning uchun
+  // testdan qaytgach dashboard eski holatni ko'rsatardi va foydalanuvchi
+  // sahifani qo'lda yangilashga majbur bo'lardi.
+  //
+  // Yechim: to'rtta signalni tinglaymiz. Avval localStorage'dan darhol
+  // o'qiymiz (0ms, spinner yo'q), keyin fonda Supabase bilan birlashtiramiz.
+  // ------------------------------------------------------------------
+  useEffect(() => {
+    let cancelled = false
+    let lastSync = 0
+
+    function syncNow() {
+      // Bir necha signal ketma-ket kelishi mumkin (masalan pageshow +
+      // visibilitychange). Bulutga keraksiz so'rov yubormaslik uchun
+      // 1.5 soniyalik oraliq qo'yamiz.
+      const now = Date.now()
+      if (now - lastSync < 1500) return
+      lastSync = now
+
+      // 1-bosqich: darhol localStorage'dan (tez)
+      const local = readLocalResults()
+      setResults(local)
+      setStats(computeStats(local))
+
+      // 2-bosqich: fonda bulut bilan birlashtirish
+      Promise.all([fetchResults(100), fetchStats()])
+        .then(([freshResults, freshStats]) => {
+          if (cancelled) return
+          setResults(freshResults)
+          setStats(freshStats)
+        })
+        .catch(() => { /* xato bo'lsa local ma'lumot qoladi */ })
+    }
+
+    function onStorage(e) {
+      // e.key null bo'lishi mumkin (localStorage.clear())
+      if (!e.key || e.key === 'ielts_test_results') syncNow()
+    }
+
+    function onVisibility() {
+      if (document.visibilityState === 'visible') syncNow()
+    }
+
+    function onPageShow() {
+      // Orqaga tugmasi bfcache'dan tiklaganda ham ishlaydi
+      syncNow()
+    }
+
+    window.addEventListener('storage', onStorage)                 // boshqa tab
+    window.addEventListener('ielts:results-updated', syncNow)     // shu tab (saveTestResult)
+    window.addEventListener('pageshow', onPageShow)               // bfcache / orqaga
+    document.addEventListener('visibilitychange', onVisibility)   // tabga qaytish
+
+    return () => {
+      cancelled = true
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener('ielts:results-updated', syncNow)
+      window.removeEventListener('pageshow', onPageShow)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
+  }, [])
+
   const refreshResults = useCallback(async () => {
     const [freshResults, freshStats] = await Promise.all([fetchResults(100), fetchStats()])
     setResults(freshResults)
