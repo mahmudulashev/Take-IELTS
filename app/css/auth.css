@@ -1,0 +1,213 @@
+/* auth.css */
+.auth-layout {
+    background-color: var(--color-bg, #F7F8FC);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--color-text, #111827);
+    margin: 0;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.auth-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    margin-bottom: 2rem;
+    transition: transform 0.2s ease;
+}
+
+.auth-logo:hover {
+    transform: scale(1.05);
+}
+
+.logo-badge {
+    background: var(--color-red, #FF3131);
+    color: white;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.logo-text {
+    color: var(--color-text, #111827);
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+}
+
+.auth-card-wrapper {
+    width: 100%;
+    position: relative;
+    border-radius: 24px;
+    /* Subtle animated gradient border effect */
+    background: linear-gradient(135deg, rgba(255,49,49,0.3) 0%, rgba(255,255,255,0) 50%, rgba(255,107,107,0.3) 100%);
+    padding: 1px;
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-card {
+    background-color: var(--color-card, #FFFFFF);
+    border-radius: 23px; /* Slightly less than wrapper to fit inside */
+    padding: 40px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    text-align: center;
+}
+
+.auth-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.auth-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.text-muted {
+    color: var(--color-muted, #6B7280);
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
+
+.text-muted.small {
+    font-size: 0.8125rem;
+}
+
+.google-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background-color: white;
+    border: 1px solid var(--color-border, rgba(0,0,0,0.06));
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--color-text, #111827);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.google-btn:hover:not(:disabled) {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    transform: translateY(-2px);
+    border-color: rgba(0,0,0,0.1);
+}
+
+.google-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.google-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.google-icon {
+    width: 20px;
+    height: 20px;
+    transition: opacity 0.2s ease;
+}
+
+.spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(0,0,0,0.1);
+    border-left-color: var(--color-text, #111827);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    position: absolute;
+    left: 20px; /* Aligned with icon */
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.google-btn.loading .spinner {
+    display: block;
+}
+
+.google-btn.loading .google-icon {
+    opacity: 0;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--color-muted, #6B7280);
+    font-size: 0.875rem;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--color-border, rgba(0,0,0,0.06));
+}
+
+.divider span {
+    padding: 0 12px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 8px;
+    color: var(--color-muted, #6B7280);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.back-link:hover {
+    color: var(--color-text, #111827);
+}
+
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 32px 24px;
+    }
+}

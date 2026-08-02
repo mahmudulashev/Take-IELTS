@@ -1,0 +1,997 @@
+import os
+
+# Content for listening-test-3.html
+html3 = '''<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listening Practice 3 — Take IELTS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background-color: #ffffff; line-height: 1.4; font-size: 16px; padding-bottom: 90px; }
+        .header { background-color: #ffffff; padding: 12px 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 60px; }
+        .audio-player-container { position: fixed; top: 65px; left: 50%; transform: translateX(-50%); width: 500px; max-width: 90%; height: 40px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; padding: 0 15px; z-index: 99; gap: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        .player-btn { background: none; border: none; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; }
+        .player-btn svg { width: 20px; height: 20px; fill: #333; }
+        .progress-container { flex-grow: 1; display: flex; align-items: center; gap: 10px; }
+        #progress-bar { flex-grow: 1; -webkit-appearance: none; appearance: none; height: 4px; background: #ddd; outline: none; border-radius: 3px; cursor: pointer; }
+        #progress-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #FF3131; cursor: pointer; }
+        #current-time, #total-duration { font-size: 12px; color: #555; min-width: 35px; text-align: center; }
+        .controls-container { display: flex; align-items: center; gap: 10px; }
+        #new-volume-slider { -webkit-appearance: none; appearance: none; width: 60px; height: 3px; background: #ccc; outline: none; border-radius: 2px; cursor: pointer; margin-left: 8px; }
+        #new-volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #333; }
+        #speed-btn { font-size: 12px; font-weight: 600; color: #333; background-color: #e9ecef; border: 1px solid #ced4da; border-radius: 4px; padding: 4px 8px; cursor: pointer; }
+        #speed-options { position: absolute; top: calc(100% + 5px); right: 0; background: white; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); z-index: 100; }
+        #speed-options div { padding: 8px 15px; cursor: pointer; }
+        #speed-options div:hover { background-color: #f0f0f0; }
+        .speed-container { position: relative; }
+        .main-container { margin-top: 115px; display: flex; background: #ffffff; padding-bottom: 100px; }
+        .main-container.results-mode .left-panel { width: 75%; overflow-y: auto; height: calc(100vh - 195px); }
+        .main-container.results-mode .right-panel { display: block; width: 25%; border-left: 1px solid #e0e0e0; height: calc(100vh - 195px); overflow-y: auto; }
+        .left-panel { width: 100%; padding: 20px; }
+        .questions-container { max-width: 50%; }
+        .right-panel { display: none; padding: 20px; border-left: 1px solid #e0e0e0; }
+        #transcription-text { white-space: normal; font-family: inherit; font-size: 15px; line-height: 1.7; }
+        #transcription-text p { margin-bottom: 12px; }
+        .t-hl { background: #fff3a0; border-radius: 3px; padding: 0 2px; scroll-margin-top: 80px; }
+        .t-hl.active { background: #ffd34d; box-shadow: 0 0 0 2px #f0a500; }
+        .t-hl[data-time] { cursor: pointer; }
+        .t-hl[data-time]:hover { background: #ffe066; box-shadow: 0 0 0 1px #e0a800; }
+        .t-qmark { font-size: 10px; font-weight: 700; color: #fff; background: #FF3131; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; min-width: 16px; vertical-align: super; margin-right: 2px; line-height: 1; }
+        .part-header { background-color: #FFF0F0; color: #FF3131; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(255,49,49,0.2); }
+        .question { margin-bottom: 40px; }
+        .question p { margin-bottom: 10px; }
+        .question-prompt { margin-bottom: 20px; }
+        .centered-title { text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
+        .answer-input { border: 1px solid #9aa3ad; border-radius: 4px; background-color: #fff; padding: 4px 8px; font-size: 16px; width: 140px; height: 28px; line-height: 1.2; vertical-align: middle; transition: border-color 0.15s ease; position: relative; z-index: 10; }
+        .answer-input::placeholder { color: #999; font-weight: bold; text-align: center; }
+        .answer-input:focus { outline: none; border-color: #FF3131; border-width: 2px; }
+        .answer-input.correct { border-color: #28a745; background-color: #e9f7ef; }
+        .answer-input.incorrect { border-color: #dc3545; background-color: #f8d7da; color: #721c24; }
+        .correct-inline { color: #28a745; font-weight: 700; margin-left: 10px; display: inline-block; vertical-align: middle; }
+        .correct-inline::before { content: "→ "; }
+        .multi-choice-option { display: block; width: 100%; padding: 10px 14px; background-color: #fff; border: 1px solid transparent; transition: background-color 0.2s; border-radius: 6px; }
+        .multi-choice-option:hover { background-color: #FFF0F0; border-color: rgba(255,49,49,0.3); }
+        .multi-choice-option:has(input[type="radio"]:checked), .multi-choice-option:has(input[type="checkbox"]:checked) { background-color: #FFF0F0; border-color: #FF3131; }
+        .multi-choice-option.correct { background-color: #d4edda !important; }
+        .multi-choice-option.incorrect { background-color: #f8d7da !important; }
+        .multi-choice-option label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 16px; width: 100%; }
+        .multi-choice-option input[type="radio"], .multi-choice-option input[type="checkbox"] { transform: scale(1.2); accent-color: #FF3131; }
+        .matching-options-box { border: 1px solid #ccc; border-radius: 5px; padding: 15px; background: #f9f9f9; margin-bottom: 20px; display: inline-block; min-width: 300px; }
+        .matching-options-box p { margin-bottom: 5px; }
+        .matching-item { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .matching-item span { min-width: 240px; font-size: 16px; }
+        .notes-table { width: 100%; border-collapse: collapse; }
+        .notes-table th, .notes-table td { border: 1px solid #888; padding: 10px; text-align: left; vertical-align: top; }
+        .notes-table th { background: #FFF0F0; color: #FF3131; font-weight: 700; text-align: center; }
+        .hidden { display: none; }
+        .nav-arrows { position: fixed; bottom: 100px; right: 20px; display: flex; gap: 5px; z-index: 101; }
+        .nav-arrow { width: 50px; height: 50px; background: #333; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; border-radius: 8px; }
+        .nav-arrow:hover { background: #FF3131; }
+        .nav-arrow:disabled { background: #ccc; cursor: not-allowed; }
+        .nav-row { position: fixed; bottom: 0; left: 0; right: 0; background: #ffffff; padding: 0; display: flex; align-items: center; height: 80px; z-index: 100; overflow-x: auto; overflow-y: hidden; white-space: nowrap; border-top: 1px solid #e0e0e0; }
+        .footer__questionWrapper___1tZ46 { display: flex; align-items: center; margin-right: 20px; flex-shrink: 0; }
+        .footer__questionNo___3WNct { background: none; border: none; padding: 10px 15px; font-size: 16px; font-weight: 600; color: #333; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .footer__questionNo___3WNct:hover { background-color: #f8f9fa; }
+        .attemptedCount { font-size: 14px; color: #666; margin-left: 5px; font-weight: 400; }
+        .footer__subquestionWrapper___9GgoP { display: none; gap: 2px; margin-left: 10px; }
+        .footer__questionWrapper___1tZ46.selected .footer__subquestionWrapper___9GgoP { display: flex; }
+        .footer__questionWrapper___1tZ46.selected .attemptedCount { display: none; }
+        .subQuestion { width: 32px; height: 32px; border: 1px solid #ccc; background: white; color: #333; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; border-radius: 4px; }
+        .subQuestion.answered { background-color: #e9ecef; border-color: #ddd; }
+        .subQuestion.correct { background-color: #28a745; color: white; border-color: #28a745; }
+        .subQuestion.incorrect { background-color: #dc3545; color: white; border-color: #dc3545; }
+        .subQuestion:hover { background-color: #f0f0f0; border-color: #999; }
+        .subQuestion.active { background-color: #FF3131; color: white; border-color: #FF3131; }
+        .footer__deliverButton___3FM07 { margin-left: auto; margin-right: 20px; background-color: #FF3131; color: #fff; border: 1px solid #FF3131; padding: 12px 20px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; min-width: 170px; justify-content: center; box-shadow: 0 4px 12px rgba(255, 49, 49, 0.25); }
+        .footer__deliverButton___3FM07:hover { background-color: #E82C2C; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); z-index: 2000; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: white; padding: 25px; border-radius: 16px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-header h2 { font-size: 24px; color: #333; }
+        .modal-close-btn { background: none; border: none; font-size: 28px; cursor: pointer; color: #888; }
+        #score-summary { font-size: 16px; font-weight: 600; color: #111827; background: #FFF0F0; border: 1px solid rgba(255, 49, 49, 0.2); padding: 10px 12px; border-radius: 8px; display: inline-block; margin-bottom: 15px; }
+        #result-details table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        #result-details th, #result-details td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        #result-details th { background-color: #f8f9fa; font-weight: 600; }
+        .result-correct { color: #28a745; font-weight: bold; }
+        .result-incorrect { color: #dc3545; font-weight: bold; }
+        @keyframes flash { 0% { background-color: #FFF0F0; } 100% { background-color: transparent; } }
+        .question.flash { animation: flash 1s ease-out; }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="timer-container"><span class="timer-display">60:00</span></div>
+        <a href="/dashboard" class="exit-header-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 16px;background:#FFF0F0;color:#FF3131;border:1.5px solid #FF3131;border-radius:9999px;font-weight:700;font-size:13px;text-decoration:none;transition:all 0.2s;">← Exit to Dashboard</a>
+    </div>
+
+    <div class="audio-player-container">
+        <button id="play-pause-btn" class="player-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+            </svg>
+        </button>
+        <div class="progress-container">
+            <span id="current-time">0:00</span>
+            <input type="range" id="progress-bar" value="0" step="1" style="width:100%;">
+            <span id="total-duration">0:00</span>
+        </div>
+        <div class="controls-container">
+            <div style="display:flex;align-items:center;">
+                <button id="volume-btn" class="player-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                </button>
+                <input type="range" id="new-volume-slider" min="0" max="1" step="0.01" value="1">
+            </div>
+            <div class="speed-container">
+                <button id="speed-btn" class="player-btn">1x</button>
+                <div id="speed-options" class="hidden">
+                    <div data-speed="0.5">0.5x</div>
+                    <div data-speed="0.75">0.75x</div>
+                    <div data-speed="1">1x</div>
+                    <div data-speed="1.25">1.25x</div>
+                    <div data-speed="1.5">1.5x</div>
+                    <div data-speed="2">2x</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="left-panel">
+
+            <!-- ======================== PART 1 ======================== -->
+            <div id="part-1" class="question-part">
+                <div class="part-header">
+                    <p><strong>Part 1</strong></p>
+                    <p>Listen and answer questions 1–10.</p>
+                </div>
+                <div class="questions-container">
+                    <div class="question">
+                        <div class="question-prompt">
+                            <p><strong>Questions 1–10</strong></p>
+                            <p>Complete the table below.</p>
+                            <p>Write <strong>ONE WORD AND/OR A NUMBER</strong> for each answer.</p>
+                            <p class="centered-title" style="margin-top:10px;">Asia-Pacific Tours<br>Activity Holidays</p>
+                        </div>
+                        <table class="notes-table">
+                            <tr>
+                                <th style="width:22%;">Tour</th>
+                                <th style="width:52%;">Details</th>
+                                <th style="width:26%;">Cost</th>
+                            </tr>
+                            <tr>
+                                <td><em>Example</em><br><br><strong>Vietnam</strong></td>
+                                <td>
+                                    <p style="margin-bottom:12px;">&#8226;&nbsp; a cookery course at a 5-star hotel</p>
+                                    <p style="margin-bottom:12px;">&#8226;&nbsp; either <input type="text" id="q1" class="answer-input" placeholder="1" style="width:120px;"> lessons or a one-day trek in the <input type="text" id="q2" class="answer-input" placeholder="2" style="width:120px;"></p>
+                                    <p style="margin-bottom:0;">&#8226;&nbsp; attend a <input type="text" id="q3" class="answer-input" placeholder="3" style="width:120px;"> performance</p>
+                                </td>
+                                <td><strong>4</strong> £ <input type="text" id="q4" class="answer-input" placeholder="4" style="width:110px;"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Hong Kong</strong></td>
+                                <td>
+                                    <p style="margin-bottom:12px;">&#8226;&nbsp; go to the hills to look at <input type="text" id="q5" class="answer-input" placeholder="5" style="width:120px;"> in a country park,</p>
+                                    <p style="margin-bottom:12px;">&#8226;&nbsp; followed by <input type="text" id="q6" class="answer-input" placeholder="6" style="width:120px;"> in a monastery</p>
+                                    <p style="margin-bottom:0;">&#8226;&nbsp; visit an <input type="text" id="q7" class="answer-input" placeholder="7" style="width:130px;"> factory with the chance to shop</p>
+                                </td>
+                                <td>£1,320</td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" id="q8" class="answer-input" placeholder="8" style="width:110px;"></td>
+                                <td>
+                                    <p style="margin-bottom:12px;">&#8226;&nbsp; visit a museum of traditional <input type="text" id="q9" class="answer-input" placeholder="9" style="width:120px;"></p>
+                                    <p style="margin-bottom:0;">&#8226;&nbsp; tour of a big <input type="text" id="q10" class="answer-input" placeholder="10" style="width:120px;"> market</p>
+                                </td>
+                                <td>£1,800</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== PART 2 ======================== -->
+            <div id="part-2" class="question-part hidden">
+                <div class="part-header">
+                    <p><strong>Part 2</strong></p>
+                    <p>Listen and answer questions 11–20.</p>
+                </div>
+                <div class="questions-container">
+
+                    <div class="question">
+                        <div class="question-prompt">
+                            <p><strong>Questions 11 and 12</strong></p>
+                            <p>Choose <strong>TWO</strong> letters, <strong>A–E</strong>.</p>
+                            <p>Which <strong>TWO</strong> items will participants on the dancing course receive when they check in?</p>
+                        </div>
+                        <div class="multi-choice-option"><label><input type="checkbox" name="q11-12" value="A"> A &nbsp; a class list</label></div>
+                        <div class="multi-choice-option"><label><input type="checkbox" name="q11-12" value="B"> B &nbsp; a face towel</label></div>
+                        <div class="multi-choice-option"><label><input type="checkbox" name="q11-12" value="C"> C &nbsp; a name tag</label></div>
+                        <div class="multi-choice-option"><label><input type="checkbox" name="q11-12" value="D"> D &nbsp; a shoe bag</label></div>
+                        <div class="multi-choice-option"><label><input type="checkbox" name="q11-12" value="E"> E &nbsp; a water bottle</label></div>
+                    </div>
+
+                    <div class="question" style="margin-top:40px;">
+                        <div class="question-prompt">
+                            <p><strong>Questions 13 and 14</strong></p>
+                            <p>Choose <strong>TWO</strong> letters, <strong>A–E</strong>.</p>
+                            <p>Which <strong>TWO</strong> activities will take place on the first afternoon and evening?</p>
+                        </div>
+                        <div class="multi-choice-option"><label><input type="checkbox" name="q13-14" value="A"> A &nbsp; costume making</label></div>
+                        <div class="multi-choice-option"><label><input type="checkbox" name="q13-14" value="B"> B &nbsp; a musical show</label></div>
+                        <div class="multi-choice-option"><label><input type="checkbox" name="q13-14" value="C"> C &nbsp; an informal dance</label></div>
+                        <div class="multi-choice-option"><label><input type="checkbox" name="q13-14" value="D"> D &nbsp; a talk on dance history</label></div>
+                        <div class="multi-choice-option"><label><input type="checkbox" name="q13-14" value="E"> E &nbsp; dancing tests</label></div>
+                    </div>
+
+                    <div class="question" style="margin-top:40px;">
+                        <div class="question-prompt">
+                            <p><strong>Questions 15–20</strong></p>
+                            <p>Label the map below.</p>
+                            <p>Write the correct letter, <strong>A–I</strong>, next to questions 15–20.</p>
+                        </div>
+                        <div class="map-wrap" style="height:auto;border:none;">
+                            <img src="https://i.ibb.co/svPRr0XR/Screenshot-2026-07-19-at-15-33-13.png"
+                                alt="Community centre plan" style="width:100%;display:block;">
+                        </div>
+                        <ul style="list-style:none;padding-left:0;">
+                            <li class="matching-item"><span><strong>15</strong> &nbsp; the bathrooms</span>
+                                <input type="text" id="q15" class="answer-input" placeholder="15" style="width:80px;"></li>
+                            <li class="matching-item"><span><strong>16</strong> &nbsp; the bunkrooms</span>
+                                <input type="text" id="q16" class="answer-input" placeholder="16" style="width:80px;"></li>
+                            <li class="matching-item"><span><strong>17</strong> &nbsp; the games room</span>
+                                <input type="text" id="q17" class="answer-input" placeholder="17" style="width:80px;"></li>
+                            <li class="matching-item"><span><strong>18</strong> &nbsp; the hall</span>
+                                <input type="text" id="q18" class="answer-input" placeholder="18" style="width:80px;"></li>
+                            <li class="matching-item"><span><strong>19</strong> &nbsp; the medical room</span>
+                                <input type="text" id="q19" class="answer-input" placeholder="19" style="width:80px;"></li>
+                            <li class="matching-item"><span><strong>20</strong> &nbsp; the reception office</span>
+                                <input type="text" id="q20" class="answer-input" placeholder="20" style="width:80px;"></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ======================== PART 3 ======================== -->
+            <div id="part-3" class="question-part hidden">
+                <div class="part-header">
+                    <p><strong>Part 3</strong></p>
+                    <p>Listen and answer questions 21–30.</p>
+                </div>
+                <div class="questions-container">
+
+                    <div class="question">
+                        <div class="question-prompt">
+                            <p><strong>Questions 21–25</strong></p>
+                            <p>Choose the correct answer.</p>
+                            <p class="centered-title" style="margin-top:10px;">Climate change and allergies</p>
+                        </div>
+                        <div style="margin-bottom:18px;">
+                            <p style="font-weight:600;margin-bottom:10px;">21 &nbsp; Why is Beth unconvinced that allergies are linked to vitamin D deficiency?</p>
+                            <div class="multi-choice-option"><label><input type="radio" name="q21" value="A"> A &nbsp; because people's diets have improved since the 1950s</label></div>
+                            <div class="multi-choice-option"><label><input type="radio" name="q21" value="B"> B &nbsp; because most people get enough vitamin D</label></div>
+                            <div class="multi-choice-option"><label><input type="radio" name="q21" value="C"> C &nbsp; because the evidence only applies in Britain</label></div>
+                        </div>
+                        <div style="margin-bottom:18px;">
+                            <p style="font-weight:600;margin-bottom:10px;">22 &nbsp; Eliot explains that rising CO2 levels</p>
+                            <div class="multi-choice-option"><label><input type="radio" name="q22" value="A"> A &nbsp; will mean distribution of pollen over a wider area.</label></div>
+                            <div class="multi-choice-option"><label><input type="radio" name="q22" value="B"> B &nbsp; are having less impact on pollen than milder winters.</label></div>
+                            <div class="multi-choice-option"><label><input type="radio" name="q22" value="C"> C &nbsp; are responsible for higher quantities of pollen.</label></div>
+                        </div>
+                        <div style="margin-bottom:18px;">
+                            <p style="font-weight:600;margin-bottom:10px;">23 &nbsp; What does Beth say about seasonal changes?</p>
+                            <div class="multi-choice-option"><label><input type="radio" name="q23" value="A"> A &nbsp; There is no clear short-term trend for the arrival of spring.</label></div>
+                            <div class="multi-choice-option"><label><input type="radio" name="q23" value="B"> B &nbsp; In general, spring is likely to continue arriving early.</label></div>
+                            <div class="multi-choice-option"><label><input type="radio" name="q23" value="C"> C &nbsp; Springs are becoming milder and longer.</label></div>
+                        </div>
+                        <div style="margin-bottom:18px;">
+                            <p style="font-weight:600;margin-bottom:10px;">24 &nbsp; What point is made about the plant ragweed?</p>
+                            <div class="multi-choice-option"><label><input type="radio" name="q24" value="A"> A &nbsp; It is spreading to more countries.</label></div>
+                            <div class="multi-choice-option"><label><input type="radio" name="q24" value="B"> B &nbsp; It is the most widespread cause of allergies globally.</label></div>
+                            <div class="multi-choice-option"><label><input type="radio" name="q24" value="C"> C &nbsp; It causes the most severe type of allergy.</label></div>
+                        </div>
+                        <div style="margin-bottom:18px;">
+                            <p style="font-weight:600;margin-bottom:10px;">25 &nbsp; Why is tree pollen a more serious problem in cities?</p>
+                            <div class="multi-choice-option"><label><input type="radio" name="q25" value="A"> A &nbsp; Trees produce more pollen there.</label></div>
+                            <div class="multi-choice-option"><label><input type="radio" name="q25" value="B"> B &nbsp; There is less to absorb the tree pollen.</label></div>
+                            <div class="multi-choice-option"><label><input type="radio" name="q25" value="C"> C &nbsp; There is not enough control over tree-planting.</label></div>
+                        </div>
+                    </div>
+
+                    <div class="question" style="margin-top:40px;">
+                        <div class="question-prompt">
+                            <p><strong>Questions 26–30</strong></p>
+                            <p>What comment is made about the seasonal changes in pollen in each of the following European countries?</p>
+                            <p>Choose <strong>FIVE</strong> correct answers, <strong>A–G</strong>, next to questions 26–30.</p>
+                        </div>
+                        <div class="matching-options-box">
+                            <p><strong>Seasonal changes in pollen</strong></p>
+                            <p style="margin-bottom:5px;"><strong>A</strong> &nbsp; greatest change recorded for oak pollen</p>
+                            <p style="margin-bottom:5px;"><strong>B</strong> &nbsp; changes identified for two pollen types only</p>
+                            <p style="margin-bottom:5px;"><strong>C</strong> &nbsp; a longer season for grass pollen</p>
+                            <p style="margin-bottom:5px;"><strong>D</strong> &nbsp; earlier start dates for all pollen types</p>
+                            <p style="margin-bottom:5px;"><strong>E</strong> &nbsp; significant change in start date of birch pollen</p>
+                            <p style="margin-bottom:5px;"><strong>F</strong> &nbsp; little difference in start dates</p>
+                            <p style="margin-bottom:5px;"><strong>G</strong> &nbsp; information only available for birch pollen</p>
+                        </div>
+                        <p style="font-weight:600;margin-bottom:12px;">European countries</p>
+                        <ul style="list-style:none;padding-left:0;">
+                            <li class="matching-item"><span><strong>26</strong> &nbsp; Austria</span>
+                                <input type="text" id="q26" class="answer-input" placeholder="26" style="width:80px;"></li>
+                            <li class="matching-item"><span><strong>27</strong> &nbsp; France</span>
+                                <input type="text" id="q27" class="answer-input" placeholder="27" style="width:80px;"></li>
+                            <li class="matching-item"><span><strong>28</strong> &nbsp; The Netherlands</span>
+                                <input type="text" id="q28" class="answer-input" placeholder="28" style="width:80px;"></li>
+                            <li class="matching-item"><span><strong>29</strong> &nbsp; Switzerland</span>
+                                <input type="text" id="q29" class="answer-input" placeholder="29" style="width:80px;"></li>
+                            <li class="matching-item"><span><strong>30</strong> &nbsp; UK</span>
+                                <input type="text" id="q30" class="answer-input" placeholder="30" style="width:80px;"></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ======================== PART 4 ======================== -->
+            <div id="part-4" class="question-part hidden">
+                <div class="part-header">
+                    <p><strong>Part 4</strong></p>
+                    <p>Listen and answer questions 31–40.</p>
+                </div>
+                <div class="questions-container">
+                    <div class="question">
+                        <div class="question-prompt">
+                            <p><strong>Questions 31–40</strong></p>
+                            <p>Complete the notes below.</p>
+                            <p>Write <strong>ONE WORD AND/OR A NUMBER</strong> for each answer.</p>
+                            <p class="centered-title" style="margin-top:10px;">Saffron</p>
+                        </div>
+                        <div style="border:1px solid #ccc;border-radius:5px;padding:20px;background:#fafafa;">
+                            <p style="margin-bottom:14px;">Saffron: a spice which comes from the crocus flower</p>
+
+                            <p style="font-weight:700;margin-bottom:10px;">Cultivation and production</p>
+                            <ul style="list-style:none;padding-left:24px;margin-bottom:18px;">
+                                <li style="margin-bottom:12px;">Harvested in October</li>
+                                <li style="margin-bottom:12px;">Number of stigmas needed for 50 grams: <input type="text" id="q31" class="answer-input" placeholder="31" style="width:140px;"></li>
+                                <li style="margin-bottom:12px;">Method of preservation: <input type="text" id="q32" class="answer-input" placeholder="32" style="width:140px;"></li>
+                                <li style="margin-bottom:12px;">Taste and aroma: like honey</li>
+                                <li style="margin-bottom:0;">Forms in which sold: as whole stigmas and as a <input type="text" id="q33" class="answer-input" placeholder="33" style="width:140px;"></li>
+                            </ul>
+
+                            <p style="font-weight:700;margin-bottom:10px;">Uses of saffron today</p>
+                            <ul style="list-style:none;padding-left:24px;margin-bottom:18px;">
+                                <li style="margin-bottom:12px;">To colour and flavour food in many countries, especially for making <input type="text" id="q34" class="answer-input" placeholder="34" style="width:140px;"> dishes</li>
+                                <li style="margin-bottom:8px;font-weight:600;">In medicine</li>
+                                <li style="margin-bottom:12px;margin-left:24px;">&#8226;&nbsp; as a drug in treatment of problems affecting the <input type="text" id="q35" class="answer-input" placeholder="35" style="width:140px;"></li>
+                                <li style="margin-bottom:0;margin-left:24px;">&#8226;&nbsp; experiments with rats as protection from exposure to some types of <input type="text" id="q36" class="answer-input" placeholder="36" style="width:140px;"></li>
+                            </ul>
+
+                            <p style="font-weight:700;margin-bottom:10px;">History of saffron use</p>
+                            <ul style="list-style:none;padding-left:24px;">
+                                <li style="margin-bottom:12px;">Ancient Crete as a dye for <input type="text" id="q37" class="answer-input" placeholder="37" style="width:140px;"></li>
+                                <li style="margin-bottom:8px;font-weight:600;">Roman Empire</li>
+                                <li style="margin-bottom:12px;margin-left:24px;">&#8226;&nbsp; in oil used for the production of <input type="text" id="q38" class="answer-input" placeholder="38" style="width:140px;"></li>
+                                <li style="margin-bottom:12px;margin-left:24px;">&#8226;&nbsp; as a <input type="text" id="q39" class="answer-input" placeholder="39" style="width:140px;"> in public baths</li>
+                                <li style="margin-bottom:0;">Persia (Iran) as a dye used in the making of <input type="text" id="q40" class="answer-input" placeholder="40" style="width:140px;"></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="right-panel">
+            <div id="transcription-container">
+                <h2 style="font-size:18px;font-weight:bold;margin-bottom:10px;">Transcription</h2>
+                <div id="transcription-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transcription data -->
+    <div id="transcription-data" style="display:none;">
+        <div data-part="1">
+            <p>Section 1. You will hear a telephone conversation between a woman who is looking for information about holidays and an agent for a tour company.</p>
+            <p>Asia Pacific Tours, can I help you? — Yes, I have been looking at your website and I would like some more information about your activity holidays. — Certainly. They are all in three-star hotels, and they include airfares. — Great. What about your tour of Vietnam? Don't you have a cookery course of some kind? — We certainly do. If you love eating out in Vietnam, like most people do, and want to know how to prepare a meal, <strong>you can learn how from a master in a five-star hotel</strong> <em>(Example — cookery course)</em>.</p>
+            <p>On another day you have a choice of two activities. <span class="t-hl" data-q="1"><span class="t-qmark">1</span>The first is instruction in diving in the South China Sea</span> — not a certificate course, just an introduction, but most people think it's wonderful. Or, if you want to stay dry but still want some exercise, <span class="t-hl" data-q="2"><span class="t-qmark">2</span>there's a one-day trek in the jungle</span> — the colours are just magnificent. And one evening <span class="t-hl" data-q="3"><span class="t-qmark">3</span>you can attend a traditional dance performance</span>.</p>
+            <p>What's the cost? — I've just noticed it's now a special price: <span class="t-hl" data-q="4"><span class="t-qmark">4</span>the holiday used to be £1,600, but it's just been reduced to 1,450</span>, so you do save quite a bit.</p>
+            <p>Perhaps you could tell me a little about the Hong Kong package? — You go walking <span class="t-hl" data-q="5"><span class="t-qmark">5</span>in the hills of one of the country parks, where you have the chance to see birds</span>. People don't realise Hong Kong isn't just a crowded city. That's a half-day activity, <span class="t-hl" data-q="6"><span class="t-qmark">6</span>followed by dinner in a monastery</span>. Then you go by train to <span class="t-hl" data-q="7"><span class="t-qmark">7</span>an electronics factory</span> — that might sound like an odd thing to do, but it's actually really fascinating, not like your usual ceramics factory, and you can buy their products there quite cheaply. The whole Hong Kong package is just £1,320 per person.</p>
+            <p>Let me find out about one more place. I've always wanted to go to Korea, but not on this trip, and I've been to Thailand, which I loved. But <span class="t-hl" data-q="8"><span class="t-qmark">8</span>what about your Japan package? — Good choice</span>. That tour includes a terrific trip to <span class="t-hl" data-q="9"><span class="t-qmark">9</span>a museum of traditional costume</span> — the exhibit is gorgeous, an absolutely priceless collection. — And I think the website says you take your clients to a market, don't you? — That's right, <span class="t-hl" data-q="10"><span class="t-qmark">10</span>we do go to a fish market, and it's one of the largest in the world</span>. That package is £1,800.</p>
+        </div>
+        <div data-part="2">
+            <p>Section 2. You will hear the organizer of a weekend dancing course for adults welcoming a group of participants to the community centre where the course is being held.</p>
+            <p>Hello everyone, and welcome to this weekend dancing course. Since you've all just arrived, I'd like to tell you firstly a bit about today's program, and secondly how to get around this community centre. First, go to the office, where you should check in at the registration desk. Make sure you're wearing the name tag we sent you last week. <span class="t-hl" data-q="11"><span class="t-qmark">11</span>The staff there will give you each a cloth bag as a little present from us, to keep your dancing shoes in for the weekend (D — a shoe bag)</span>. Other things useful to take to class each day will be a bottle of water — hopefully you've all brought one with you — and a towel for your face if it's hot. Also, <span class="t-hl" data-q="12"><span class="t-qmark">12</span>at registration you can pick up a list for the level class that you're in, so you can start learning people's names (A — a class list)</span>.</p>
+            <p>After checking in, this first afternoon is free for everyone. You could use this time to start thinking about your costumes for the final show, but we won't be making them until tomorrow. <span class="t-hl" data-q="13"><span class="t-qmark">13</span>For those of you who are interested, there's a talk this afternoon in the main hall on the history of dance (D)</span>, or you could practise for Sunday's concert in the music room. <span class="t-hl" data-q="14"><span class="t-qmark">14</span>There is also an informal gathering planned for this evening, consisting of mainly easy dances, where you can get to know each other (C)</span>. The tests for the different levels won't be held until the final afternoon, so there's no need to worry about those yet.</p>
+            <p>Now, as I said, I will tell you how to find your way around the community centre. We're standing at the south end of the site. I'll tell you where the bathrooms are first — that's the most important thing. <span class="t-hl" data-q="15"><span class="t-qmark">15</span>Walk straight ahead from here to pass this first big block on your left, and you'll find the bathrooms on your left just after it (C)</span>.</p>
+            <p>Now, equally important of course is where you'll sleep. <span class="t-hl" data-q="16"><span class="t-qmark">16</span>The bunkrooms are just here on our left — you can see them beside where we're standing now (E)</span>.</p>
+            <p>We also have a games room where you can entertain yourself during your free time. <span class="t-hl" data-q="17"><span class="t-qmark">17</span>You'll get there if you go straight ahead from where we're standing now, take the first turning right and carry on to the second building — it's on your right, just before the bike racks (I)</span>. Games and books are in the cupboard there, and there's a ping-pong table, air hockey, things like that — good for a rainy day.</p>
+            <p>Okay, what else? <span class="t-hl" data-q="18"><span class="t-qmark">18</span>The hall is where we'll meet for class photos. You can find that in the middle of the site, just south of the music room (F)</span>.</p>
+            <p><span class="t-hl" data-q="19"><span class="t-qmark">19</span>The medical room, in case any of you get injured, can be found in the centre of the site also — go straight, it's across the pathway beside the music room (D)</span>. The nurse there is very good with sports injuries, so don't hesitate to visit her if you need to.</p>
+            <p>Any questions? Oh yes, the reception office, of course — you'll need to go over there after this talk to register. <span class="t-hl" data-q="20"><span class="t-qmark">20</span>That's quite a long walk away from here: go straight ahead and take the third turning on your right, then you will find that the office is the second building on your left (B)</span>. The staff there are very friendly, and if you have any problems during the weekend they'll go out of their way to help you.</p>
+        </div>
+        <div data-part="3">
+            <p>Section 3. You will hear two environmental science students called Dominic and Ella discussing some ways of solving environmental problems.</p>
+            <p>These innovative environmental solutions we've been reading about this week — let's discuss some of the pros and cons of each one. — I think the supermarket garden project is interesting: that's where the supermarket grows fruit and vegetables in the store and sells them. — Yes. Understandably, only a few shops have decided to adopt this idea — it's hard to set up. — What's the reaction from customers? — Well, of course they love the idea. <span class="t-hl" data-q="21"><span class="t-qmark">21</span>What was surprising was that the idea is hugely popular with local chefs, and many of them are finding new ways to use the plants at all their different stages of growth (B — it has gained a lot of interest from chefs)</span>.</p>
+            <p>I found the solar carpark idea to be really practical. — I know what you mean: putting solar panels on the roofs of car parks to generate electricity might be a cost-effective way to power a whole shopping centre. <span class="t-hl" data-q="22"><span class="t-qmark">22</span>The difficulty could be finding space to put all the panels — some smaller shopping centres probably don't have covered car parks (C — there may not be enough room)</span>. — That's right. It's a shame, because the technology seems to be all there and ready to go if the conditions are right.</p>
+            <p>What do you think of the wildlife crossing solution? You know, where a bridge or a tunnel is built over or under a major roadway so that animals can cross. — That idea has become very popular and has so many benefits. A lot of research has been done, hasn't it? — Yes. It's not surprising that the data reveals a huge drop in the number of road accidents in areas where there are wildlife crossings — that's one of the predicted outcomes. <span class="t-hl" data-q="23"><span class="t-qmark">23</span>Something I read about in the research which was never considered before was how the animal populations in these areas are affected: naturally more of them survive, but because their habitat is not interrupted too much by the roads, the genetic diversity of local species is increased (B — animal populations become more genetically diverse)</span>.</p>
+            <p>And the 100% renewable energy campaign? — <span class="t-hl" data-q="24"><span class="t-qmark">24</span>Given the sheer amount of time and planning it takes for a city to convert completely to renewables, what impressed me is how much the organisers of the movement do to support the participating communities throughout the process (C — how much help is given to participating communities)</span>.</p>
+            <p>Did you read about carrot-mobbing as an environmental movement? — What's that? — It's where huge numbers of people learn through the internet about where to shop — at stores that use their profits to support environmental projects. — So they stop buying products that aren't eco-friendly, like a boycott? — No, actually it's the opposite of that. <span class="t-hl" data-q="25"><span class="t-qmark">25</span>It allows businesses to fund initiatives to help protect the environment while boosting their profiles (A — it helps businesses undertake eco-friendly projects)</span>. It's a pity that most participants don't get to know each other personally — it's all through online notices.</p>
+            <p>Now let's look at one particular environmental innovation — aerial reforestation — and discuss the process involved. So, aerial reforestation is where they drop mixtures from planes to sow vegetables, grains or trees in areas that might be hard to reach. Let's see, what are the steps? — Well, <span class="t-hl" data-q="26"><span class="t-qmark">26</span>the first step is choosing the right area: whatever size land you're working on, ensuring there's enough light is crucial (H)</span>. — <span class="t-hl" data-q="27"><span class="t-qmark">27</span>The next step is to make sure you have the right seeds; to give them a better chance against the competition from other plants, you need to use a lot (C)</span>. — <span class="t-hl" data-q="28"><span class="t-qmark">28</span>So then you make a mixture with decent-quality compost that will last a long time (E)</span>. — <span class="t-hl" data-q="29"><span class="t-qmark">29</span>The next step is pressing the whole thing into a small chunk of clay to make a ball (G)</span>. — Is it then coated in an outer material such as paper? — Right. <span class="t-hl" data-q="30"><span class="t-qmark">30</span>That way, when it lands, it will add balanced nutrients to the mixture (D)</span>, and it may also protect it from insects and other plants. A few days before they release it from the plane onto the land below, the final step is dipping it in water — just enough to get the germination process started.</p>
+        </div>
+        <div data-part="4">
+            <p>Section 4. You will hear a student who is studying food science giving a presentation on a spice called saffron.</p>
+            <p>I have focused on the cultivation and production of saffron, an expensive bright yellow spice made from crocus flowers. Unlike most other species of crocus, the saffron crocus doesn't flower in February or March, but in October, when it produces fragrant lilac coloured flowers, which are harvested at that time. During the harvest, the flower petals are discarded and only the stigmas are commercially used. One person must pick for almost 400 hours to produce just one kilo of saffron. And amazingly, <span class="t-hl" data-q="31" data-time="1480"><span class="t-qmark">31</span>to produce just 50 grams, it takes about 14,000 individual stigmas</span>.</p>
+            <p>After this painstaking harvesting, and to preserve the intensive taste, smell and colour of the product, <span class="t-hl" data-q="32" data-time="1495"><span class="t-qmark">32</span>the stigmas are subject to a process of drying</span>, by which some 98% of their moisture content is removed. The highly prized spice is famous for the flavour and aroma it imparts, which are often compared to that of honey. If you want to buy some of this fabled spice, you will find that <span class="t-hl" data-q="33" data-time="1525"><span class="t-qmark">33</span>saffron is either sold as whole stigmas or ground up as a powder</span>.</p>
+            <p>Today saffron is used in both eastern and western cuisines to add both colour and flavour to an enormous range of recipes, though cooks would agree that <span class="t-hl" data-q="34" data-time="1540"><span class="t-qmark">34</span>it is most commonly added to recipes for the cooking of rice</span>, because somehow it seems to complement such dishes perfectly.</p>
+            <p>Although food preparation is its most common present-day use, medical research indicates that <span class="t-hl" data-q="35" data-time="1560"><span class="t-qmark">35</span>saffron may have important applications as a drug in the clinical treatment of a number of eye disorders</span>. And although scientists are still unsure of exactly why, <span class="t-hl" data-q="36" data-time="1580"><span class="t-qmark">36</span>recent experiments with laboratory rats have shown saffron to be effective in protecting the animals from damage caused when they are exposed to potentially harmful lights</span>.</p>
+            <p>Some of the earliest evidence of saffron cultivation comes from archaeological excavations dating back 4,000 years on the island of Crete, <span class="t-hl" data-q="37" data-time="1615"><span class="t-qmark">37</span>where paintings and other artifacts have been found indicating that women wore beautiful saffron-coloured clothes. This is the earliest evidence of saffron being used as a dye</span>.</p>
+            <p>During the Roman Empire, <span class="t-hl" data-q="38" data-time="1640"><span class="t-qmark">38</span>saffron oil was produced, which, because of both its colour and aroma, was used to create cosmetics</span>, but only the wealthiest citizens could afford these. Another use of saffron was to be found in the public baths. <span class="t-hl" data-q="39" data-time="1655"><span class="t-qmark">39</span>There, saffron was used as a perfume to keep the places smelling fresh and aromatic</span>.</p>
+            <p>Other parts of the ancient world used saffron extensively. One of the most well-known examples was in Persia, which is modern-day Iran, <span class="t-hl" data-q="40" data-time="1685"><span class="t-qmark">40</span>where saffron was a vital part of the process of manufacturing carpets, being used as a traditional dye</span> along with other natural products like berries and minerals.</p>
+        </div>
+    </div>
+
+    <audio id="global-audio-player" class="hidden"></audio>
+
+    <!-- Nav Arrows -->
+    <div class="nav-arrows">
+        <button class="nav-arrow" onclick="previousPart()" id="prevBtn">&#8249;</button>
+        <button class="nav-arrow" onclick="nextPart()" id="nextBtn">&#8250;</button>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="nav-row" aria-label="Questions">
+        <div class="footer__questionWrapper___1tZ46 selected multiple" role="tablist">
+            <button role="tab" class="footer__questionNo___3WNct" onclick="switchToPart(1)">
+                <span><span class="section-prefix">Part </span><span class="sectionNr">1</span><span
+                        class="attemptedCount">0 of 10</span></span>
+            </button>
+            <div class="footer__subquestionWrapper___9GgoP">
+                <button class="subQuestion" onclick="goToQuestion(1)"><span
+                        class="sr-only">Q1</span><span>1</span></button>
+                <button class="subQuestion" onclick="goToQuestion(2)"><span
+                        class="sr-only">Q2</span><span>2</span></button>
+                <button class="subQuestion" onclick="goToQuestion(3)"><span
+                        class="sr-only">Q3</span><span>3</span></button>
+                <button class="subQuestion" onclick="goToQuestion(4)"><span
+                        class="sr-only">Q4</span><span>4</span></button>
+                <button class="subQuestion" onclick="goToQuestion(5)"><span
+                        class="sr-only">Q5</span><span>5</span></button>
+                <button class="subQuestion" onclick="goToQuestion(6)"><span
+                        class="sr-only">Q6</span><span>6</span></button>
+                <button class="subQuestion" onclick="goToQuestion(7)"><span
+                        class="sr-only">Q7</span><span>7</span></button>
+                <button class="subQuestion" onclick="goToQuestion(8)"><span
+                        class="sr-only">Q8</span><span>8</span></button>
+                <button class="subQuestion" onclick="goToQuestion(9)"><span
+                        class="sr-only">Q9</span><span>9</span></button>
+                <button class="subQuestion" onclick="goToQuestion(10)"><span
+                        class="sr-only">Q10</span><span>10</span></button>
+            </div>
+        </div>
+        <div class="footer__questionWrapper___1tZ46 multiple" role="tablist">
+            <button role="tab" class="footer__questionNo___3WNct" onclick="switchToPart(2)">
+                <span><span class="section-prefix">Part </span><span class="sectionNr">2</span><span
+                        class="attemptedCount">0 of 10</span></span>
+            </button>
+            <div class="footer__subquestionWrapper___9GgoP">
+                <button class="subQuestion" onclick="goToQuestion(11)"><span>11</span></button>
+                <button class="subQuestion" onclick="goToQuestion(12)"><span>12</span></button>
+                <button class="subQuestion" onclick="goToQuestion(13)"><span>13</span></button>
+                <button class="subQuestion" onclick="goToQuestion(14)"><span>14</span></button>
+                <button class="subQuestion" onclick="goToQuestion(15)"><span>15</span></button>
+                <button class="subQuestion" onclick="goToQuestion(16)"><span>16</span></button>
+                <button class="subQuestion" onclick="goToQuestion(17)"><span>17</span></button>
+                <button class="subQuestion" onclick="goToQuestion(18)"><span>18</span></button>
+                <button class="subQuestion" onclick="goToQuestion(19)"><span>19</span></button>
+                <button class="subQuestion" onclick="goToQuestion(20)"><span>20</span></button>
+            </div>
+        </div>
+        <div class="footer__questionWrapper___1tZ46 multiple" role="tablist">
+            <button role="tab" class="footer__questionNo___3WNct" onclick="switchToPart(3)">
+                <span><span class="section-prefix">Part </span><span class="sectionNr">3</span><span
+                        class="attemptedCount">0 of 10</span></span>
+            </button>
+            <div class="footer__subquestionWrapper___9GgoP">
+                <button class="subQuestion" onclick="goToQuestion(21)"><span>21</span></button>
+                <button class="subQuestion" onclick="goToQuestion(22)"><span>22</span></button>
+                <button class="subQuestion" onclick="goToQuestion(23)"><span>23</span></button>
+                <button class="subQuestion" onclick="goToQuestion(24)"><span>24</span></button>
+                <button class="subQuestion" onclick="goToQuestion(25)"><span>25</span></button>
+                <button class="subQuestion" onclick="goToQuestion(26)"><span>26</span></button>
+                <button class="subQuestion" onclick="goToQuestion(27)"><span>27</span></button>
+                <button class="subQuestion" onclick="goToQuestion(28)"><span>28</span></button>
+                <button class="subQuestion" onclick="goToQuestion(29)"><span>29</span></button>
+                <button class="subQuestion" onclick="goToQuestion(30)"><span>30</span></button>
+            </div>
+        </div>
+        <div class="footer__questionWrapper___1tZ46 multiple" role="tablist">
+            <button role="tab" class="footer__questionNo___3WNct" onclick="switchToPart(4)">
+                <span><span class="section-prefix">Part </span><span class="sectionNr">4</span><span
+                        class="attemptedCount">0 of 10</span></span>
+            </button>
+            <div class="footer__subquestionWrapper___9GgoP">
+                <button class="subQuestion" onclick="goToQuestion(31)"><span>31</span></button>
+                <button class="subQuestion" onclick="goToQuestion(32)"><span>32</span></button>
+                <button class="subQuestion" onclick="goToQuestion(33)"><span>33</span></button>
+                <button class="subQuestion" onclick="goToQuestion(34)"><span>34</span></button>
+                <button class="subQuestion" onclick="goToQuestion(35)"><span>35</span></button>
+                <button class="subQuestion" onclick="goToQuestion(36)"><span>36</span></button>
+                <button class="subQuestion" onclick="goToQuestion(37)"><span>37</span></button>
+                <button class="subQuestion" onclick="goToQuestion(38)"><span>38</span></button>
+                <button class="subQuestion" onclick="goToQuestion(39)"><span>39</span></button>
+                <button class="subQuestion" onclick="goToQuestion(40)"><span>40</span></button>
+            </div>
+        </div>
+        <button id="deliver-button" class="footer__deliverButton___3FM07"><span>Check Answers</span></button>
+    </nav>
+
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu">
+        <div class="context-menu-item" onclick="highlightText()">Highlight</div>
+        <div class="context-menu-item" onclick="addComment()">Comment</div>
+        <div class="context-menu-item" id="clear-item" onclick="clearHighlight()" style="display:none;">Clear</div>
+        <div class="context-menu-item" onclick="clearAllHighlights()">Clear All</div>
+    </div>
+
+    <!-- Result Modal -->
+    <div id="result-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Your Results</h2>
+                <button id="modal-close-button" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="score-summary"></p>
+                <div id="result-details"></div>
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button id="exit-dashboard-btn" type="button" style="flex: 1; padding: 12px 16px; border: 1.5px solid #d1d5db; background: #ffffff; color: #374151; font-weight: 700; border-radius: 12px; cursor: pointer; font-size: 14px;">Exit to Dashboard</button>
+                    <button id="review-answers-btn" type="button" style="flex: 1; padding: 12px 16px; border: none; background: #FF3131; color: #ffffff; font-weight: 700; border-radius: 12px; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(255,49,49,0.25);">Review Answers</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.testStartTime = Date.now();
+        const correctAnswers = {
+            'q1': ['diving'],
+            'q2': ['jungle', 'the jungle'],
+            'q3': ['dance', 'dancing'],
+            'q4': ['1,450', '1450'],
+            'q5': ['birds'],
+            'q6': ['dinner'],
+            'q7': ['electronics'],
+            'q8': ['japan'],
+            'q9': ['costume', 'costumes'],
+            'q10': ['fish'],
+            'q11-12': ['A', 'D'],
+            'q13-14': ['C', 'D'],
+            'q15': ['C'],
+            'q16': ['E'],
+            'q17': ['I'],
+            'q18': ['F'],
+            'q19': ['D'],
+            'q20': ['B'],
+            'q21': 'B',
+            'q22': 'C',
+            'q23': 'B',
+            'q24': 'C',
+            'q25': 'A',
+            'q26': ['H'],
+            'q27': ['C'],
+            'q28': ['E'],
+            'q29': ['G'],
+            'q30': ['D'],
+            'q31': ['14,000', '14000'],
+            'q32': ['drying'],
+            'q33': ['powder'],
+            'q34': ['rice'],
+            'q35': ['eye', 'eyes'],
+            'q36': ['lights', 'light'],
+            'q37': ['clothes', 'clothing'],
+            'q38': ['cosmetics'],
+            'q39': ['perfume'],
+            'q40': ['carpets', 'carpet']
+        };
+
+        const questionTypes = {
+            'q1': 'text', 'q2': 'text', 'q3': 'text', 'q4': 'text', 'q5': 'text',
+            'q6': 'text', 'q7': 'text', 'q8': 'text', 'q9': 'text', 'q10': 'text',
+            'q11-12': 'checkbox', 'q13-14': 'checkbox',
+            'q15': 'text', 'q16': 'text', 'q17': 'text', 'q18': 'text', 'q19': 'text', 'q20': 'text',
+            'q21': 'mcq', 'q22': 'mcq', 'q23': 'mcq', 'q24': 'mcq', 'q25': 'mcq',
+            'q26': 'text', 'q27': 'text', 'q28': 'text', 'q29': 'text', 'q30': 'text',
+            'q31': 'text', 'q32': 'text', 'q33': 'text', 'q34': 'text', 'q35': 'text',
+            'q36': 'text', 'q37': 'text', 'q38': 'text', 'q39': 'text', 'q40': 'text'
+        };
+
+        let currentPart = 1;
+        let currentQuestion = 1;
+        let selectedRange = null;
+        let contextElement = null;
+
+        const audioSource = 'https://ia601807.us.archive.org/21/items/mix-29m-27s-audio-joiner.com_202607/mix_29m27s%20%28audio-joiner.com%29.mp3';
+        const audioPlayer = document.getElementById('global-audio-player');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const currentTimeEl = document.getElementById('current-time');
+        const totalDurationEl = document.getElementById('total-duration');
+        const speedBtn = document.getElementById('speed-btn');
+        const speedOptions = document.getElementById('speed-options');
+        const volumeSlider = document.getElementById('new-volume-slider');
+
+        if (audioSource) audioPlayer.src = audioSource;
+
+        function formatTime(s) {
+            const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+            return m + ':' + (sec < 10 ? '0' : '') + sec;
+        }
+
+        playPauseBtn.addEventListener('click', () => {
+            if (!audioSource) { alert('Audio URL qo\'shilmagan. Script ichida audioSource ni to\'ldiring.'); return; }
+            if (audioPlayer.paused) audioPlayer.play(); else audioPlayer.pause();
+        });
+        audioPlayer.addEventListener('play', () => { playPauseBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'; });
+        audioPlayer.addEventListener('pause', () => { playPauseBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'; });
+        audioPlayer.addEventListener('loadedmetadata', () => { progressBar.max = audioPlayer.duration; totalDurationEl.textContent = formatTime(audioPlayer.duration); });
+        audioPlayer.addEventListener('timeupdate', () => { progressBar.value = audioPlayer.currentTime; currentTimeEl.textContent = formatTime(audioPlayer.currentTime); });
+        progressBar.addEventListener('input', () => { audioPlayer.currentTime = progressBar.value; });
+        volumeSlider.addEventListener('input', (e) => { audioPlayer.volume = e.target.value; });
+        speedBtn.addEventListener('click', (e) => { e.stopPropagation(); speedOptions.classList.toggle('hidden'); });
+        speedOptions.addEventListener('click', (e) => {
+            if (e.target.dataset.speed) { audioPlayer.playbackRate = parseFloat(e.target.dataset.speed); speedBtn.textContent = e.target.dataset.speed + 'x'; speedOptions.classList.add('hidden'); }
+        });
+        document.addEventListener('click', () => speedOptions.classList.add('hidden'));
+
+        function switchToPart(partNumber) {
+            currentPart = partNumber;
+            document.querySelectorAll('.question-part').forEach(p => p.classList.add('hidden'));
+            const part = document.getElementById('part-' + partNumber);
+            if (part) part.classList.remove('hidden');
+            document.querySelectorAll('.footer__questionWrapper___1tZ46').forEach((w, i) => w.classList.toggle('selected', i + 1 === partNumber));
+            const partStart = (partNumber - 1) * 10 + 1;
+            const partEnd = partNumber * 10;
+            if (currentQuestion < partStart || currentQuestion > partEnd) {
+                currentQuestion = partStart;
+                document.querySelectorAll('.subQuestion').forEach(b => b.classList.remove('active'));
+                const activeBtn = document.querySelector('.subQuestion[onclick="goToQuestion(' + partStart + ')"]');
+                if (activeBtn) activeBtn.classList.add('active');
+            }
+            if (document.querySelector('.main-container.results-mode')) {
+                const src = document.querySelector('#transcription-data [data-part="' + partNumber + '"]');
+                const tgt = document.getElementById('transcription-text');
+                if (src && tgt) tgt.innerHTML = src.innerHTML;
+            }
+            updateAttemptedCount(partNumber);
+            document.getElementById('prevBtn').disabled = currentQuestion <= 1;
+            document.getElementById('nextBtn').disabled = currentQuestion >= 40;
+        }
+
+        function goToQuestion(qNum) {
+            currentQuestion = qNum;
+            let part = 1;
+            if (qNum > 10 && qNum <= 20) part = 2;
+            else if (qNum > 20 && qNum <= 30) part = 3;
+            else if (qNum > 30) part = 4;
+            if (currentPart !== part) switchToPart(part);
+            document.querySelectorAll('.subQuestion').forEach(b => b.classList.remove('active'));
+            const btn = document.querySelector(`.subQuestion[onclick="goToQuestion(${qNum})"]`);
+            if (btn) btn.classList.add('active');
+            const pairName = pairNameForQ(qNum);
+            let el = document.getElementById('q' + qNum) || document.querySelector('input[name="q' + qNum + '"]')
+                || (pairName ? document.querySelector('input[name="' + pairName + '"]') : null);
+            if (el) {
+                const container = el.closest('.question');
+                if (container) {
+                    container.classList.add('flash');
+                    setTimeout(() => container.classList.remove('flash'), 1000);
+                }
+            }
+            document.getElementById('prevBtn').disabled = qNum <= 1;
+            document.getElementById('nextBtn').disabled = qNum >= 40;
+        }
+
+        function nextPart() { if (currentQuestion < 40) goToQuestion(currentQuestion + 1); }
+        function previousPart() { if (currentQuestion > 1) goToQuestion(currentQuestion - 1); }
+
+        const pairGroups = { 'q11-12': [11, 12], 'q13-14': [13, 14] };
+
+        function pairNameForQ(qNum) {
+            return Object.keys(pairGroups).find(name => pairGroups[name].includes(qNum)) || null;
+        }
+
+        function updateAttemptedCount(partNumber) {
+            const start = (partNumber - 1) * 10 + 1;
+            const end = partNumber * 10;
+            let count = 0;
+            const countedPairs = {};
+            for (let i = start; i <= end; i++) {
+                const pairName = pairNameForQ(i);
+                if (pairName) {
+                    if (!countedPairs[pairName]) {
+                        count += document.querySelectorAll('input[name="' + pairName + '"]:checked').length;
+                        countedPairs[pairName] = true;
+                    }
+                    continue;
+                }
+                const txt = document.getElementById('q' + i);
+                const rad = document.querySelector('input[name="q' + i + '"]:checked');
+                if ((txt && txt.value.trim()) || rad) count++;
+            }
+            const wrapper = document.querySelectorAll('.footer__questionWrapper___1tZ46')[partNumber - 1];
+            if (wrapper) {
+                const span = wrapper.querySelector('.attemptedCount');
+                if (span) span.textContent = count + ' of 10';
+            }
+        }
+
+        function updateAnsweredIndicators() {
+            for (let qNum = 1; qNum <= 40; qNum++) {
+                const btn = document.querySelector(`.subQuestion[onclick="goToQuestion(${qNum})"]`);
+                if (!btn || btn.classList.contains('correct') || btn.classList.contains('incorrect')) continue;
+                let answered;
+                const pairName = pairNameForQ(qNum);
+                if (pairName) {
+                    const idx = pairGroups[pairName].indexOf(qNum);
+                    const checkedCount = document.querySelectorAll('input[name="' + pairName + '"]:checked').length;
+                    answered = checkedCount >= (idx + 1);
+                } else {
+                    const txt = document.getElementById('q' + qNum);
+                    const rad = document.querySelector('input[name="q' + qNum + '"]:checked');
+                    answered = (txt && txt.value.trim() !== '') || !!rad;
+                }
+                btn.classList.toggle('answered', answered);
+            }
+            [1, 2, 3, 4].forEach(p => updateAttemptedCount(p));
+        }
+
+        document.querySelectorAll('.answer-input, input[type="radio"], input[type="checkbox"]').forEach(inp => {
+            inp.addEventListener('input', updateAnsweredIndicators);
+            inp.addEventListener('change', updateAnsweredIndicators);
+        });
+
+        function setupCheckboxLimits() {
+            Object.keys(pairGroups).forEach(name => {
+                const boxes = Array.from(document.querySelectorAll('input[type="checkbox"][name="' + name + '"]'));
+                if (!boxes.length) return;
+                boxes.forEach(b => b.addEventListener('change', () => {
+                    const checkedCount = boxes.filter(x => x.checked).length;
+                    boxes.forEach(x => { if (!x.checked) x.disabled = checkedCount >= pairGroups[name].length; });
+                }));
+            });
+        }
+
+        function calculateListeningBand(score) {
+            if (score >= 39) return '9.0';
+            if (score >= 37) return '8.5';
+            if (score >= 35) return '8.0';
+            if (score >= 32) return '7.5';
+            if (score >= 30) return '7.0';
+            if (score >= 26) return '6.5';
+            if (score >= 23) return '6.0';
+            if (score >= 18) return '5.5';
+            if (score >= 16) return '5.0';
+            if (score >= 13) return '4.5';
+            if (score >= 10) return '4.0';
+            if (score >= 8) return '3.5';
+            if (score >= 6) return '3.0';
+            if (score >= 4) return '2.5';
+            return '2.0';
+        }
+
+        function checkAnswers() {
+            let score = 0;
+            const resultsData = [];
+
+            document.querySelectorAll('.correct-inline').forEach(el => el.remove());
+            document.querySelectorAll('.answer-input').forEach(el => el.classList.remove('correct', 'incorrect'));
+            document.querySelectorAll('.multi-choice-option').forEach(el => el.classList.remove('correct', 'incorrect'));
+
+            Object.keys(correctAnswers).forEach(key => {
+                const correct = correctAnswers[key];
+                const type = questionTypes[key];
+
+                if (key.includes('-')) {
+                    const [startQ, endQ] = key.split('-').map(s => parseInt(s.replace('q', '')));
+                    const checked = document.querySelectorAll('input[name="' + key + '"]:checked');
+                    const userVals = Array.from(checked).map(c => c.value).sort();
+                    const correctSorted = [...correct].sort();
+                    const correctSel = userVals.filter(v => correctSorted.includes(v));
+                    score += correctSel.length;
+                    const isCorrect = correctSel.length === correctSorted.length && userVals.length === correctSorted.length;
+                    checked.forEach(cb => { const w = cb.closest('.multi-choice-option'); if (w) w.classList.add(correctSorted.includes(cb.value) ? 'correct' : 'incorrect'); });
+                    correctSorted.forEach(v => { const cb = document.querySelector('input[name="' + key + '"][value="' + v + '"]'); if (cb && !cb.checked) { const w = cb.closest('.multi-choice-option'); if (w) w.classList.add('correct'); } });
+                    for (let q = startQ; q <= endQ; q++) { const b = document.querySelector(`.subQuestion[onclick="goToQuestion(${q})"]`); if (b) { b.classList.remove('answered'); b.classList.add(isCorrect ? 'correct' : 'incorrect'); } }
+                    resultsData.push({ question: startQ + '-' + endQ, userAnswer: userVals.join(', ') || 'No Answer', correctAnswer: correctSorted.join(', '), isCorrect });
+                    return;
+                }
+
+                const qNum = parseInt(key.replace('q', ''));
+                let userAnswer = '', isCorrect = false;
+
+                if (type === 'text') {
+                    const el = document.getElementById(key);
+                    userAnswer = el ? el.value.trim() : '';
+                    const accepted = Array.isArray(correct) ? correct : [correct];
+                    if (accepted[0] === '???') {
+                        isCorrect = false;
+                    } else {
+                        isCorrect = accepted.some(a => a.toLowerCase() === userAnswer.toLowerCase());
+                    }
+                    if (el) {
+                        el.classList.add(isCorrect ? 'correct' : 'incorrect');
+                        if (!isCorrect && accepted[0] !== '???') {
+                            const sp = document.createElement('span');
+                            sp.className = 'correct-inline';
+                            sp.textContent = accepted[0];
+                            el.insertAdjacentElement('afterend', sp);
+                        }
+                    }
+                } else if (type === 'mcq') {
+                    const checked = document.querySelector('input[name="' + key + '"]:checked');
+                    userAnswer = checked ? checked.value : 'No Answer';
+                    isCorrect = correct !== '???' && userAnswer === correct;
+                    document.querySelectorAll('input[name="' + key + '"]').forEach(r => {
+                        const wrapper = r.closest('.multi-choice-option');
+                        if (!wrapper) return;
+                        if (correct !== '???' && r.value === correct) wrapper.classList.add('correct');
+                        else if (r.checked) wrapper.classList.add('incorrect');
+                    });
+                }
+
+                if (isCorrect) score++;
+                const navBtn = document.querySelector(`.subQuestion[onclick="goToQuestion(${qNum})"]`);
+                if (navBtn) { navBtn.classList.remove('answered'); navBtn.classList.add(isCorrect ? 'correct' : 'incorrect'); }
+                resultsData.push({ question: qNum, userAnswer: userAnswer || 'No Answer', correctAnswer: Array.isArray(correct) ? correct[0] : correct, isCorrect });
+            });
+
+            document.querySelectorAll('.answer-input, input[type="radio"], input[type="checkbox"]').forEach(el => el.disabled = true);
+
+            const band = calculateListeningBand(score);
+
+            try {
+                const userStored = localStorage.getItem('ielts_user');
+                const userId = userStored ? JSON.parse(userStored).id : 'guest-user';
+                const currentResults = JSON.parse(localStorage.getItem('ielts_test_results') || '[]');
+                const userAnswersObj = {};
+                resultsData.forEach(r => {
+                    if (r.question) userAnswersObj[r.question] = r.userAnswer;
+                });
+                const newRes = {
+                    id: 'res-' + Date.now(),
+                    user_id: userId,
+                    test_type: 'listening',
+                    test_id: 'listening-3',
+                    score: score,
+                    total_questions: 40,
+                    band_score: band,
+                    time_spent: Math.max(1, Math.round((Date.now() - (window.testStartTime || Date.now())) / 1000)),
+                    answers: userAnswersObj,
+                    completed_at: new Date().toISOString()
+                };
+                currentResults.unshift(newRes);
+                localStorage.setItem('ielts_test_results', JSON.stringify(currentResults));
+            } catch(e) { console.error('Save error:', e); }
+
+            document.querySelector('.main-container').classList.add('results-mode');
+            switchToPart(currentPart);
+
+            document.getElementById('score-summary').textContent = 'You scored ' + score + ' out of 40 (Band ' + band + ').';
+
+            const resultDetails = document.getElementById('result-details');
+            let html = '<table><thead><tr><th>Question</th><th>Your Answer</th><th>Correct Answer</th><th>Result</th></tr></thead><tbody>';
+            resultsData.forEach(r => {
+                html += '<tr><td>' + r.question + '</td><td>' + r.userAnswer + '</td><td>' + r.correctAnswer + '</td><td class="' + (r.isCorrect ? 'result-correct' : 'result-incorrect') + '">' + (r.isCorrect ? '&#10003; Correct' : '&#10007; Incorrect') + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            resultDetails.innerHTML = html;
+
+            const deliverButton = document.getElementById('deliver-button');
+            deliverButton.classList.add('success');
+            deliverButton.innerHTML = '<span>My Results</span>';
+            const newBtn = deliverButton.cloneNode(true);
+            deliverButton.parentNode.replaceChild(newBtn, deliverButton);
+            newBtn.addEventListener('click', () => { document.getElementById('result-modal').style.display = 'flex'; });
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        document.getElementById('deliver-button').addEventListener('click', checkAnswers);
+        document.getElementById('modal-close-button').addEventListener('click', () => { document.getElementById('result-modal').style.display = 'none'; });
+
+        document.getElementById('exit-dashboard-btn').addEventListener('click', function() {
+            window.location.href = '/dashboard';
+        });
+        document.getElementById('review-answers-btn').addEventListener('click', function() {
+            document.getElementById('result-modal').style.display = 'none';
+        });
+
+        document.addEventListener('selectionchange', () => {
+            const sel = window.getSelection();
+            if (sel && sel.rangeCount > 0 && !sel.isCollapsed) selectedRange = sel.getRangeAt(0);
+        });
+        document.body.addEventListener('contextmenu', function (e) {
+            const text = window.getSelection().toString();
+            if (!text) return;
+            e.preventDefault();
+            const menu = document.getElementById('contextMenu');
+            menu.style.left = e.pageX + 'px';
+            menu.style.top = e.pageY + 'px';
+            menu.style.display = 'block';
+            contextElement = e.target.closest('.highlight, .comment-highlight');
+            document.getElementById('clear-item').style.display = contextElement ? 'block' : 'none';
+        });
+        document.body.addEventListener('click', function (e) {
+            if (!e.target.closest('.context-menu')) document.getElementById('contextMenu').style.display = 'none';
+        });
+        function highlightText() {
+            if (!selectedRange || selectedRange.collapsed) return;
+            try { const span = document.createElement('span'); span.className = 'highlight'; selectedRange.surroundContents(span); } catch (e) { }
+            window.getSelection().removeAllRanges();
+            document.getElementById('contextMenu').style.display = 'none';
+        }
+        function addComment() {
+            const t = prompt('Enter your comment:');
+            if (!t || !selectedRange) return;
+            try {
+                const span = document.createElement('span'); span.className = 'comment-highlight';
+                const tip = document.createElement('span'); tip.className = 'comment-tooltip'; tip.textContent = t;
+                span.appendChild(tip); selectedRange.surroundContents(span);
+            } catch (e) { }
+            window.getSelection().removeAllRanges();
+            document.getElementById('contextMenu').style.display = 'none';
+        }
+        function clearHighlight() {
+            if (contextElement) {
+                const parent = contextElement.parentNode;
+                while (contextElement.firstChild) parent.insertBefore(contextElement.firstChild, contextElement);
+                parent.removeChild(contextElement); parent.normalize();
+            }
+            document.getElementById('contextMenu').style.display = 'none';
+        }
+        function clearAllHighlights() {
+            document.querySelectorAll('.highlight, .comment-highlight').forEach(el => {
+                const parent = el.parentNode;
+                while (el.firstChild) parent.insertBefore(el.firstChild, el);
+                parent.removeChild(el); parent.normalize();
+            });
+            document.getElementById('contextMenu').style.display = 'none';
+        }
+
+        document.getElementById('transcription-text').addEventListener('click', (e) => {
+            const hl = e.target.closest('.t-hl[data-time]');
+            if (!hl || !audioSource) return;
+            const tSec = parseFloat(hl.getAttribute('data-time'));
+            if (isNaN(tSec)) return;
+            audioPlayer.currentTime = Math.max(0, tSec - 2);
+            audioPlayer.play();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            switchToPart(1);
+            goToQuestion(1);
+            setupCheckboxLimits();
+        });
+    </script>
+</body>
+
+</html>'''
+
+with open('app/listening-test-3.html', 'w', encoding='utf-8') as f:
+    f.write(html3)
+
+print('Created listening-test-3.html')

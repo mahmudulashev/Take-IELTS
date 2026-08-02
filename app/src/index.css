@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-[#F7F8FC] text-gray-900 font-sans antialiased;
+    overflow-x: hidden;
+  }
+}
+
+/* Rendering performance & GPU acceleration for animations */
+.gpu-layer {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Fast rendering for list cards */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 180px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Tabular numbers for timers */
+.font-timer {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  html,
+  body,
+  #root {
+    min-width: 320px;
+    overflow-x: hidden;
+  }
+
+  input,
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
