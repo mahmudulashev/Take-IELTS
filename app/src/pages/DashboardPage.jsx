@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Sidebar from '../components/layout/Sidebar'
 import { useAuth } from '../context/AuthContext'
+import { RevealGroup, Reveal, CountUp, useSmoothScroll } from '../components/motion'
 import { formatDate } from '../lib/scoring'
 import { Flame, Award, BookOpen, Headphones, ArrowRight, History, CheckCircle2 } from 'lucide-react'
 
 export default function DashboardPage() {
+  useSmoothScroll(true)
   const { user, sessionChecked, signOut, results, stats } = useAuth()
   const [currentSlide, setCurrentSlide] = useState(0)
   const navigate = useNavigate()
@@ -122,14 +124,14 @@ export default function DashboardPage() {
           </div>
 
           {/* Desktop: 4-col grid (>= 640px) */}
-          <div className="max-sm:hidden grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <RevealGroup stagger={0.08} y={28} className="max-sm:hidden grid grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-gradient-to-br from-[#FF3131] to-[#FF6B6B] rounded-[24px] p-6 text-white shadow-lg shadow-[#FF3131]/20 relative overflow-hidden">
               <div className="relative z-10">
                 <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-3">
                   <Flame className="w-6 h-6 text-white" />
                 </div>
                 <p className="text-xs font-medium opacity-90">Testlar soni</p>
-                <p className="text-3xl font-extrabold mt-1">{stats.totalTests}</p>
+                <p className="text-3xl font-extrabold mt-1"><CountUp to={stats.totalTests} /></p>
               </div>
             </div>
 
@@ -138,7 +140,7 @@ export default function DashboardPage() {
                 <Award className="w-6 h-6 text-green-600" />
               </div>
               <p className="text-xs font-medium text-gray-500">O'rtacha Band</p>
-              <p className="text-3xl font-extrabold text-gray-900 mt-1">{stats.avgBand}</p>
+              <p className="text-3xl font-extrabold text-gray-900 mt-1"><CountUp to={stats.avgBand} decimals={1} /></p>
             </div>
 
             <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm">
@@ -146,7 +148,7 @@ export default function DashboardPage() {
                 <Award className="w-6 h-6 text-[#FF3131]" />
               </div>
               <p className="text-xs font-medium text-gray-500">Eng yaxshi</p>
-              <p className="text-3xl font-extrabold text-[#FF3131] mt-1">{stats.bestBand}</p>
+              <p className="text-3xl font-extrabold text-[#FF3131] mt-1"><CountUp to={stats.bestBand} decimals={1} /></p>
             </div>
 
             <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm">
@@ -158,12 +160,12 @@ export default function DashboardPage() {
                 {stats.lastTest ? stats.lastTest.band_score : '—'}
               </p>
             </div>
-          </div>
+          </RevealGroup>
         </div>
 
         {/* Practice Test Section Launchers */}
         <h2 className="text-xl font-extrabold text-gray-900 mb-4">Testlar</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 anim-stagger">
+        <RevealGroup stagger={0.12} y={40} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
           {/* Reading Launcher */}
           <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm hover:shadow-md transition-ui flex flex-col justify-between">
             <div>
@@ -201,7 +203,7 @@ export default function DashboardPage() {
               <span>Boshlash →</span>
             </Link>
           </div>
-        </div>
+        </RevealGroup>
 
         {/* Recent Results Summary — full charts, analytics & history now live on /reports */}
         <div className="flex items-center justify-between gap-4 mb-4">

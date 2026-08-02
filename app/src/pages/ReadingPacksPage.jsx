@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Sidebar from '../components/layout/Sidebar'
 import { useAuth } from '../context/AuthContext'
+import { RevealGroup, Reveal, useSmoothScroll } from '../components/motion'
 import { TestCatalog } from '../data/tests-catalog'
 import { BookOpen, ArrowRight, CheckCircle2 } from 'lucide-react'
 
 export default function ReadingPacksPage() {
+  useSmoothScroll(true)
   const { user, sessionChecked, signOut, results } = useAuth()
   const navigate = useNavigate()
 
@@ -60,7 +62,7 @@ export default function ReadingPacksPage() {
         </div>
 
         {/* Grid of Reading Packs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 anim-stagger">
+        <RevealGroup stagger={0.09} y={36} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {readingPacks.map(pack => {
             const packResult = getPackResult(pack.id)
 
@@ -121,7 +123,7 @@ export default function ReadingPacksPage() {
               </div>
             )
           })}
-        </div>
+        </RevealGroup>
       </main>
     </div>
   )
