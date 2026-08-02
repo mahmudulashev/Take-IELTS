@@ -7,7 +7,6 @@ import {
   getProfile, 
   updateProfile, 
   isSupabaseConfigured,
-  syncLocalResultsToSupabase,
   clearTestHistory
 } from '../lib/supabase'
 import { 
@@ -18,8 +17,7 @@ import {
   FileText, 
   CheckCircle2, 
   Cloud, 
-  CloudOff, 
-  RefreshCw, 
+  CloudOff,
   Trash2, 
   Save, 
   Award,
@@ -34,11 +32,11 @@ import {
 } from 'lucide-react'
 
 export default function ProfilePage() {
-  const { user, sessionChecked, signOut, stats, refreshResults, clearHistory } = useAuth()
+  const { user, sessionChecked, signOut, stats, clearHistory } = useAuth()
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [syncing, setSyncing] = useState(false)
+
   const [message, setMessage] = useState(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const navigate = useNavigate()
@@ -142,25 +140,6 @@ export default function ProfilePage() {
       setMessage({ type: 'error', text: 'Profilni saqlashda xatolik yuz berdi.' })
     } finally {
       setSaving(false)
-    }
-  }
-
-  const handleSyncSupabase = async () => {
-    setSyncing(true)
-    setMessage(null)
-
-    try {
-      const res = await syncLocalResultsToSupabase()
-      if (res.success) {
-        setMessage({ type: 'success', text: res.message })
-        await refreshResults()
-      } else {
-        setMessage({ type: 'error', text: res.message || 'Sinxronlashda xatolik yuz berdi.' })
-      }
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Sinxronlashda xatolik yuz berdi.' })
-    } finally {
-      setSyncing(false)
     }
   }
 
@@ -559,19 +538,10 @@ export default function ProfilePage() {
                 </h3>
 
                 <div className="text-xs text-gray-500 leading-relaxed">
-                  {isSupabaseConfigured 
-                    ? 'Supabase bazangiz ulangan. LocalStorage test natijalarini Supabase bulutiga sinxronlang.' 
+                  {isSupabaseConfigured
+                    ? 'Test natijalaringiz avtomatik tarzda bulutga saqlanadi — hech narsa bosishingiz shart emas.'
                     : 'Hozircha `.env` faylida Supabase kalitlari belgilanmagan. Sozlaganingizdan so\'ng Google OAuth va bulut saqlash ishga tushadi.'}
                 </div>
-
-                <button
-                  onClick={handleSyncSupabase}
-                  disabled={syncing}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-bold text-xs transition-all disabled:opacity-50"
-                >
-                  <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-                  <span>Supabase'ga Sinxronlash</span>
-                </button>
 
                 <button
                   onClick={() => setShowDeleteModal(true)}

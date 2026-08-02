@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { 
   getSession, 
   signOut as supabaseSignOut, 
   onAuthStateChange, 
   getTestResults as fetchResults, 
   getStats as fetchStats,
-  clearTestHistory as supabaseClearHistory
+  clearTestHistory as supabaseClearHistory,
+  syncLocalResultsToSupabase,
+  isSupabaseConfigured
 } from '../lib/supabase'
 
 const AuthContext = createContext(null)
@@ -66,19 +68,43 @@ export function AuthProvider({ children }) {
     return () => subscription?.unsubscribe()
   }, [])
 
-  // Background refresh of results/stats
+  // Foydalanuvchi kirgach: avval yuborilmagan local natijalarni avtomatik
+  // sinxronlaymiz, keyin natija/statistikani yangilaymiz.
+  // Har bir user uchun seans davomida bir marta ishlaydi.
+  const syncedForUser = useRef(null)
+
   useEffect(() => {
     if (!user) return
-    async function refreshData() {
+    let cancelled = false
+
+    async function syncThenRefresh() {
+      if (isSupabaseConfigured && syncedForUser.current !== user.id) {
+        syncedForUser.current = user.id
+        try {
+          const res = await syncLocalResultsToSupabase()
+          if (res.count > 0) {
+            console.info(`[auto-sync] ${res.count} ta natija bulutga yuborildi`)
+          }
+        } catch (e) {
+          // Sinxronlash muvaffaqiyatsiz bo'lsa ham natijalarni ko'rsatishda davom etamiz
+          syncedForUser.current = null
+        }
+      }
+
+      if (cancelled) return
+
       try {
         const [freshResults, freshStats] = await Promise.all([fetchResults(100), fetchStats()])
+        if (cancelled) return
         setResults(freshResults)
         setStats(freshStats)
       } catch (e) {
         // Keep localStorage data on error
       }
     }
-    refreshData()
+
+    syncThenRefresh()
+    return () => { cancelled = true }
   }, [user])
 
   const refreshResults = useCallback(async () => {

@@ -18,7 +18,28 @@ const STORAGE_KEYS = {
   USER: 'ielts_user',
   PROFILE: 'ielts_user_profile',
   RESULTS: 'ielts_test_results',
-  CLEARED_AT: 'ielts_cleared_at'
+  CLEARED_AT: 'ielts_cleared_at',
+  SYNCED_IDS: 'ielts_synced_ids'
+}
+
+/**
+ * Supabase'ga muvaffaqiyatli yuborilgan natija ID'larini belgilash.
+ * Shu ro'yxat tufayli avtomatik sinxronlash bir xil natijani qayta yubormaydi.
+ */
+function readSyncedIds() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(STORAGE_KEYS.SYNCED_IDS) || '[]'))
+  } catch {
+    return new Set()
+  }
+}
+
+function markSynced(ids) {
+  const synced = readSyncedIds()
+  ids.forEach(id => synced.add(id))
+  // Ro'yxat cheksiz o'smasligi uchun oxirgi 500 tasini saqlaymiz
+  const trimmed = Array.from(synced).slice(-500)
+  localStorage.setItem(STORAGE_KEYS.SYNCED_IDS, JSON.stringify(trimmed))
 }
 
 /**
@@ -264,11 +285,15 @@ export async function saveTestResult({ testType, testId, score, totalQuestions =
   results.unshift(newResult)
   localStorage.setItem(STORAGE_KEYS.RESULTS, JSON.stringify(results))
 
-  // Save to Supabase if available
-  if (isSupabaseConfigured && supabase) {
+  // Avtomatik bulutga yozish — test tugagan zahoti
+  if (isSupabaseConfigured && supabase && user?.id) {
     try {
-      await supabase.from('test_results').insert([newResult])
+      const { error } = await supabase.from('test_results').insert([newResult])
+      if (error) throw error
+      markSynced([newResult.id])
     } catch (e) {
+      // Xatolik bo'lsa ham natija localStorage'da qoladi va keyingi
+      // avtomatik sinxronlashda qayta yuboriladi
       console.warn('Supabase test result save error:', e)
     }
   }
@@ -358,11 +383,20 @@ export async function getStats() {
 }
 
 /**
- * Local natijalarni Supabase ga sinxronlash
+ * Local natijalarni Supabase ga sinxronlash.
+ * Endi bu funksiya avtomatik chaqiriladi — foydalanuvchi tugma bosishi shart emas.
+ *
+ * @param {Object}  opts
+ * @param {boolean} opts.force  true bo'lsa, allaqachon yuborilgan natijalar ham qayta yuboriladi
  */
-export async function syncLocalResultsToSupabase() {
+export async function syncLocalResultsToSupabase({ force = false } = {}) {
   if (!isSupabaseConfigured || !supabase) {
-    return { success: false, message: 'Supabase kalitlari o\'rnatilmagan' }
+    return { success: false, count: 0, message: 'Supabase kalitlari o\'rnatilmagan' }
+  }
+
+  const user = await getUser()
+  if (!user?.id) {
+    return { success: false, count: 0, message: 'Sinxronlash uchun avval tizimga kiring' }
   }
 
   const localResults = JSON.parse(localStorage.getItem(STORAGE_KEYS.RESULTS) || '[]')
@@ -370,13 +404,27 @@ export async function syncLocalResultsToSupabase() {
     return { success: true, count: 0, message: 'Sinxronlanadigan natijalar yo\'q' }
   }
 
+  const syncedIds = readSyncedIds()
+  const pending = force ? localResults : localResults.filter(r => !syncedIds.has(r.id))
+
+  if (!pending.length) {
+    return { success: true, count: 0, message: 'Barcha natijalar allaqachon sinxronlangan' }
+  }
+
+  // Login'gacha yig'ilgan "guest-user" natijalarini haqiqiy foydalanuvchiga bog'laymiz
+  const payload = pending.map(r => ({
+    ...r,
+    user_id: r.user_id && r.user_id !== 'guest-user' ? r.user_id : user.id
+  }))
+
   try {
-    const { error } = await supabase.from('test_results').upsert(localResults)
+    const { error } = await supabase.from('test_results').upsert(payload)
     if (error) throw error
-    return { success: true, count: localResults.length, message: `${localResults.length} ta natija Supabase ga saqlandi!` }
+    markSynced(payload.map(r => r.id))
+    return { success: true, count: payload.length, message: `${payload.length} ta natija Supabase ga saqlandi!` }
   } catch (err) {
-    console.error('Sync error:', err)
-    return { success: false, message: err.message }
+    console.warn('Sync error:', err)
+    return { success: false, count: 0, message: err.message }
   }
 }
 
