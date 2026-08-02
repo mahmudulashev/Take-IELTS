@@ -57,7 +57,7 @@ export const TestCatalog = [
     questions: 40,
     duration: 30,
     badge: 'Popular',
-    route: '/test/listening'
+    route: '/listening-test.html'
   },
   {
     id: 'listening-2',

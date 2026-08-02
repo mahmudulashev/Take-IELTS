@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listening Practice 3 — Take IELTS</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/css/test.css">
     <script src="/js/mobile-test-helper.js" defer></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -102,10 +103,14 @@
         .result-incorrect { color: #dc3545; font-weight: bold; }
         @keyframes flash { 0% { background-color: #FFF0F0; } 100% { background-color: transparent; } }
         .question.flash { animation: flash 1s ease-out; }
+        .context-menu { position: absolute; background: white; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); z-index: 1000; display: none; min-width: 140px; }
+        .context-menu-item { padding: 12px 16px; cursor: pointer; font-size: 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px; }
+        .context-menu-item:hover { background-color: #f8f9fa; }
+        .context-menu-item:last-child { border-bottom: none; }
     </style>
 </head>
 
-<body>
+<body class="listening-test">
 
     <div class="header">
         <div class="timer-container"><span class="timer-display">60:00</span></div>
@@ -540,7 +545,7 @@
     </nav>
 
     <!-- Context Menu -->
-    <div id="contextMenu" class="context-menu">
+    <div id="contextMenu" class="context-menu" onmousedown="event.preventDefault()">
         <div class="context-menu-item" onclick="highlightText()">Highlight</div>
         <div class="context-menu-item" onclick="addComment()">Comment</div>
         <div class="context-menu-item" id="clear-item" onclick="clearHighlight()" style="display:none;">Clear</div>
@@ -566,6 +571,7 @@
     </div>
 
     <script>
+        console.log('%c[Take IELTS] highlight-fix v2 loaded', 'color:#FF3131;font-weight:bold');
         window.testStartTime = Date.now();
         const correctAnswers = {
             'q1': ['diving'],
@@ -642,7 +648,7 @@
         }
 
         playPauseBtn.addEventListener('click', () => {
-            if (!audioSource) { alert('Audio URL qo'shilmagan. Script ichida audioSource ni to'ldiring.'); return; }
+            if (!audioSource) { alert("Audio URL qo'shilmagan. Script ichida audioSource ni to'ldiring."); return; }
             if (audioPlayer.paused) audioPlayer.play(); else audioPlayer.pause();
         });
         audioPlayer.addEventListener('play', () => { playPauseBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'; });
@@ -921,12 +927,16 @@
 
         document.addEventListener('selectionchange', () => {
             const sel = window.getSelection();
-            if (sel && sel.rangeCount > 0 && !sel.isCollapsed) selectedRange = sel.getRangeAt(0);
+            if (sel && sel.rangeCount > 0 && !sel.isCollapsed) selectedRange = sel.getRangeAt(0).cloneRange();
         });
         document.body.addEventListener('contextmenu', function (e) {
-            const text = window.getSelection().toString();
+            const sel = window.getSelection();
+            const text = sel.toString();
             if (!text) return;
             e.preventDefault();
+            // Capture a snapshot of the selection NOW: the live Range collapses
+            // as soon as the user mousedowns on the menu item.
+            if (sel.rangeCount > 0 && !sel.isCollapsed) selectedRange = sel.getRangeAt(0).cloneRange();
             const menu = document.getElementById('contextMenu');
             menu.style.left = e.pageX + 'px';
             menu.style.top = e.pageY + 'px';
@@ -938,8 +948,89 @@
             if (!e.target.closest('.context-menu')) document.getElementById('contextMenu').style.display = 'none';
         });
         function highlightText() {
-            if (!selectedRange || selectedRange.collapsed) return;
-            try { const span = document.createElement('span'); span.className = 'highlight'; selectedRange.surroundContents(span); } catch (e) { }
+            if (!selectedRange || selectedRange.collapsed) {
+                document.getElementById('contextMenu').style.display = 'none';
+                return;
+            }
+
+            try {
+                const startContainer = selectedRange.startContainer;
+                const endContainer = selectedRange.endContainer;
+
+                if (startContainer === endContainer && startContainer.nodeType === Node.TEXT_NODE) {
+                    const span = document.createElement('span');
+                    span.className = 'highlight';
+                    selectedRange.surroundContents(span);
+                } else {
+                    const startOffset = selectedRange.startOffset;
+                    const endOffset = selectedRange.endOffset;
+
+                    if (startContainer.nodeType === Node.TEXT_NODE && startOffset > 0) {
+                        const startText = startContainer.textContent;
+                        const beforeNode = document.createTextNode(startText.substring(0, startOffset));
+                        const selectedNode = document.createTextNode(startText.substring(startOffset));
+                        const parent = startContainer.parentNode;
+                        parent.insertBefore(beforeNode, startContainer);
+                        parent.insertBefore(selectedNode, startContainer);
+                        parent.removeChild(startContainer);
+                        selectedRange.setStart(selectedNode, 0);
+                    }
+
+                    if (endContainer.nodeType === Node.TEXT_NODE && endOffset < endContainer.textContent.length) {
+                        const endText = endContainer.textContent;
+                        const selectedNode = document.createTextNode(endText.substring(0, endOffset));
+                        const afterNode = document.createTextNode(endText.substring(endOffset));
+                        const parent = endContainer.parentNode;
+                        parent.insertBefore(selectedNode, endContainer);
+                        parent.insertBefore(afterNode, endContainer);
+                        parent.removeChild(endContainer);
+                        selectedRange.setEnd(selectedNode, selectedNode.textContent.length);
+                    }
+
+                    const fragment = selectedRange.extractContents();
+                    const walker = document.createTreeWalker(
+                        fragment,
+                        NodeFilter.SHOW_TEXT,
+                        { acceptNode: node => node.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP },
+                        false
+                    );
+                    const textNodes = [];
+                    let node;
+                    while (node = walker.nextNode()) textNodes.push(node);
+                    textNodes.forEach(textNode => {
+                        const span = document.createElement('span');
+                        span.className = 'highlight';
+                        const parent = textNode.parentNode;
+                        if (parent) { parent.insertBefore(span, textNode); span.appendChild(textNode); }
+                    });
+                    selectedRange.insertNode(fragment);
+                }
+            } catch (err) {
+                console.warn('Primary highlighting failed, trying fallback:', err);
+                try {
+                    const selection = window.getSelection();
+                    if (selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0);
+                        const contents = range.extractContents();
+                        (function highlightAllText(n) {
+                            if (n.nodeType === Node.TEXT_NODE) {
+                                if (n.textContent.trim()) {
+                                    const span = document.createElement('span');
+                                    span.className = 'highlight';
+                                    const parent = n.parentNode;
+                                    if (parent) { parent.insertBefore(span, n); span.appendChild(n); }
+                                }
+                            } else if (n.nodeType === Node.ELEMENT_NODE) {
+                                Array.from(n.childNodes).forEach(highlightAllText);
+                            }
+                        })(contents);
+                        range.insertNode(contents);
+                    }
+                } catch (err2) {
+                    console.error('All highlighting methods failed:', err2);
+                }
+            }
+
             window.getSelection().removeAllRanges();
             document.getElementById('contextMenu').style.display = 'none';
         }

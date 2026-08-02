@@ -55,7 +55,7 @@ export default function ListeningPacksPage() {
               IELTS Listening Test To'plamlari
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              Audio media pleer va 4 ta Part bo'yicha 40 ta savolni topshiring.
+              4 ta part, 40 ta savol, audio player va transkript bilan mashq qiling.
             </p>
           </div>
         </div>
@@ -72,7 +72,7 @@ export default function ListeningPacksPage() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-[#FFF0F0] text-[#FF3131] flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
                       <Headphones className="w-6 h-6" />
                     </div>
                     

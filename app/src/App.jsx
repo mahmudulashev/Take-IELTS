@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 const LandingPage = lazy(() => import('./pages/LandingPage'))
 const AuthPage = lazy(() => import('./pages/AuthPage'))
@@ -8,7 +8,7 @@ const ReadingPacksPage = lazy(() => import('./pages/ReadingPacksPage'))
 const ListeningPacksPage = lazy(() => import('./pages/ListeningPacksPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const ReadingTestPage = lazy(() => import('./pages/ReadingTestPage'))
-const ListeningTestPage = lazy(() => import('./pages/ListeningTestPage'))
+const ReportsPage = lazy(() => import('./pages/ReportsPage'))
 
 function PageLoader() {
   return (
@@ -28,10 +28,9 @@ export default function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/reading-packs" element={<ReadingPacksPage />} />
           <Route path="/listening-packs" element={<ListeningPacksPage />} />
-          <Route path="/reports" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/reports" element={<ReportsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/test/reading" element={<ReadingTestPage />} />
-          <Route path="/test/listening" element={<ListeningTestPage />} />
         </Routes>
       </Suspense>
     </Router>

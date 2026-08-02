@@ -2786,7 +2786,7 @@
     </nav>
 
     <!-- Context Menu -->
-    <div id="contextMenu" class="context-menu">
+    <div id="contextMenu" class="context-menu" onmousedown="event.preventDefault()">
         <div class="context-menu-item" onclick="highlightText()">Highlight</div>
         <div class="context-menu-item" onclick="addComment()">Comment</div>
         <div class="context-menu-item" id="clear-item" onclick="clearHighlight()" style="display:none;">Clear</div>
@@ -2894,7 +2894,8 @@
             [1, 2, 3].forEach(p => { const ph = document.getElementById('part-header-' + p); if (ph) ph.classList.toggle('hidden', p !== n); });
             document.getElementById('questions-' + n).classList.add('active');
             document.querySelectorAll('.footer__questionWrapper___1tZ46').forEach((w, i) => w.classList.toggle('selected', i + 1 === n));
-            document.getElementById('part-indicator').textContent = 'Reading Passage ' + n;
+            const partIndicator = document.getElementById('part-indicator');
+            if (partIndicator) partIndicator.textContent = 'Reading Passage ' + n;
             document.getElementById('passage-panel').scrollTop = 0;
             document.getElementById('questions-panel').scrollTop = 0;
             const [start, end] = passageRanges[n];
@@ -3180,12 +3181,14 @@
 
         document.addEventListener('selectionchange', () => {
             const sel = window.getSelection();
-            if (sel && sel.rangeCount > 0 && !sel.isCollapsed) selectedRange = sel.getRangeAt(0);
+            if (sel && sel.rangeCount > 0 && !sel.isCollapsed) selectedRange = sel.getRangeAt(0).cloneRange();
         });
         document.body.addEventListener('contextmenu', function (e) {
-            const text = window.getSelection().toString();
+            const sel = window.getSelection();
+            const text = sel.toString();
             if (!text) return;
             e.preventDefault();
+            if (sel.rangeCount > 0 && !sel.isCollapsed) selectedRange = sel.getRangeAt(0).cloneRange();
             const menu = document.getElementById('contextMenu');
             menu.style.left = e.pageX + 'px';
             menu.style.top = e.pageY + 'px';

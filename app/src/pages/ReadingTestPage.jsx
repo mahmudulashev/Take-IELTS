@@ -294,13 +294,18 @@ export default function ReadingTestPage() {
   return (
     <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '16px', lineHeight: 1.4, color: '#333' }}>
       <div className="header" style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '60px', background: '#fff', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', zIndex: 100 }}>
-        <div className="timer-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span className="timer-display" style={{ fontWeight: 'bold', fontSize: '18px', color: timeLeft < 300 ? 'red' : 'black' }}>
+        <div className="timer-container" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <span className="timer-display" style={{ fontWeight: 700, fontSize: '18px', color: timeLeft < 300 ? 'red' : '#000', fontVariantNumeric: 'tabular-nums' }}>
             {formatSeconds(timeLeft)}
           </span>
           <div className="timer-controls" style={{ display: 'flex', gap: '5px' }}>
-            <button onClick={() => setIsPaused(!isPaused)} id="timer-toggle-btn" title="Pause/Resume Timer" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"><path d="M0 0h24v24H0V0z" fill="none"/><path d={isPaused ? "M8 5v14l11-7L8 5z" : "M6 19h4V5H6v14zm8-14v14h4V5h-4z"}/></svg>
+            <button
+              onClick={() => setIsPaused(!isPaused)}
+              id="timer-toggle-btn"
+              title="Pause/Resume Timer"
+              style={{ width: '32px', height: '32px', padding: 0, borderRadius: '999px', background: '#f0f0f0', border: '1px solid #ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" height="20px" width="20px" viewBox="0 0 24 24" fill="#333"><path d="M0 0h24v24H0V0z" fill="none"/><path d={isPaused ? "M8 5v14l11-7L8 5z" : "M6 19h4V5H6v14zm8-14v14h4V5h-4z"}/></svg>
             </button>
           </div>
         </div>
@@ -311,8 +316,8 @@ export default function ReadingTestPage() {
 
       <div className="main-container" id="main-container" onContextMenu={handleContextMenu} style={{ display: 'flex', flexDirection: 'column', height: '100vh', paddingTop: '60px', paddingBottom: '80px' }}>
         <div id="passage-header-container" style={{ padding: '10px 20px', background: '#f8f9fa', borderBottom: '1px solid #e0e0e0' }}>
-          <div className="part-header" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <p><strong>Part {currentPart}</strong></p>
+          <div className="part-header" style={{ background: '#FFF0F0', border: '1px solid rgba(255,49,49,0.2)', borderRadius: '5px', padding: '15px 20px', margin: 0 }}>
+            <p style={{ margin: '0 0 5px', fontWeight: 700 }}>Part {currentPart}</p>
             <p style={{ margin: 0 }}>Read the text and answer questions {currentPart === 1 ? '1-13' : currentPart === 2 ? '14-26' : '27-40'}.</p>
           </div>
         </div>

@@ -457,7 +457,8 @@
     font-size: 11px !important;
     font-weight: 700 !important;
     border-radius: 12px !important;
-    background: #111827 !important;
+    background: #FF3131 !important;
+    border: 1px solid #FF3131 !important;
     color: #ffffff !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
@@ -465,5 +466,292 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LISTENING TESTS — RESPONSIVE
+   Scoped to body.listening-test so the reading tests (which use
+   .passage-panel / .questions-panel) are never affected.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ---------- Tablet & below ---------- */
+@media (max-width: 1024px) {
+  .listening-test .main-container {
+    flex-direction: column !important;
+  }
+
+  /* questions were capped at 50% of the page — full width on small screens */
+  .listening-test .questions-container {
+    max-width: 100% !important;
+  }
+
+  /* after submitting, transcript stacks under the questions instead of 75/25 */
+  .listening-test .main-container.results-mode .left-panel,
+  .listening-test .main-container.results-mode .right-panel {
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border-left: none !important;
+  }
+  .listening-test .main-container.results-mode .right-panel {
+    border-top: 1px solid #e0e0e0 !important;
+  }
+}
+
+/* ---------- Phone ---------- */
+@media (max-width: 768px) {
+  .listening-test {
+    padding-bottom: 150px !important;
+  }
+
+  /* The Passage/Questions tab bar is injected by mobile-test-helper.js for
+     reading tests. On listening there is no passage panel to switch to
+     (the transcript only appears after submitting), so it would be a dead
+     control — hide it. */
+  .listening-test .mobile-test-tabs {
+    display: none !important;
+  }
+
+  /* ---- Header ---- */
+  .listening-test .header {
+    height: 52px !important;
+    padding: 6px 10px !important;
+  }
+  .listening-test .timer-display {
+    font-size: 15px !important;
+  }
+  .listening-test .exit-header-btn {
+    padding: 5px 10px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+  }
+
+  /* ---- Audio player: full-width bar that wraps onto two rows ---- */
+  .listening-test .audio-player-container {
+    top: 56px !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-width: none !important;
+    transform: none !important;
+    height: auto !important;
+    min-height: 44px !important;
+    flex-wrap: wrap !important;
+    padding: 8px 10px !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
+  }
+  /* play button + scrubber share the first row */
+  .listening-test .progress-container {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    gap: 6px !important;
+  }
+  .listening-test .progress-container span {
+    font-size: 11px !important;
+    flex: none !important;
+  }
+  .listening-test #progress-bar {
+    min-width: 0 !important;
+  }
+  /* volume + speed drop to their own row, right-aligned */
+  .listening-test .controls-container {
+    flex: 1 0 100% !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+  }
+  .listening-test #new-volume-slider {
+    width: 90px !important;
+    max-width: 40vw !important;
+  }
+
+  /* ---- Body / panels ---- */
+  .listening-test .main-container {
+    margin-top: 118px !important;
+    padding-bottom: 20px !important;
+  }
+  .listening-test .left-panel {
+    width: 100% !important;
+    padding: 16px 14px !important;
+    box-sizing: border-box !important;
+  }
+  .listening-test .right-panel {
+    padding: 16px 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* ---- Question content ---- */
+  .listening-test .question,
+  .listening-test .part-header {
+    font-size: 15px !important;
+  }
+
+  /* inputs have hard-coded inline widths (80–150px) that overflow narrow
+     screens; let them shrink and keep 16px font so iOS doesn't zoom on focus */
+  .listening-test .answer-input {
+    width: 100% !important;
+    max-width: 220px !important;
+    min-width: 0 !important;
+    font-size: 16px !important;
+    height: 34px !important;
+  }
+  /* short blank-fillers (matching / map labels) stay compact */
+  .listening-test .matching-item .answer-input {
+    width: 64px !important;
+    max-width: 64px !important;
+    flex: none !important;
+  }
+
+  /* matching lists: label above, box below instead of a 240px fixed column */
+  .listening-test .matching-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+    margin-bottom: 10px !important;
+  }
+  .listening-test .matching-item span {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    font-size: 15px !important;
+  }
+  .listening-test .matching-options-box {
+    min-width: 0 !important;
+    width: 100% !important;
+    display: block !important;
+    box-sizing: border-box !important;
+  }
+
+  /* radio/checkbox rows become comfortable tap targets */
+  .listening-test .multi-choice-option label,
+  .listening-test .tf-option {
+    font-size: 15px !important;
+    line-height: 1.45 !important;
+  }
+  .listening-test .multi-choice-option {
+    padding: 10px 12px !important;
+  }
+  .listening-test input[type="radio"],
+  .listening-test input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    flex: none !important;
+  }
+
+  /* tables (notes/summary completion) scroll sideways rather than breaking out */
+  .listening-test .left-panel table,
+  .listening-test .notes-table {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    white-space: normal !important;
+  }
+  .listening-test .left-panel table td,
+  .listening-test .left-panel table th {
+    padding: 8px !important;
+    font-size: 14px !important;
+  }
+
+  .listening-test img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* ---- Bottom navigation ---- */
+  /* the per-question 1..10 grid can't fit; the Part buttons are enough */
+  .listening-test .footer__subquestionWrapper___9GgoP {
+    display: none !important;
+  }
+  .listening-test .nav-row {
+    height: auto !important;
+    flex-wrap: wrap !important;
+    padding: 8px !important;
+    gap: 6px !important;
+    overflow-x: visible !important;
+    white-space: normal !important;
+  }
+  .listening-test .footer__questionWrapper___1tZ46 {
+    flex: 1 1 22% !important;
+    margin-right: 0 !important;
+    min-width: 0 !important;
+  }
+  .listening-test .footer__questionNo___3WNct {
+    width: 100% !important;
+    padding: 8px 4px !important;
+    font-size: 13px !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+  }
+  /* selected Part keeps the shared solid-red treatment (white text on #FF3131);
+     do not tint the background here — an earlier shared rule forces child
+     <span>s to white, which would leave white-on-pink text */
+  .listening-test .footer__questionWrapper___1tZ46.selected .footer__questionNo___3WNct {
+    font-weight: 700 !important;
+  }
+  /* "0 of 10" counter is noise at this width */
+  .listening-test .attemptedCount {
+    display: none !important;
+  }
+  .listening-test .footer__deliverButton___3FM07 {
+    flex: 1 0 100% !important;
+    margin: 4px 0 0 !important;
+    min-width: 0 !important;
+    padding: 12px !important;
+    font-size: 15px !important;
+  }
+
+  /* prev/next part arrows would sit on top of the footer */
+  .listening-test .nav-arrows {
+    display: none !important;
+  }
+
+  /* ---- Results modal ---- */
+  .listening-test .modal-content {
+    padding: 16px !important;
+    width: 100% !important;
+    max-height: 88vh !important;
+    border-radius: 14px !important;
+  }
+  .listening-test #result-details {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .listening-test #result-details table {
+    font-size: 12px !important;
+    min-width: 380px !important;
+  }
+  .listening-test #result-details th,
+  .listening-test #result-details td {
+    padding: 6px !important;
+  }
+  .listening-test .modal-header h2 {
+    font-size: 19px !important;
+  }
+
+  /* context menu stays inside the viewport */
+  .listening-test .context-menu {
+    max-width: 60vw !important;
+  }
+}
+
+/* ---------- Small phones ---------- */
+@media (max-width: 400px) {
+  .listening-test .footer__questionWrapper___1tZ46 {
+    flex: 1 1 46% !important;
+  }
+  .listening-test #new-volume-slider {
+    width: 70px !important;
+  }
+  .listening-test .exit-header-btn {
+    font-size: 0 !important;
+    padding: 8px 10px !important;
+  }
+  /* keep the arrow glyph visible after zeroing the label */
+  .listening-test .exit-header-btn::before {
+    content: "←" !important;
+    font-size: 15px !important;
   }
 }

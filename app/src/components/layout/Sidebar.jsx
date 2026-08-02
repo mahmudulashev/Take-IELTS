@@ -1,11 +1,12 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { 
-  LayoutDashboard, 
-  BookOpen, 
+import {
+  LayoutDashboard,
+  BookOpen,
   Headphones,
-  User, 
+  BarChart3,
+  User,
   LogOut,
 } from 'lucide-react'
 
@@ -16,6 +17,7 @@ export default function Sidebar({ user, onSignOut }) {
     { label: 'Bosh sahifa', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Reading Testlar', path: '/reading-packs', icon: BookOpen },
     { label: 'Listening Testlar', path: '/listening-packs', icon: Headphones },
+    { label: 'Natijalarim', path: '/reports', icon: BarChart3 },
     { label: 'Profilim', path: '/profile', icon: User },
   ]
 
@@ -23,6 +25,7 @@ export default function Sidebar({ user, onSignOut }) {
     { label: 'Bosh sahifa', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Reading', path: '/reading-packs', icon: BookOpen },
     { label: 'Listening', path: '/listening-packs', icon: Headphones },
+    { label: 'Natijalar', path: '/reports', icon: BarChart3 },
     { label: 'Profilim', path: '/profile', icon: User },
   ]
 
@@ -69,7 +72,7 @@ export default function Sidebar({ user, onSignOut }) {
             <Link
               key={item.path}
               to={item.path}
-              className="relative flex flex-col items-center justify-center py-2 px-4 rounded-full transition-colors z-10"
+              className="relative flex flex-col items-center justify-center py-2 px-2.5 sm:px-4 rounded-full transition-colors z-10"
             >
               {isActive && (
                 <motion.div

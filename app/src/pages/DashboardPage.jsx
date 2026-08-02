@@ -2,15 +2,12 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Sidebar from '../components/layout/Sidebar'
-import BandScoreChart from '../components/charts/BandScoreChart'
-import SkillBreakdownCard from '../components/charts/SkillBreakdownCard'
 import { useAuth } from '../context/AuthContext'
-import { formatDate, formatSeconds } from '../lib/scoring'
+import { formatDate } from '../lib/scoring'
 import { Flame, Award, BookOpen, Headphones, ArrowRight, History, CheckCircle2 } from 'lucide-react'
 
 export default function DashboardPage() {
   const { user, sessionChecked, signOut, results, stats } = useAuth()
-  const [activeTab, setActiveTab] = useState('reading') // 'reading' or 'listening'
   const [currentSlide, setCurrentSlide] = useState(0)
   const navigate = useNavigate()
 
@@ -30,19 +27,18 @@ export default function DashboardPage() {
   }
 
   const handleStatsScroll = (e) => {
-    const scrollLeft = e.target.scrollLeft
-    const width = e.target.offsetWidth
-    const newIndex = Math.round(scrollLeft / (width * 0.72))
-    if (newIndex >= 0 && newIndex < 4 && newIndex !== currentSlide) {
-      setCurrentSlide(newIndex)
-    }
+    const track = e.currentTarget
+    const firstCard = track.firstElementChild
+    if (!firstCard) return
+    // Stride = one card plus the flex gap between cards.
+    const gap = parseFloat(getComputedStyle(track).columnGap) || 16
+    const stride = firstCard.offsetWidth + gap
+    if (!stride) return
+    const newIndex = Math.min(3, Math.max(0, Math.round(track.scrollLeft / stride)))
+    if (newIndex !== currentSlide) setCurrentSlide(newIndex)
   }
 
   const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || 'IELTS Student'
-
-  const readingResults = results.filter(r => r.test_type === 'reading')
-  const listeningResults = results.filter(r => r.test_type === 'listening')
-  const currentTabResults = activeTab === 'reading' ? readingResults : listeningResults
 
   const itemVariants = {
     hidden: { opacity: 0, y: 10 },
@@ -74,6 +70,7 @@ export default function DashboardPage() {
         <div className="mb-8">
           {/* Mobile: Instagram-style snap carousel (< 640px) */}
           <div
+            onScroll={handleStatsScroll}
             className="max-sm:flex hidden gap-4 overflow-x-auto -mx-4 px-4 snap-x snap-mandatory"
             style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
@@ -110,6 +107,18 @@ export default function DashboardPage() {
                 {stats.lastTest ? stats.lastTest.band_score : '—'}
               </p>
             </div>
+          </div>
+
+          {/* Mobile: carousel position dots */}
+          <div className="max-sm:flex hidden justify-center gap-1.5 mt-3">
+            {[0, 1, 2, 3].map((i) => (
+              <span
+                key={i}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  currentSlide === i ? 'w-[18px] bg-[#FF3131]' : 'w-1.5 bg-gray-300'
+                }`}
+              />
+            ))}
           </div>
 
           {/* Desktop: 4-col grid (>= 640px) */}
@@ -194,155 +203,66 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Charts & Skill Breakdown Section */}
-        <div className="mb-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <h2 className="text-xl font-extrabold text-gray-900">Natijalar Tahlili & Ko'nikmalar</h2>
-            
-            {/* Type Switcher Tabs */}
-            <div className="flex items-center gap-1 bg-gray-100 p-1.5 rounded-2xl border border-gray-200 w-full sm:w-auto overflow-x-auto">
-              <button
-                onClick={() => setActiveTab('reading')}
-                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                  activeTab === 'reading'
-                    ? 'bg-[#FF3131] text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <BookOpen className="w-4 h-4" />
-                <span>Reading ({readingResults.length})</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('listening')}
-                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                  activeTab === 'listening'
-                    ? 'bg-[#FF3131] text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <Headphones className="w-4 h-4" />
-                <span>Listening ({listeningResults.length})</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <BandScoreChart results={currentTabResults} />
-            </div>
-            <div>
-              <SkillBreakdownCard results={currentTabResults} />
-            </div>
-          </div>
+        {/* Recent Results Summary — full charts, analytics & history now live on /reports */}
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <h2 className="text-xl font-extrabold text-gray-900">Natijalar tarixi</h2>
+          {results.length > 0 && (
+            <Link
+              to="/reports"
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-[#FF3131] hover:text-[#E82C2C] transition-colors shrink-0"
+            >
+              <span>Barchasini ko'rish</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          )}
         </div>
-
-        {/* Results History Section */}
-        <h2 className="text-xl font-extrabold text-gray-900 mb-4">Natijalar tarixi</h2>
-        <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden w-full max-h-[500px] overflow-y-auto relative">
+        <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden">
           {results.length === 0 ? (
             <div className="p-12 text-center">
               <CheckCircle2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-base font-bold text-gray-700">Hali test yechilmagan. Birinchi testingizni boshlang!</p>
             </div>
           ) : (
-            <div>
-              {/* Desktop Table (>= 640px) */}
-              <div className="hidden sm:block overflow-x-auto w-full">
-                <table className="w-full text-left border-collapse">
-                  <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
-                    <tr className="border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                      <th className="py-4 px-6">#</th>
-                      <th className="py-4 px-6">Sana</th>
-                      <th className="py-4 px-6">Test turi</th>
-                      <th className="py-4 px-6">Ball</th>
-                      <th className="py-4 px-6">Band</th>
-                      <th className="py-4 px-6">Vaqt</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 text-sm font-semibold text-gray-700">
-                    {results.map((res, index) => (
-                      <tr key={res.id || index} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="py-4 px-6 text-gray-400 font-normal">{index + 1}</td>
-                        <td className="py-4 px-6">{formatDate(res.completed_at || res.created_at || res.date)}</td>
-                        <td className="py-4 px-6">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                              res.test_type === 'reading'
-                                ? 'bg-[#FFF0F0] text-[#FF3131]'
-                                : 'bg-blue-50 text-blue-600'
-                            }`}
-                          >
-                            {res.test_type === 'reading' ? '📖 Reading' : '🎧 Listening'}
-                          </span>
-                        </td>
-                        <td className="py-4 px-6">{res.score} / {res.total_questions || 40}</td>
-                        <td className="py-4 px-6">
-                          <span
-                            className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold ${
-                              parseFloat(res.band_score) >= 7.0
-                                ? 'bg-green-100 text-green-700'
-                                : parseFloat(res.band_score) >= 5.5
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'bg-red-100 text-red-700'
-                            }`}
-                          >
-                            {res.band_score}
-                          </span>
-                        </td>
-                        <td className="py-4 px-6 text-gray-500 font-mono text-xs">
-                          {formatSeconds(res.time_spent)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Mobile Cards (< 640px) */}
-              <div className="sm:hidden divide-y divide-gray-100">
-                {results.map((res, index) => (
-                  <div key={res.id || index} className="p-4 flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                          res.test_type === 'reading'
-                            ? 'bg-[#FFF0F0] text-[#FF3131]'
-                            : 'bg-blue-50 text-blue-600'
-                        }`}
-                      >
-                        {res.test_type === 'reading' ? '📖 Reading' : '🎧 Listening'}
-                      </span>
-
-                      <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold ${
-                          parseFloat(res.band_score) >= 7.0
-                            ? 'bg-green-100 text-green-700'
-                            : parseFloat(res.band_score) >= 5.5
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-red-100 text-red-700'
-                        }`}
-                      >
-                        Band {res.band_score}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-1">
-                      <div>
-                        <p className="text-[11px] text-gray-400 font-medium">To'g'ri javoblar</p>
-                        <p className="text-sm font-extrabold text-gray-900">{res.score} / {res.total_questions || 40}</p>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="text-[11px] text-gray-400 font-medium">Sana & Vaqt</p>
-                        <p className="text-xs font-bold text-gray-700">
-                          {formatDate(res.completed_at || res.created_at || res.date)} • {formatSeconds(res.time_spent)}
-                        </p>
-                      </div>
-                    </div>
+            <div className="divide-y divide-gray-100">
+              {results.slice(0, 3).map((res, index) => (
+                <div key={res.id || index} className="p-4 sm:p-5 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
+                        res.test_type === 'reading'
+                          ? 'bg-[#FFF0F0] text-[#FF3131]'
+                          : 'bg-blue-50 text-blue-600'
+                      }`}
+                    >
+                      {res.test_type === 'reading' ? (
+                        <><BookOpen className="w-[13px] h-[13px]" />Reading</>
+                      ) : (
+                        <><Headphones className="w-[13px] h-[13px]" />Listening</>
+                      )}
+                    </span>
+                    <span className="text-xs text-gray-500 font-medium truncate">
+                      {formatDate(res.completed_at || res.created_at || res.date)}
+                    </span>
                   </div>
-                ))}
-              </div>
+
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="hidden sm:inline text-sm font-semibold text-gray-700">
+                      {res.score} / {res.total_questions || 40}
+                    </span>
+                    <span
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold ${
+                        parseFloat(res.band_score) >= 7.0
+                          ? 'bg-green-100 text-green-700'
+                          : parseFloat(res.band_score) >= 5.5
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}
+                    >
+                      {res.band_score}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

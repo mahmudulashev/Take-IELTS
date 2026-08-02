@@ -52,7 +52,7 @@ export default function LandingPage() {
           <span className="text-[#FF3131]">Haqiqiy Formatda</span> Tayyorlaning
         </h1>
 
-        <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+        <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed [text-wrap:pretty]">
           Google orqali bir zumda kirib, Reading va Listening mock testlarini topshiring, band score va natijalaringizni shaxsiy profildan kuzatib boring.
         </p>
 
@@ -66,7 +66,7 @@ export default function LandingPage() {
           </Link>
         </div>
 
-        <div className="flex items-center justify-center gap-6 mt-8 text-xs font-medium text-gray-500">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-6 mt-6 sm:mt-8 text-xs font-medium text-gray-500">
           <div className="flex items-center gap-1.5">
             <CheckCircle2 className="w-4 h-4 text-green-500" />
             <span>Bepul ro'yxatdan o'tish</span>

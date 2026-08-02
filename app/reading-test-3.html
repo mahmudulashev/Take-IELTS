@@ -2356,7 +2356,7 @@
     </nav>
 
     <!-- Context Menu -->
-    <div id="contextMenu" class="context-menu">
+    <div id="contextMenu" class="context-menu" onmousedown="event.preventDefault()">
         <div id="menu-highlight" class="context-menu-item" onclick="highlightText()">
             Highlight
         </div>
@@ -3625,7 +3625,7 @@
             document.addEventListener('selectionchange', () => {
                 const selection = window.getSelection();
                 if (selection && !selection.isCollapsed && selection.toString().trim().length > 0) {
-                    const range = selection.getRangeAt(0);
+                    const range = selection.getRangeAt(0).cloneRange();
                     if (panels.some(panel => panel.contains(range.commonAncestorContainer))) {
                         selectedRange = range;
                         targetElementForClear = null; // New selection overrides clearing a specific element

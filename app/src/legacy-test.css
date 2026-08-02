@@ -917,9 +917,9 @@
             margin-bottom: 20px;
         }
         .part-header {
-            background-color: #FFF0F0; border-color: rgba(255, 49, 49, 0.2);
+            background-color: #FFF0F0;
             padding: 15px 20px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid rgba(255, 49, 49, 0.2);
             text-align: left;
             margin: 10px 20px;
             border-radius: 5px;

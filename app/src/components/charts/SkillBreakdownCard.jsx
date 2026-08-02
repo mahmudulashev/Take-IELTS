@@ -42,15 +42,15 @@ export default function SkillBreakdownCard({ results = [] }) {
   return (
     <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm h-full flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-start justify-between mb-6">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF3131] uppercase tracking-wider bg-[#FFF0F0] px-3 py-1 rounded-full mb-1">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF3131] uppercase tracking-wider bg-[#FFF0F0] px-3 py-1 rounded-full mb-1.5">
               <Target className="w-3.5 h-3.5" />
-              <span>Ko'nikmalar Tahlili</span>
+              <span>Ko'nikmalar</span>
             </div>
-            <h3 className="text-xl font-extrabold text-gray-900">Savol Turlari bo'yicha Tahlil</h3>
+            <h3 className="text-xl font-extrabold text-gray-900 leading-tight">Savol Turlari bo'yicha Tahlil</h3>
           </div>
-          <div className="text-right">
+          <div className="text-right shrink-0">
             <span className="text-2xl font-black text-gray-900">{accuracy}%</span>
             <p className="text-[11px] font-bold text-gray-400">Umumiy Aniqlik</p>
           </div>

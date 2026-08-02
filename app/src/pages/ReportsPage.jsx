@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Sidebar from '../components/layout/Sidebar'
 import BandScoreChart from '../components/charts/BandScoreChart'
 import SkillBreakdownCard from '../components/charts/SkillBreakdownCard'
+import DeepAnalyticsSection from '../components/charts/DeepAnalyticsSection'
 import { useAuth } from '../context/AuthContext'
 import { formatDate, formatSeconds } from '../lib/scoring'
 import { BookOpen, Headphones, Calendar, CheckCircle2, XCircle, ChevronRight, X, BarChart3, Trash2 } from 'lucide-react'
@@ -66,6 +67,18 @@ export default function ReportsPage() {
     return (sum / arr.length).toFixed(1)
   }
 
+  const bandBadgeClass = (band) => {
+    const b = parseFloat(band)
+    if (b >= 7.0) return 'bg-green-100 text-green-700'
+    if (b >= 5.5) return 'bg-blue-100 text-blue-700'
+    return 'bg-red-100 text-red-700'
+  }
+
+  const resultTestName = (res) =>
+    res.test_id
+      ? `${res.test_type === 'reading' ? 'Reading' : 'Listening'} Practice Test ${res.test_id.split('-')[1] || '1'}`
+      : 'Practice Test'
+
   return (
     <div className="min-h-screen bg-[#F7F8FC] flex flex-col lg:flex-row">
       <Sidebar user={user} onSignOut={handleSignOut} />
@@ -86,18 +99,7 @@ export default function ReportsPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Clear History Button */}
-            {results.length > 0 && (
-              <button
-                onClick={() => setShowClearModal(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-all"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Natijalarni Tozalash</span>
-              </button>
-            )}
-
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
             {/* Type Switcher Tabs */}
             <div className="flex items-center gap-1 bg-gray-100 p-1.5 rounded-2xl border border-gray-200 w-full sm:w-auto overflow-x-auto">
               <button
@@ -124,6 +126,17 @@ export default function ReportsPage() {
                 <span>Listening ({listeningResults.length})</span>
               </button>
             </div>
+
+            {/* Clear History Button */}
+            {results.length > 0 && (
+              <button
+                onClick={() => setShowClearModal(true)}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-all"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Natijalarni Tozalash</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -159,6 +172,9 @@ export default function ReportsPage() {
           </div>
         </div>
 
+        {/* Deeper Analytics — radar, accuracy ring, monthly compare, error heatmap, pacing, streak */}
+        <DeepAnalyticsSection results={results} />
+
         {/* Detailed Results Table */}
         <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden w-full max-h-[600px] overflow-y-auto relative">
           <div className="p-6 border-b border-gray-100 flex items-center justify-between">
@@ -171,62 +187,94 @@ export default function ReportsPage() {
               Ushbu bo'lim bo'yicha hali test topshirilmagan.
             </div>
           ) : (
-            <div className="overflow-x-auto w-full">
-              <table className="w-full text-left border-collapse">
-                <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
-                  <tr className="border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                    <th className="py-4 px-6">#</th>
-                    <th className="py-4 px-6">Sana & Vaqt</th>
-                    <th className="py-4 px-6">Test Nomi</th>
-                    <th className="py-4 px-6">To'g'ri Javoblar</th>
-                    <th className="py-4 px-6">Band Score</th>
-                    <th className="py-4 px-6">Sarflangan Vaqt</th>
-                    <th className="py-4 px-6 text-right">Tahlil</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 text-sm font-semibold text-gray-700">
-                  {currentTabResults.map((res, idx) => (
-                    <tr key={res.id || idx} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="py-4 px-6 text-gray-400 font-normal">{idx + 1}</td>
-                      <td className="py-4 px-6 flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        <span>{formatDate(res.completed_at || res.created_at || res.date)}</span>
-                      </td>
-                      <td className="py-4 px-6 font-bold text-gray-900">
-                        {res.test_id ? `${res.test_type === 'reading' ? 'Reading' : 'Listening'} Practice Test ${res.test_id.split('-')[1] || '1'}` : 'Practice Test'}
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className="font-extrabold text-gray-900">{res.score}</span> / {res.total_questions || 40}
-                      </td>
-                      <td className="py-4 px-6">
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold ${
-                            parseFloat(res.band_score) >= 7.0
-                              ? 'bg-green-100 text-green-700'
-                              : parseFloat(res.band_score) >= 5.5
-                              ? 'bg-blue-100 text-blue-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}
-                        >
-                          {res.band_score}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6 text-gray-500 font-mono text-xs">
-                        {formatSeconds(res.time_spent)}
-                      </td>
-                      <td className="py-4 px-6 text-right">
-                        <button
-                          onClick={() => setSelectedResult(res)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-[#FFF0F0] text-gray-700 hover:text-[#FF3131] text-xs font-bold transition-colors"
-                        >
-                          <span>Batafsil Tahlil</span>
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
+            <div>
+              {/* Desktop Table (>= 640px) */}
+              <div className="hidden sm:block overflow-x-auto w-full">
+                <table className="w-full text-left border-collapse">
+                  <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
+                    <tr className="border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      <th className="py-4 px-6">#</th>
+                      <th className="py-4 px-6">Sana & Vaqt</th>
+                      <th className="py-4 px-6">Test Nomi</th>
+                      <th className="py-4 px-6">To'g'ri Javoblar</th>
+                      <th className="py-4 px-6">Band Score</th>
+                      <th className="py-4 px-6">Sarflangan Vaqt</th>
+                      <th className="py-4 px-6 text-right">Tahlil</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 text-sm font-semibold text-gray-700">
+                    {currentTabResults.map((res, idx) => (
+                      <tr key={res.id || idx} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="py-4 px-6 text-gray-400 font-normal">{idx + 1}</td>
+                        <td className="py-4 px-6 flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                          <span>{formatDate(res.completed_at || res.created_at || res.date)}</span>
+                        </td>
+                        <td className="py-4 px-6 font-bold text-gray-900">
+                          {resultTestName(res)}
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className="font-extrabold text-gray-900">{res.score}</span> / {res.total_questions || 40}
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold ${bandBadgeClass(res.band_score)}`}>
+                            {res.band_score}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 text-gray-500 font-mono text-xs">
+                          {formatSeconds(res.time_spent)}
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <button
+                            onClick={() => setSelectedResult(res)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-[#FFF0F0] text-gray-700 hover:text-[#FF3131] text-xs font-bold transition-colors"
+                          >
+                            <span>Batafsil Tahlil</span>
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards (< 640px) */}
+              <div className="sm:hidden divide-y divide-gray-100">
+                {currentTabResults.map((res, idx) => (
+                  <div key={res.id || idx} className="p-4 flex flex-col gap-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="text-sm font-extrabold text-gray-900 leading-snug">
+                        {resultTestName(res)}
+                      </span>
+                      <span className={`shrink-0 inline-block px-3 py-1 rounded-full text-xs font-extrabold ${bandBadgeClass(res.band_score)}`}>
+                        {res.band_score}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                      <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                      <span>{formatDate(res.completed_at || res.created_at || res.date)}</span>
+                      <span>•</span>
+                      <span className="font-mono">{formatSeconds(res.time_spent)}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <div>
+                        <p className="text-[11px] text-gray-400 font-medium">To'g'ri javoblar</p>
+                        <p className="text-sm font-extrabold text-gray-900">{res.score} / {res.total_questions || 40}</p>
+                      </div>
+                      <button
+                        onClick={() => setSelectedResult(res)}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-bold transition-colors"
+                      >
+                        <span>Batafsil</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
