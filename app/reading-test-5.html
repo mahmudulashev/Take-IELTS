@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/test.css">
+    <script src="/js/mobile-test-helper.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IELTS Full Reading Practice</title>
@@ -12,7 +17,7 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
             background-color: #ffffff;
             line-height: 1.4;
             font-size: 16px;
@@ -65,21 +70,22 @@
             gap: 10px;
             align-items: center;
         }
-  .telegram-link {
-            color: #3e3e3e;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            border: 2px solid #3e3e3e;
-            border-radius: 9999px;
-            background-color: #ffffff;
-            line-height: 1;
-        }
 
+        .telegram-link {
+            color: #3e3e3e;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    display: flex
+;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 2px solid #3e3e3e;
+    border-radius: 9999px;
+    background-color: #ffffff;
+    line-height: 1;
+        }
 
         .telegram-link:hover {
             text-decoration: underline;
@@ -159,7 +165,7 @@
 
         /* Page watermark */
         body::after {
-            content: "@MINDLESS_WRITER";
+            display: none;
             position: fixed;
             left: 50%;
             top: 50%;
@@ -242,7 +248,7 @@
         }
 
         .help-button {
-            background: #4a90e2;
+            background: #FF3131;
             color: white;
             border: none;
             padding: 6px 12px;
@@ -293,12 +299,12 @@
 
         .question-number {
             background: white;
-            border: 1px solid #4a90e2;
+            border: 1px solid #FF3131;
             padding: 4px 8px;
             border-radius: 3px;
             font-weight: bold;
             font-size: 14px;
-            color: #4a90e2;
+            color: #FF3131;
             min-width: 30px;
             text-align: center;
         }
@@ -378,14 +384,14 @@
         }
 
         .map-text {
-            font-family: Arial, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
             font-size: 13px;
             text-anchor: middle;
             fill: #333;
         }
 
         .map-number {
-            font-family: Arial, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
             font-size: 16px;
             font-weight: bold;
             text-anchor: middle;
@@ -569,9 +575,9 @@
         }
 
         .subQuestion.active {
-            background-color: #4a90e2;
+            background-color: #FF3131;
             color: white;
-            border-color: #4a90e2;
+            border-color: #FF3131;
         }
 
         .subQuestion.completed {
@@ -735,7 +741,7 @@
         }
         .answer-input.active-input,
         .answer-input:focus {
-            border-color: #3581d8;
+            border-color: #E82C2C;
             border-width: 2px;
             outline: none;
         }
@@ -805,8 +811,8 @@
             opacity: 0.5;
         }
         .drag-item.selected {
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.5);
+            /* border-color: #FF3131; */
+            /* box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.5); */
         }
         .drop-zone {
             border: 2px dashed #aaa;
@@ -822,8 +828,8 @@
             position: relative;
         }
         .drop-zone.drag-over {
-            background-color: #e6f4ff;
-            border-color: #4a90e2;
+            background-color: #FFF0F0;
+            border-color: #FF3131;
         }
         .drop-zone.correct {
             background-color: #e9f7ef;
@@ -860,6 +866,55 @@
         .drag-options-container .drag-item:last-child {
             margin-bottom: 0;
         }
+        
+        .passage-drag-zone {
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            /* text-align: center; */
+            color: #666;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            max-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* width: 50%; */
+        }
+        
+        .passage-drag-zone.drag-over {
+            background-color: #FFF0F0;
+            border-color: #FF3131;
+            border-style: solid;
+        }
+        
+        .passage-drag-zone.filled {
+            background-color: #e9f7ef;
+            border-color: #28a745;
+            border-style: solid;
+            color: #155724;
+            font-weight: bold;
+        }
+        
+        .passage-drag-zone .drag-item {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            /* align-items: center; */
+            justify-content: center;
+            font-size: 14px;
+            padding: 4px;
+            background-color: transparent;
+            border: none;
+            margin: 0;
+        }
+        
+        .passage-drag-zone.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
         .q-number {
             color: #888;
             font-size: 14px;
@@ -873,7 +928,7 @@
             margin-bottom: 20px;
         }
         .part-header {
-            background-color: #f1f2ec;
+            background-color: #FFF0F0; border-color: rgba(255, 49, 49, 0.2);
             padding: 15px 20px;
             border: 1px solid #e0e0e0;
             text-align: left;
@@ -1045,7 +1100,7 @@
         }
         /* Active question blue outline for TF (clears when navigating away) */
         .tf-question.active-question .tf-question-number {
-            border-color: #4a90e2;
+            border-color: #FF3131;
         }
         .tf-question-text {
             padding-top: 3px;
@@ -1063,12 +1118,12 @@
             background-color: #fff;
         }
         .tf-option:hover {
-            background-color: #f1f7ff;
-            border-color: #c6dcfb;
+            background-color: #FFF8F8;
+            border-color: #FFCCCC;
         }
         .tf-option:has(input[type="radio"]:checked) {
-            background-color: #cfe3f9;
-            border-color: #7db3f5;
+            background-color: #FFF0F0;
+            border-color: #FF6B6B;
         }
         /* Answer checking states for TF/NG */
         .tf-option.correct {
@@ -1121,9 +1176,7 @@
             border-radius: 4px;
             transition: border-color 0.3s;
         }
-        .matching-question-item > span {
-            flex: 1;
-        }
+        
         .matching-question-item.correct {
             background-color: #e9f7ef;
             border-color: #28a745 !important;
@@ -1145,7 +1198,6 @@
         }
         .matching-options-bank .drag-item {
             font-size: 15px;
-            text-align: center;
             border: 1px solid #ccc;
             background: #f9f9f9;
         }
@@ -1174,11 +1226,12 @@
             margin-bottom: 10px;
         }
         .summary-drop-zone {
-            display: inline-flex;
+            display: inline-flex
+;
             align-items: center;
             justify-content: center;
             vertical-align: middle;
-            max-width:200px;
+    min-width: 200px;
             height: 32px;
             border: 2px dashed #999;
             border-radius: 4px;
@@ -1187,12 +1240,13 @@
             transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
             color: #aaa;
             font-weight: bold;
+    text-align: center;
         }
         .summary-drop-zone.filled {
-            border-color: #4a90e2;
+            border-color: #FF3131;
         }
         .summary-drop-zone.active-input {
-             border-color: #4a90e2;
+             border-color: #FF3131;
              box-shadow: none;
         }
         .summary-drop-zone .drag-item {
@@ -1208,6 +1262,7 @@
             align-items: center;
             justify-content: center;
         }
+
         .summary-options-bank {
             display: flex;
             flex-wrap: wrap;
@@ -1232,40 +1287,17 @@
             padding: 0;
         }
         .drop-zone.filled .drag-item {
-            border: 2px solid #4a90e2;
+            width: auto;
+            height: auto;
+            display: inline-block;
+            border: 2px solid #FF3131;
             border-radius: 10px;
-            padding: 4px 10px 4px 36px; /* extra left space for letter badge */
+            padding: 4px 10px;
             font-weight: 700;
             background: #fff;
             box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.15);
             cursor: default;
             white-space: nowrap;
-            position: relative;          /* allow left badge positioning */
-            text-align: center;          /* center the option text */
-        }
-
-        /* Show the letter as a left badge inside the pill when dropped */
-        .drop-zone.filled .drag-item::before {
-            content: attr(data-value);
-            position: absolute;
-            left: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            color: #4a90e2;
-            background: #ffffff;
-            font-weight: 800;
-            line-height: 1;
-        }
-
-        /* Hide the inline <strong>letter</strong> inside the pill to avoid duplication */
-        .drop-zone.filled .drag-item strong {
-            display: none;
         }
         .multi-choice-question {
             margin-bottom: 20px;
@@ -1288,7 +1320,7 @@
         }
         /* Active question blue outline for MCQ (clears when navigating away) */
         .multi-choice-question.active-question .question-prompt p > strong:first-child {
-            border-color: #4a90e2;
+            border-color: #FF3131;
             border-width: 2px;
         }
         .multi-choice-option {
@@ -1297,12 +1329,12 @@
             transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .multi-choice-option:hover {
-            background-color: #f1f7ff;
-            border-color: #c6dcfb;
+            background-color: #FFF8F8;
+            border-color: #FFCCCC;
         }
         .multi-choice-option:has(input:checked) {
-            background-color: #cfe3f9;
-            border-color: #7db3f5;
+            background-color: #FFF0F0;
+            border-color: #FF6B6B;
         }
         /* Answer checking states for MCQ */
         .multi-choice-option.correct {
@@ -1336,7 +1368,7 @@
         .multi-choice-option input[type="radio"] {
             margin-right: 12px;
             transform: scale(1.3);
-            accent-color: #4a90e2;
+            accent-color: #FF3131;
         }
         .multi-choice-option.correct {
             background-color: #e9f7ef;
@@ -1349,7 +1381,7 @@
             border-color: #dc3545 !important;
         }
         .matching-question-item .drop-zone.filled {
-            border-color: #4a90e2;
+            border-color: #FF3131;
         }
         .matching-question-item .drop-zone {
             width: 200px;
@@ -1453,7 +1485,7 @@
         }
         .result-row {
             display: grid;
-            grid-template-columns: 56px 1fr 1fr;
+            grid-template-columns: 56px 1fr 1fr 120px;
             gap: 12px;
             padding: 10px 8px;
             border-bottom: 1px solid #eef2f7;
@@ -1493,6 +1525,24 @@
             padding: 4px 8px;
             border-radius: 6px;
         }
+        .status-badge {
+            justify-self: end;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid transparent;
+        }
+        .status-badge.ok {
+            background: #ecfdf5;
+            color: #065f46;
+            border-color: #a7f3d0;
+        }
+        .status-badge.bad {
+            background: #fff5f5;
+            color: #7f1d1d;
+            border-color: #f5c6cb;
+        }
         .correct-answer-display {
             font-weight: bold;
             color: #28a745;
@@ -1516,7 +1566,7 @@
         }
         
         .matching-table th {
-            background-color: #007bff;
+            background-color: #FF3131;
             color: white;
             padding: 12px;
             text-align: center;
@@ -1556,7 +1606,7 @@
         }
         
         .matching-table input[type="radio"]:checked {
-            accent-color: #007bff;
+            accent-color: #FF3131;
         }
         
         .matching-table td.correct {
@@ -1598,45 +1648,41 @@
         
         .matching-table .clickable-cell {
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: all 0.2s ease;
             min-height: 40px;
-            border: 1px solid #ddd;
+            border: 2px solid #e0e0e0;
             position: relative;
+            background-color: #fafafa;
+            /* Debug styling - make cells very obvious */
+            min-width: 40px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 12px;
+            color: #333;
+            font-weight: bold;
         }
         
         .matching-table .clickable-cell:hover {
             background-color: #f0f8ff;
-            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
         }
         
         .matching-table .clickable-cell.selected {
             background-color: #e3f2fd;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.3);
         }
         
         .matching-table .clickable-cell.correct {
             background-color: #d4edda !important;
-            border-color: #c3e6cb;
         }
         
         .matching-table .clickable-cell.incorrect {
             background-color: #f8d7da !important;
-            border-color: #f5c6cb;
-        }
-        
-        .matching-table .clickable-cell::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: transparent;
-            transition: background-color 0.2s ease;
         }
         
         
+        
+        .matching-table .clickable-cell.selected::after { background-color: #FF3131; }
         
         /* Explanation Section Styles */
         .explanation-section {
@@ -1662,12 +1708,12 @@
         }
         
         .explanation-content strong {
-            color: #4a90e2;
+            color: #FF3131;
             font-weight: 600;
         }
         
         #show-explanation-btn {
-            background-color: #4a90e2;
+            background-color: #FF3131;
             color: white;
             border: none;
             padding: 12px 24px;
@@ -1681,25 +1727,66 @@
         #show-explanation-btn:hover {
             background-color: #357abd;
         }
-        /* Reading Test Mobile Responsiveness */
+        /* Flow Chart Styling */
+        .flow-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            margin: 20px 0;
+            padding: 20px;
+            /* background: #f8f9fa; */
+            /* border-radius: 8px; */
+            /* border: 1px solid #dee2e6; */
+        }
+
+        .flow-step {
+            background: white;
+            border: 2px solid #333;
+            border-radius: 0;
+            padding: 15px 20px;
+            /* width: 400px; */
+            text-align: left;
+            position: relative;
+            font-size: 14px;
+            line-height: 2.5;
+            margin: 0;
+        }
+
+        .flow-step.input-step {
+            background: white;
+            border-color: #333;
+        }
+
+        .flow-arrow {
+            font-size: 24px;
+            color: #333;
+            font-weight: 600;
+            margin: 0;
+            padding: 5px 0;
+            line-height: 1;
+        }
+
+        .flow-step .answer-input {
+            margin: 0 2px;
+            width: 40px;
+            height: 24px;
+            background: #fff;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .flow-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: left;
+            width: 400px;
+        }
+
+        /* Navigation Mobile Responsiveness */
         @media (max-width: 768px) {
-            #panels-container, .panels-container {
-                flex-direction: column !important;
-                overflow-y: auto !important;
-            }
-            #passage-panel, .passage-panel, #questions-panel, .questions-panel {
-                width: 100% !important;
-                border-left: none !important;
-                border-top: 1px solid #e0e0e0;
-                overflow-y: visible !important;
-                height: auto !important;
-                padding: 10px !important;
-            }
-            #resizer, .resizer {
-                display: none !important;
-            }
-            
-            /* Navigation Mobile Responsiveness */
             .nav-row {
                 height: auto !important;
                 flex-direction: column !important;
@@ -1754,10 +1841,11 @@
             }
     
         }
+
     </style>
 </head>
 <body>
-    <div class="header">
+            <div class="header">
         <div class="timer-container">
             <span class="timer-display">60:00</span>
             <div class="timer-controls">
@@ -1769,9 +1857,7 @@
                 </button>
             </div>
         </div>
-        <a href="https://t.me/+SoPpY9nBi3U0NTE1" target="_blank" class="telegram-link">
-            MINDLESS_WRITER
-        </a>
+        <a href="/dashboard" class="exit-header-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 16px;background:#FFF0F0;color:#FF3131;border:1.5px solid #FF3131;border-radius:9999px;font-weight:700;font-size:13px;text-decoration:none;transition:all 0.2s;">← Exit to Dashboard</a>
     </div>
 
     <div class="main-container" id="main-container">
