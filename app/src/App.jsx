@@ -1,5 +1,5 @@
-import React, { lazy, Suspense, useEffect, useRef } from 'react'
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import React, { lazy, Suspense } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import ErrorBoundary from './components/ErrorBoundary'
 
 const LandingPage = lazy(() => import('./pages/LandingPage'))
@@ -19,37 +19,9 @@ function PageLoader() {
   )
 }
 
-/**
- * Kirish animatsiyalarini faqat BIRINCHI yuklanishda qoldiradi.
- *
- * Foydalanuvchi sidebar/navbar orqali sahifa almashtirsa, React
- * komponentlarni qaytadan mount qiladi va kirish animatsiyasi har
- * safar qaytadan ishlaydi — bu bezovta qiladi. Birinchi
- * navigatsiyadan keyin <html> ga `spa-nav` klassi qo'shiladi va
- * index.css o'sha animatsiyalarni o'chiradi.
- *
- * Modal / xato oynasi / toast animatsiyalari bunga kirmaydi —
- * ular sahifa kirishi emas, foydalanuvchi amaliga javob.
- */
-function NavAnimationGate() {
-  const { pathname } = useLocation()
-  const isFirst = useRef(true)
-
-  useEffect(() => {
-    if (isFirst.current) {
-      isFirst.current = false
-      return
-    }
-    document.documentElement.classList.add('spa-nav')
-  }, [pathname])
-
-  return null
-}
-
 export default function App() {
   return (
     <Router>
-      <NavAnimationGate />
       <ErrorBoundary>
         <Suspense fallback={<PageLoader />}>
           <Routes>

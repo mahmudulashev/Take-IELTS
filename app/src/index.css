@@ -65,38 +65,16 @@
 .anim-slide-right { animation: ielts-slide-in-right 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
 /* Ketma-ket paydo bo'lish (kartalar ro'yxati uchun).
-   JS kerak emas — faqat kechikish.
-
-   MUHIM: bu yerda ataylab `ielts-fade-up` EMAS, `ielts-fade-in`
-   ishlatilgan. Sahifalar almashganda kartalar qayta mount bo'ladi
-   va har safar siljib chiqsa, ko'z charchaydi. Faqat shaffoflik
-   o'zgaradi — kartalar joyidan qimirlamaydi. */
-.anim-stagger > *          { animation: ielts-fade-in 0.3s ease-out both; }
+   JS kerak emas — faqat kechikish. */
+.anim-stagger > *          { animation: ielts-fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .anim-stagger > *:nth-child(1) { animation-delay: 0.00s; }
-.anim-stagger > *:nth-child(2) { animation-delay: 0.04s; }
-.anim-stagger > *:nth-child(3) { animation-delay: 0.08s; }
-.anim-stagger > *:nth-child(4) { animation-delay: 0.12s; }
-.anim-stagger > *:nth-child(5) { animation-delay: 0.16s; }
-.anim-stagger > *:nth-child(6) { animation-delay: 0.20s; }
-.anim-stagger > *:nth-child(n + 7) { animation-delay: 0.24s; }
-
-/* ------------------------------------------------------------
-   SPA NAVIGATSIYASI
-   Birinchi navigatsiyadan keyin App.jsx <html> ga `spa-nav`
-   klassini qo'shadi. Shundan so'ng SAHIFA KIRISH animatsiyalari
-   o'chadi — foydalanuvchi menyudan sahifa almashtirganda hech
-   narsa qimirlamaydi va miltillamaydi.
-
-   Bu yerga faqat kirish animatsiyalari yoziladi. Modal, xato
-   oynasi (anim-pop-in) va toast (anim-slide-right) ataylab
-   qoldirilgan — ular foydalanuvchi amaliga javob, sahifa
-   kirishi emas.
-   ------------------------------------------------------------ */
-.spa-nav .anim-stagger > *,
-.spa-nav .anim-fade-up,
-.spa-nav .anim-fade-in {
-  animation: none !important;
-}
+.anim-stagger > *:nth-child(2) { animation-delay: 0.05s; }
+.anim-stagger > *:nth-child(3) { animation-delay: 0.10s; }
+.anim-stagger > *:nth-child(4) { animation-delay: 0.15s; }
+.anim-stagger > *:nth-child(5) { animation-delay: 0.20s; }
+.anim-stagger > *:nth-child(6) { animation-delay: 0.25s; }
+.anim-stagger > *:nth-child(7) { animation-delay: 0.30s; }
+.anim-stagger > *:nth-child(n + 8) { animation-delay: 0.35s; }
 
 /* Yuklanish skeleti — transform bilan, background-position bilan emas */
 .skeleton {
