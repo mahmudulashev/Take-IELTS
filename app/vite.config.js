@@ -5,6 +5,11 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
+    // Emit to the repository-root `dist/` (this config lives in `app/`).
+    // Vercel looks for `dist` at the repo root, so building here keeps the
+    // deploy working whether or not vercel.json's outputDirectory is applied.
+    outDir: resolve(__dirname, '../dist'),
+    emptyOutDir: true,
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
