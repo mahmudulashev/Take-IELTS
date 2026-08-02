@@ -72,16 +72,16 @@ export default function ScoreBreakdownChart({ results = [] }) {
 
           return (
             <div key={index} className="flex-1 flex flex-col items-center h-full justify-end group">
-              <div className="w-full max-w-[36px] flex flex-col justify-end h-full rounded-lg overflow-hidden bg-gray-100 relative group-hover:shadow-md transition-all">
+              <div className="w-full max-w-[36px] flex flex-col justify-end h-full rounded-lg overflow-hidden bg-gray-100 relative group-hover:shadow-md transition-ui">
                 {/* Incorrect top bar */}
                 <div
                   style={{ height: `${incorrectHeightPct}%` }}
-                  className="bg-gray-200 w-full transition-all duration-500"
+                  className="bg-gray-200 w-full transition-[height] duration-500"
                 />
                 {/* Correct bottom bar */}
                 <div
                   style={{ height: `${correctHeightPct}%` }}
-                  className="bg-[#FF3131] w-full transition-all duration-500"
+                  className="bg-[#FF3131] w-full transition-[height] duration-500"
                 />
               </div>
               <span className="text-[10px] font-bold text-gray-400 mt-2 truncate w-full text-center">

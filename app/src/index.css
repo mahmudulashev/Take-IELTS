@@ -12,10 +12,114 @@
   }
 }
 
+/* ============================================================
+   ANIMATSIYA TIZIMI
+   ============================================================
+   Qoida: faqat `transform` va `opacity` animatsiya qilinadi.
+   Bu ikkisi kompozitor oqimida ishlaydi — layout ham, paint ham
+   qayta hisoblanmaydi, shuning uchun arzon telefonlarda ham 60fps.
+
+   `transition-all` dan ataylab voz kechilgan: u `width`,
+   `height`, `padding`, `margin` kabi layout xossalarini ham
+   qamrab oladi va har kadrda sahifani qayta joylashtiradi.
+   ============================================================ */
+
+/* transition-all o'rniga: interfeys elementlari uchun
+   (tugma, karta, input, havola). Layout xossalari yo'q. */
+.transition-ui {
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke, box-shadow, transform, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+@keyframes ielts-fade-up {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes ielts-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes ielts-pop-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ielts-slide-in-right {
+  from { opacity: 0; transform: translate3d(24px, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes ielts-shimmer {
+  from { transform: translate3d(-100%, 0, 0); }
+  to   { transform: translate3d(100%, 0, 0); }
+}
+
+/* Sahifa va blok kirishi */
+.anim-fade-up     { animation: ielts-fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-fade-in     { animation: ielts-fade-in 0.35s ease-out both; }
+.anim-pop-in      { animation: ielts-pop-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-slide-right { animation: ielts-slide-in-right 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Ketma-ket paydo bo'lish (kartalar ro'yxati uchun).
+   JS kerak emas — faqat kechikish. */
+.anim-stagger > *          { animation: ielts-fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-stagger > *:nth-child(1) { animation-delay: 0.00s; }
+.anim-stagger > *:nth-child(2) { animation-delay: 0.05s; }
+.anim-stagger > *:nth-child(3) { animation-delay: 0.10s; }
+.anim-stagger > *:nth-child(4) { animation-delay: 0.15s; }
+.anim-stagger > *:nth-child(5) { animation-delay: 0.20s; }
+.anim-stagger > *:nth-child(6) { animation-delay: 0.25s; }
+.anim-stagger > *:nth-child(7) { animation-delay: 0.30s; }
+.anim-stagger > *:nth-child(n + 8) { animation-delay: 0.35s; }
+
+/* Yuklanish skeleti — transform bilan, background-position bilan emas */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #eef0f5;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+  animation: ielts-shimmer 1.4s infinite;
+}
+
+/* Bosilganda javob berish hissi */
+.press:active { transform: scale(0.97); }
+
 /* Rendering performance & GPU acceleration for animations */
 .gpu-layer {
   transform: translateZ(0);
   will-change: transform;
+}
+
+/* ------------------------------------------------------------
+   HARAKATNI KAMAYTIRISH (WCAG 2.3.3)
+   Foydalanuvchi tizim sozlamalarida animatsiyani kamaytirishni
+   tanlagan bo'lsa, hammasini deyarli darhol tugatamiz.
+   O'chirib qo'ymaymiz — 0.01ms qilamiz, chunki ba'zi kod
+   animationend hodisasini kutayotgan bo'lishi mumkin.
+   ------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html { scroll-behavior: auto; }
+
+  .skeleton::after { animation: none; }
+  .press:active { transform: none; }
 }
 
 /* Fast rendering for list cards */

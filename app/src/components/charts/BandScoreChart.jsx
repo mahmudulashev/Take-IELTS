@@ -134,7 +134,7 @@ export default function BandScoreChart({ results = [] }) {
                   fill="#ffffff"
                   stroke="#FF3131"
                   strokeWidth={isHovered ? 4 : 3}
-                  className="transition-all duration-200"
+                  className="transition-[r,fill,opacity] duration-200"
                 />
                 {/* X-axis date labels */}
                 <text
@@ -153,7 +153,7 @@ export default function BandScoreChart({ results = [] }) {
         {/* Floating Tooltip */}
         {activePoint !== null && chartData[activePoint] && (
           <div
-            className="absolute bg-gray-900 text-white p-3 rounded-xl shadow-xl text-xs font-semibold pointer-events-none transition-all z-20"
+            className="absolute bg-gray-900 text-white p-3 rounded-xl shadow-xl text-xs font-semibold pointer-events-none transition-ui z-20"
             style={{
               left: `${(getX(activePoint) / width) * 100}%`,
               top: `${(getY(chartData[activePoint].band) / height) * 100 - 25}%`,

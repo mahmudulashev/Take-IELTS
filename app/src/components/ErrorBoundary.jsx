@@ -53,7 +53,7 @@ export default class ErrorBoundary extends React.Component {
 
     return (
       <div className="min-h-screen bg-[#F7F8FC] flex items-center justify-center p-4">
-        <div className="bg-white rounded-[24px] max-w-lg w-full p-8 border border-gray-100 shadow-sm text-center">
+        <div className="bg-white rounded-[24px] max-w-lg w-full p-8 border border-gray-100 shadow-sm text-center anim-pop-in">
 
           <div className="w-14 h-14 bg-[#FFF0F0] text-[#FF3131] rounded-full flex items-center justify-center mx-auto mb-5">
             <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

@@ -339,7 +339,7 @@ export default function ProfilePage() {
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="Ismingiz va familiyangiz"
                         required
-                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:border-[#FF3131] focus:ring-2 focus:ring-[#FF3131]/20 outline-none text-sm font-semibold text-gray-900 transition-all"
+                        className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:border-[#FF3131] focus:ring-2 focus:ring-[#FF3131]/20 outline-none text-sm font-semibold text-gray-900 transition-ui"
                       />
                     </div>
                   </div>
@@ -353,7 +353,7 @@ export default function ProfilePage() {
                       <button
                         type="button"
                         onClick={() => setIsBandDropdownOpen(!isBandDropdownOpen)}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#FF3131] focus:ring-2 focus:ring-[#FF3131]/20 bg-white text-left flex items-center justify-between text-sm font-semibold text-gray-900 shadow-xs hover:border-gray-300 transition-all"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#FF3131] focus:ring-2 focus:ring-[#FF3131]/20 bg-white text-left flex items-center justify-between text-sm font-semibold text-gray-900 shadow-xs hover:border-gray-300 transition-ui"
                       >
                         <span>Band {targetBand}</span>
                         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isBandDropdownOpen ? 'rotate-180 text-[#FF3131]' : ''}`} />
@@ -376,7 +376,7 @@ export default function ProfilePage() {
                                   setTargetBand(band)
                                   setIsBandDropdownOpen(false)
                                 }}
-                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-ui ${
                                   targetBand === band
                                     ? 'bg-[#FFF0F0] text-[#FF3131]'
                                     : 'text-gray-700 hover:bg-gray-50'
@@ -400,7 +400,7 @@ export default function ProfilePage() {
                       <button
                         type="button"
                         onClick={() => setIsDateDropdownOpen(!isDateDropdownOpen)}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#FF3131] focus:ring-2 focus:ring-[#FF3131]/20 bg-white text-left flex items-center justify-between text-sm font-semibold text-gray-900 shadow-xs hover:border-gray-300 transition-all"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#FF3131] focus:ring-2 focus:ring-[#FF3131]/20 bg-white text-left flex items-center justify-between text-sm font-semibold text-gray-900 shadow-xs hover:border-gray-300 transition-ui"
                       >
                         <div className="flex items-center gap-2.5">
                           <Calendar className="w-4 h-4 text-[#FF3131]" />
@@ -463,7 +463,7 @@ export default function ProfilePage() {
                                     key={day}
                                     type="button"
                                     onClick={() => handleSelectDay(day)}
-                                    className={`h-8 rounded-lg text-xs font-bold flex items-center justify-center transition-all ${
+                                    className={`h-8 rounded-lg text-xs font-bold flex items-center justify-center transition-ui ${
                                       isSelected
                                         ? 'bg-[#FF3131] text-white shadow-md shadow-[#FF3131]/20 scale-105'
                                         : 'text-gray-700 hover:bg-gray-100'
@@ -480,28 +480,28 @@ export default function ProfilePage() {
                               <button
                                 type="button"
                                 onClick={() => handleQuickAddMonths(1)}
-                                className="py-1.5 px-2 rounded-lg bg-gray-50 hover:bg-[#FFF0F0] text-gray-600 hover:text-[#FF3131] text-[11px] font-bold transition-all text-center"
+                                className="py-1.5 px-2 rounded-lg bg-gray-50 hover:bg-[#FFF0F0] text-gray-600 hover:text-[#FF3131] text-[11px] font-bold transition-ui text-center"
                               >
                                 +1 oydan keyin
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleQuickAddMonths(2)}
-                                className="py-1.5 px-2 rounded-lg bg-gray-50 hover:bg-[#FFF0F0] text-gray-600 hover:text-[#FF3131] text-[11px] font-bold transition-all text-center"
+                                className="py-1.5 px-2 rounded-lg bg-gray-50 hover:bg-[#FFF0F0] text-gray-600 hover:text-[#FF3131] text-[11px] font-bold transition-ui text-center"
                               >
                                 +2 oydan keyin
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleQuickAddMonths(3)}
-                                className="py-1.5 px-2 rounded-lg bg-gray-50 hover:bg-[#FFF0F0] text-gray-600 hover:text-[#FF3131] text-[11px] font-bold transition-all text-center"
+                                className="py-1.5 px-2 rounded-lg bg-gray-50 hover:bg-[#FFF0F0] text-gray-600 hover:text-[#FF3131] text-[11px] font-bold transition-ui text-center"
                               >
                                 +3 oydan keyin
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleQuickAddMonths(6)}
-                                className="py-1.5 px-2 rounded-lg bg-gray-50 hover:bg-[#FFF0F0] text-gray-600 hover:text-[#FF3131] text-[11px] font-bold transition-all text-center"
+                                className="py-1.5 px-2 rounded-lg bg-gray-50 hover:bg-[#FFF0F0] text-gray-600 hover:text-[#FF3131] text-[11px] font-bold transition-ui text-center"
                               >
                                 +6 oydan keyin
                               </button>
@@ -516,7 +516,7 @@ export default function ProfilePage() {
                     <button
                       type="submit"
                       disabled={saving}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#FF3131] text-white font-bold text-xs hover:bg-[#E82C2C] transition-all shadow-md shadow-[#FF3131]/20 active:scale-95 disabled:opacity-50"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#FF3131] text-white font-bold text-xs hover:bg-[#E82C2C] transition-ui shadow-md shadow-[#FF3131]/20 active:scale-95 disabled:opacity-50"
                     >
                       <Save className="w-4 h-4" />
                       <span>{saving ? 'Saqlanmoqda...' : 'O\'zgarishlarni Saqlash'}</span>

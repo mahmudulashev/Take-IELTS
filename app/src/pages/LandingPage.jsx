@@ -41,7 +41,7 @@ export default function LandingPage() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="pt-36 pb-20 px-6 max-w-6xl mx-auto text-center">
+      <section className="pt-36 pb-20 px-6 max-w-6xl mx-auto text-center anim-fade-up">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFF0F0] text-[#FF3131] text-xs font-bold uppercase tracking-wider mb-6 animate-pulse">
           <Sparkles className="w-4 h-4" />
           <span>Computer-Delivered IELTS Simulation</span>
@@ -59,7 +59,7 @@ export default function LandingPage() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
           <Link
             to={user ? "/dashboard" : "/auth"}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full text-base font-bold bg-[#FF3131] text-white hover:bg-[#E82C2C] transition-all shadow-lg shadow-[#FF3131]/25 hover:shadow-xl hover:shadow-[#FF3131]/35 hover:-translate-y-0.5 active:translate-y-0"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full text-base font-bold bg-[#FF3131] text-white hover:bg-[#E82C2C] transition-ui press shadow-lg shadow-[#FF3131]/25 hover:shadow-xl hover:shadow-[#FF3131]/35 hover:-translate-y-0.5 active:translate-y-0"
           >
             <span>{user ? "Dashboard-ga O'tish" : "Testni Boshlash"}</span>
             <ArrowRight className="w-5 h-5" />
@@ -80,13 +80,13 @@ export default function LandingPage() {
 
       {/* Features Grid */}
       <section className="py-16 px-6 max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 anim-stagger">
           {features.map((item, idx) => {
             const Icon = item.icon
             return (
               <div
                 key={idx}
-                className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-1"
+                className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm hover:shadow-md transition-ui hover:-translate-y-1"
               >
                 <div className={`w-14 h-14 rounded-2xl ${item.color} flex items-center justify-center mb-6`}>
                   <Icon className="w-7 h-7" />
@@ -110,7 +110,7 @@ export default function LandingPage() {
           </div>
           <Link
             to={user ? "/dashboard" : "/auth"}
-            className="px-8 py-4 rounded-full text-base font-bold bg-white text-[#FF3131] hover:bg-gray-50 transition-all shadow-lg hover:scale-105 active:scale-100 whitespace-nowrap"
+            className="px-8 py-4 rounded-full text-base font-bold bg-white text-[#FF3131] hover:bg-gray-50 transition-ui shadow-lg hover:scale-105 active:scale-100 whitespace-nowrap"
           >
             {user ? "Dashboard →" : "Ro'yxatdan o'tish →"}
           </Link>

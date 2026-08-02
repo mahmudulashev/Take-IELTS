@@ -87,7 +87,7 @@ export default function AuthPage() {
         <button
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-bold text-sm transition-all shadow-sm hover:shadow-md active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 font-bold text-sm transition-ui shadow-sm hover:shadow-md active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <div className="w-5 h-5 border-2 border-gray-300 border-t-[#FF3131] rounded-full animate-spin" />

@@ -104,7 +104,7 @@ export default function ReportsPage() {
             <div className="flex items-center gap-1 bg-gray-100 p-1.5 rounded-2xl border border-gray-200 w-full sm:w-auto overflow-x-auto">
               <button
                 onClick={() => setActiveTab('reading')}
-                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold transition-ui whitespace-nowrap ${
                   activeTab === 'reading'
                     ? 'bg-[#FF3131] text-white shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
@@ -116,7 +116,7 @@ export default function ReportsPage() {
 
               <button
                 onClick={() => setActiveTab('listening')}
-                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold transition-ui whitespace-nowrap ${
                   activeTab === 'listening'
                     ? 'bg-[#FF3131] text-white shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
@@ -131,7 +131,7 @@ export default function ReportsPage() {
             {results.length > 0 && (
               <button
                 onClick={() => setShowClearModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-ui"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Natijalarni Tozalash</span>

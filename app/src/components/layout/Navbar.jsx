@@ -21,7 +21,7 @@ export default function Navbar() {
         {user ? (
           <Link
             to="/dashboard"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold bg-[#FF3131] text-white hover:bg-[#E82C2C] transition-all shadow-md shadow-[#FF3131]/20"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold bg-[#FF3131] text-white hover:bg-[#E82C2C] transition-ui shadow-md shadow-[#FF3131]/20"
           >
             <User className="w-4 h-4" />
             <span>Dashboard ga o'tish</span>
@@ -36,7 +36,7 @@ export default function Navbar() {
             </Link>
             <Link
               to="/auth"
-              className="inline-flex items-center gap-1.5 px-3.5 sm:px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold bg-[#FF3131] text-[#FFFFFF] hover:bg-[#E82C2C] transition-all shadow-md shadow-[#FF3131]/20 hover:shadow-lg"
+              className="inline-flex items-center gap-1.5 px-3.5 sm:px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold bg-[#FF3131] text-[#FFFFFF] hover:bg-[#E82C2C] transition-ui shadow-md shadow-[#FF3131]/20 hover:shadow-lg"
             >
               <span>Bepul boshlash</span>
               <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
