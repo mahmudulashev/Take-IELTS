@@ -61,14 +61,14 @@ export default function ListeningPacksPage() {
         </div>
 
         {/* Grid of Listening Packs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 anim-stagger">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {listeningPacks.map(pack => {
             const packResult = getPackResult(pack.id)
 
             return (
               <div
                 key={pack.id}
-                className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm hover:shadow-md transition-ui flex flex-col justify-between group hover:-translate-y-1"
+                className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group hover:-translate-y-1"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -105,7 +105,7 @@ export default function ListeningPacksPage() {
                 {pack.route.endsWith('.html') ? (
                   <a
                     href={pack.route}
-                    className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-[#FF3131] text-white font-bold text-xs hover:bg-[#E82C2C] transition-ui shadow-md shadow-[#FF3131]/20"
+                    className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-[#FF3131] text-white font-bold text-xs hover:bg-[#E82C2C] transition-all shadow-md shadow-[#FF3131]/20"
                   >
                     <span>{packResult ? "Qayta Topshirish" : "Testni Boshlash"}</span>
                     <ArrowRight className="w-4 h-4" />
@@ -113,7 +113,7 @@ export default function ListeningPacksPage() {
                 ) : (
                   <Link
                     to={pack.route}
-                    className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-[#FF3131] text-white font-bold text-xs hover:bg-[#E82C2C] transition-ui shadow-md shadow-[#FF3131]/20"
+                    className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-[#FF3131] text-white font-bold text-xs hover:bg-[#E82C2C] transition-all shadow-md shadow-[#FF3131]/20"
                   >
                     <span>{packResult ? "Qayta Topshirish" : "Testni Boshlash"}</span>
                     <ArrowRight className="w-4 h-4" />

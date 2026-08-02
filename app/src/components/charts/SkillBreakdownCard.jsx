@@ -71,7 +71,7 @@ export default function SkillBreakdownCard({ results = [] }) {
               </div>
               <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-[width] duration-700 ${skill.color}`}
+                  className={`h-full rounded-full transition-all duration-700 ${skill.color}`}
                   style={{ width: `${skill.pct}%` }}
                 />
               </div>

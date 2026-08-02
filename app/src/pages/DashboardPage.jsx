@@ -114,7 +114,7 @@ export default function DashboardPage() {
             {[0, 1, 2, 3].map((i) => (
               <span
                 key={i}
-                className={`h-1.5 rounded-full transition-[width] duration-300 ${
+                className={`h-1.5 rounded-full transition-all duration-300 ${
                   currentSlide === i ? 'w-[18px] bg-[#FF3131]' : 'w-1.5 bg-gray-300'
                 }`}
               />
@@ -163,9 +163,9 @@ export default function DashboardPage() {
 
         {/* Practice Test Section Launchers */}
         <h2 className="text-xl font-extrabold text-gray-900 mb-4">Testlar</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 anim-stagger">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
           {/* Reading Launcher */}
-          <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm hover:shadow-md transition-ui flex flex-col justify-between">
+          <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-[#FFF0F0] text-[#FF3131] flex items-center justify-center mb-4">
                 <BookOpen className="w-6 h-6" />
@@ -177,14 +177,14 @@ export default function DashboardPage() {
             </div>
             <Link
               to="/reading-packs"
-              className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-[#FF3131] text-white font-bold text-sm hover:bg-[#E82C2C] transition-ui shadow-md shadow-[#FF3131]/20 hover:shadow-lg"
+              className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-[#FF3131] text-white font-bold text-sm hover:bg-[#E82C2C] transition-all shadow-md shadow-[#FF3131]/20 hover:shadow-lg"
             >
               <span>Boshlash →</span>
             </Link>
           </div>
 
           {/* Listening Launcher */}
-          <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm hover:shadow-md transition-ui flex flex-col justify-between">
+          <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-[#FFF0F0] text-[#FF3131] flex items-center justify-center mb-4">
                 <Headphones className="w-6 h-6" />
@@ -196,7 +196,7 @@ export default function DashboardPage() {
             </div>
             <Link
               to="/listening-packs"
-              className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-[#FF3131] text-white font-bold text-sm hover:bg-[#E82C2C] transition-ui shadow-md shadow-[#FF3131]/20 hover:shadow-lg"
+              className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-[#FF3131] text-white font-bold text-sm hover:bg-[#E82C2C] transition-all shadow-md shadow-[#FF3131]/20 hover:shadow-lg"
             >
               <span>Boshlash →</span>
             </Link>

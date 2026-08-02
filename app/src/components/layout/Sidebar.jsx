@@ -125,7 +125,7 @@ export default function Sidebar({ user, onSignOut }) {
                   className="relative block"
                 >
                   <div
-                    className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-ui duration-200 ${
+                    className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
                       isActive
                         ? 'bg-[#FFF0F0] text-[#FF3131] font-bold'
                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
@@ -170,7 +170,7 @@ export default function Sidebar({ user, onSignOut }) {
 
           <button
             onClick={onSignOut}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold text-gray-500 hover:bg-red-50 hover:text-[#FF3131] transition-ui"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold text-gray-500 hover:bg-red-50 hover:text-[#FF3131] transition-all"
           >
             <LogOut className="w-4 h-4" />
             <span>Chiqish</span>
