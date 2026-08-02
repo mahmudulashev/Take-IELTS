@@ -103,9 +103,9 @@ export default function LandingPage() {
       <section className="py-12 px-6 max-w-6xl mx-auto">
         <div className="bg-gradient-to-r from-[#FF3131] to-[#FF6B6B] rounded-[24px] p-10 md:p-14 text-white text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl shadow-[#FF3131]/20">
           <div className="max-w-xl">
-            <h2 className="text-3xl font-extrabold mb-3">Orzudagi Band Score ga Yering!</h2>
+            <h2 className="text-3xl font-extrabold mb-3">Orzudagi Band Score ga Erishing!</h2>
             <p className="text-white/90 text-sm md:text-base leading-relaxed">
-              Vaqtni boy bermang, hoziroq bepul akkount yarating va haqiqiy imtihon muhitini tajriba qiling.
+              Vaqtni boy bermang, hoziroq bepul akkount yarating va haqiqiy imtihon muhitini o'zingizda sinab ko'ring.
             </p>
           </div>
           <Link
