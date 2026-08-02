@@ -88,5 +88,45 @@ export const TestCatalog = [
     duration: 30,
     badge: 'New',
     route: '/listening-test-4.html'
+  },
+  {
+    id: 'listening-5',
+    title: 'Listening Practice 5',
+    type: 'listening',
+    parts: 4,
+    questions: 40,
+    duration: 30,
+    badge: 'New',
+    route: '/listening-test-5.html'
+  },
+  {
+    id: 'listening-6',
+    title: 'Listening Practice 6',
+    type: 'listening',
+    parts: 4,
+    questions: 40,
+    duration: 30,
+    badge: 'New',
+    route: '/listening-test-6.html'
+  },
+  {
+    id: 'listening-7',
+    title: 'Listening Practice 7',
+    type: 'listening',
+    parts: 4,
+    questions: 40,
+    duration: 30,
+    badge: 'New',
+    route: '/listening-test-7.html'
+  },
+  {
+    id: 'listening-8',
+    title: 'Listening Practice 8',
+    type: 'listening',
+    parts: 4,
+    questions: 40,
+    duration: 30,
+    badge: 'New',
+    route: '/listening-test-8.html'
   }
 ]

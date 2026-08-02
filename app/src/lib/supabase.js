@@ -311,13 +311,19 @@ export async function getTestResults(limit = 100) {
   let supabaseResults = []
   if (isSupabaseConfigured && supabase) {
     try {
-      const { data, error } = await supabase
-        .from('test_results')
-        .select('*')
-        .order('completed_at', { ascending: false })
-        .limit(limit)
-      if (data && !error) {
-        supabaseResults = data
+      const user = await getUser()
+      // DIQQAT: user_id filtri shart — busiz har bir foydalanuvchi
+      // boshqalarning natijalarini ham ko'radi.
+      if (user?.id) {
+        const { data, error } = await supabase
+          .from('test_results')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('completed_at', { ascending: false })
+          .limit(limit)
+        if (data && !error) {
+          supabaseResults = data
+        }
       }
     } catch (e) {
       console.warn('Supabase fetch error:', e)
@@ -442,9 +448,10 @@ export async function clearTestHistory() {
     try {
       const user = await getUser()
       if (user?.id) {
+        // DIQQAT: faqat shu foydalanuvchining natijalari o'chiriladi.
+        // Bu yerga hech qachon filtersiz delete qo'shmang — u butun jadvalni tozalaydi.
         await supabase.from('test_results').delete().eq('user_id', user.id)
       }
-      await supabase.from('test_results').delete().gte('score', 0)
     } catch (e) {
       console.warn('Supabase delete history error:', e)
     }

@@ -3299,6 +3299,31 @@ The last timekeeper to be introduced is the fire candle clock. Candle clocks tak
             });
 
             // Results mode layout with transcription
+            // Save to localStorage for Dashboard & Reports
+            try {
+                const userStored = localStorage.getItem('ielts_user');
+                const userId = userStored ? JSON.parse(userStored).id : 'guest-user';
+                const currentResults = JSON.parse(localStorage.getItem('ielts_test_results') || '[]');
+                const userAnswersObj = {};
+                resultsData.forEach(r => {
+                    if (r.question) userAnswersObj[r.question] = r.userAnswer;
+                });
+                const newRes = {
+                    id: 'res-' + Date.now(),
+                    user_id: userId,
+                    test_type: 'listening',
+                    test_id: 'listening-7',
+                    score: score,
+                    total_questions: 40,
+                    band_score: band,
+                    time_spent: Math.max(1, 3600 - timeInSeconds),
+                    answers: userAnswersObj,
+                    completed_at: new Date().toISOString()
+                };
+                currentResults.unshift(newRes);
+                localStorage.setItem('ielts_test_results', JSON.stringify(currentResults));
+            } catch(e) { console.error('Save error:', e); }
+
             document.querySelector('.main-container').classList.add('results-mode');
             switchToPart(currentPart); // Show the transcription for the current part
 
