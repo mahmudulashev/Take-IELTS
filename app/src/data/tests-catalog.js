@@ -88,45 +88,31 @@ export const TestCatalog = [
     duration: 30,
     badge: 'New',
     route: '/listening-test-4.html'
-  },
-  {
-    id: 'listening-5',
-    title: 'Listening Practice 5',
-    type: 'listening',
-    parts: 4,
-    questions: 40,
-    duration: 30,
-    badge: 'New',
-    route: '/listening-test-5.html'
-  },
-  {
-    id: 'listening-6',
-    title: 'Listening Practice 6',
-    type: 'listening',
-    parts: 4,
-    questions: 40,
-    duration: 30,
-    badge: 'New',
-    route: '/listening-test-6.html'
-  },
-  {
-    id: 'listening-7',
-    title: 'Listening Practice 7',
-    type: 'listening',
-    parts: 4,
-    questions: 40,
-    duration: 30,
-    badge: 'New',
-    route: '/listening-test-7.html'
-  },
-  {
-    id: 'listening-8',
-    title: 'Listening Practice 8',
-    type: 'listening',
-    parts: 4,
-    questions: 40,
-    duration: 30,
-    badge: 'New',
-    route: '/listening-test-8.html'
   }
+
+  // ----------------------------------------------------------------
+  // Listening 5–8 — VAQTINCHA YASHIRILGAN
+  //
+  // Sabab: bu 4 ta fayl eski shablonda qolgan va 1–4 dan farq qiladi:
+  //   - shrift: Arial (1–4 da Plus Jakarta Sans)
+  //   - asosiy rang: #4a90e2 ko'k (1–4 da #FF3131 brend qizil)
+  //   - /js/mobile-test-helper.js ulanmagan — mobil moslashuv yo'q
+  //   - listening-test-6.html da audio manzili umuman yo'q
+  //
+  // Natija saqlash kodi (test_id: listening-5..8) va vite.config.js
+  // dagi build input'lari joyida turibdi. Dizayn migratsiyasidan
+  // keyin quyidagi bloklarni izohdan chiqarish kifoya.
+  // ----------------------------------------------------------------
+  // ,{ id: 'listening-5', title: 'Listening Practice 5', type: 'listening',
+  //    parts: 4, questions: 40, duration: 30, badge: 'New',
+  //    route: '/listening-test-5.html' },
+  // { id: 'listening-6', title: 'Listening Practice 6', type: 'listening',
+  //    parts: 4, questions: 40, duration: 30, badge: 'New',
+  //    route: '/listening-test-6.html' },
+  // { id: 'listening-7', title: 'Listening Practice 7', type: 'listening',
+  //    parts: 4, questions: 40, duration: 30, badge: 'New',
+  //    route: '/listening-test-7.html' },
+  // { id: 'listening-8', title: 'Listening Practice 8', type: 'listening',
+  //    parts: 4, questions: 40, duration: 30, badge: 'New',
+  //    route: '/listening-test-8.html' }
 ]
