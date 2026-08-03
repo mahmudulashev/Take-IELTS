@@ -9,6 +9,32 @@ import {
   syncLocalResultsToSupabase,
   isSupabaseConfigured
 } from '../lib/supabase'
+import { getWritingResults } from '../lib/writing'
+
+/**
+ * Writing natijalari alohida jadvalda (`writing_results`) saqlanadi,
+ * chunki ularning tuzilishi butunlay boshqacha — 40 ta savol emas,
+ * to'rtta mezon va matn tahlili.
+ *
+ * Lekin Dashboard va statistika uchun ular Reading/Listening bilan
+ * bir qatorda turishi kerak. Shuning uchun bu yerda umumiy shaklga
+ * keltiramiz: `band_score` va `completed_at` bo'lsa, mavjud kod
+ * hech qanday o'zgarishsiz ishlaydi.
+ */
+function normalizeWriting(row) {
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    test_type: 'writing',
+    test_id: row.prompt_id || 'writing-task2',
+    score: row.word_count,          // "so'z" ma'nosida
+    total_questions: null,          // Writing'da savol soni yo'q
+    band_score: row.band_overall,
+    time_spent: row.time_spent,
+    completed_at: row.created_at,
+    writing: row,                   // to'liq tahlil kerak bo'lsa
+  }
+}
 
 const AuthContext = createContext(null)
 
@@ -28,6 +54,12 @@ function readLocalResults(limit = 100) {
     const all = raw ? JSON.parse(raw) : []
     return all.slice(0, limit)
   } catch { return [] }
+}
+
+/** Reading/Listening va Writing natijalarini bitta sanalangan ro'yxatga qo'shish */
+function mergeAll(testRows = [], writingRows = []) {
+  return [...testRows, ...writingRows.map(normalizeWriting)]
+    .sort((a, b) => new Date(b.completed_at || 0) - new Date(a.completed_at || 0))
 }
 
 function computeStats(results) {
@@ -94,10 +126,11 @@ export function AuthProvider({ children }) {
       if (cancelled) return
 
       try {
-        const [freshResults, freshStats] = await Promise.all([fetchResults(100), fetchStats()])
+        const [testRows, writingRows] = await Promise.all([fetchResults(100), getWritingResults(50)])
         if (cancelled) return
-        setResults(freshResults)
-        setStats(freshStats)
+        const merged = mergeAll(testRows, writingRows)
+        setResults(merged)
+        setStats(computeStats(merged))
       } catch (e) {
         // Keep localStorage data on error
       }
@@ -138,12 +171,13 @@ export function AuthProvider({ children }) {
       setResults(local)
       setStats(computeStats(local))
 
-      // 2-bosqich: fonda bulut bilan birlashtirish
-      Promise.all([fetchResults(100), fetchStats()])
-        .then(([freshResults, freshStats]) => {
+      // 2-bosqich: fonda bulut bilan birlashtirish (Writing ham qo'shiladi)
+      Promise.all([fetchResults(100), getWritingResults(50)])
+        .then(([testRows, writingRows]) => {
           if (cancelled) return
-          setResults(freshResults)
-          setStats(freshStats)
+          const merged = mergeAll(testRows, writingRows)
+          setResults(merged)
+          setStats(computeStats(merged))
         })
         .catch(() => { /* xato bo'lsa local ma'lumot qoladi */ })
     }
@@ -177,9 +211,10 @@ export function AuthProvider({ children }) {
   }, [])
 
   const refreshResults = useCallback(async () => {
-    const [freshResults, freshStats] = await Promise.all([fetchResults(100), fetchStats()])
-    setResults(freshResults)
-    setStats(freshStats)
+    const [testRows, writingRows] = await Promise.all([fetchResults(100), getWritingResults(50)])
+    const merged = mergeAll(testRows, writingRows)
+    setResults(merged)
+    setStats(computeStats(merged))
   }, [])
 
   const clearHistory = useCallback(async () => {

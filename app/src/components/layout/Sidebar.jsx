@@ -23,8 +23,10 @@ export default function Sidebar({ user, onSignOut }) {
     { label: 'Profilim', path: '/profile', icon: User },
   ]
 
+  // Mobil panelda joy tor — yorliqlar bir so'zli bo'lishi shart,
+  // aks holda ikki qatorga tushib panelni buzadi.
   const bottomNavItems = [
-    { label: 'Bosh sahifa', path: '/dashboard', icon: LayoutDashboard },
+    { label: 'Asosiy', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Reading', path: '/reading-packs', icon: BookOpen },
     { label: 'Listening', path: '/listening-packs', icon: Headphones },
     { label: 'Writing', path: '/test/writing', icon: PenLine },
@@ -65,8 +67,13 @@ export default function Sidebar({ user, onSignOut }) {
         </Link>
       </div>
 
-      {/* Mobile Floating Bottom Navigation Bar with Framer Motion liquid tab indicator */}
-      <div className="lg:hidden fixed bottom-3 left-3 right-3 sm:left-6 sm:right-6 z-40 bg-white/90 backdrop-blur-xl border border-gray-200/80 shadow-2xl rounded-full p-1.5 flex items-center justify-around">
+      {/* Mobile Floating Bottom Navigation Bar with Framer Motion liquid tab indicator
+          Diqqat: elementlar soni o'zgarsa ham buzilmasligi kerak.
+          - flex-1 + basis-0 → oltitasi ham teng joy oladi
+          - whitespace-nowrap → yorliq ikki qatorga tushmaydi (aks holda
+            faol element aylanaga aylanib, paneldan chiqib ketadi)
+          - rounded-2xl → baland element aylana emas, to'rtburchak bo'lib qoladi */}
+      <div className="lg:hidden fixed bottom-3 left-3 right-3 sm:left-6 sm:right-6 z-40 bg-white/90 backdrop-blur-xl border border-gray-200/80 shadow-2xl rounded-[28px] p-1.5 flex items-stretch gap-0.5">
         {bottomNavItems.map((item) => {
           const Icon = item.icon
           const isActive = location.pathname === item.path
@@ -75,17 +82,17 @@ export default function Sidebar({ user, onSignOut }) {
             <Link
               key={item.path}
               to={item.path}
-              className="relative flex flex-col items-center justify-center py-2 px-2.5 sm:px-4 rounded-full transition-colors z-10"
+              className="relative flex-1 basis-0 min-w-0 flex flex-col items-center justify-center py-2 px-0.5 rounded-2xl transition-colors z-10"
             >
               {isActive && (
                 <motion.div
                   layoutId="activeBottomTab"
-                  className="absolute inset-0 bg-[#FF3131] rounded-full shadow-md shadow-[#FF3131]/30 -z-10"
+                  className="absolute inset-0 bg-[#FF3131] rounded-2xl shadow-md shadow-[#FF3131]/30 -z-10"
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />
               )}
-              <Icon className={`w-5 h-5 transition-colors duration-200 ${isActive ? 'text-white' : 'text-gray-500'}`} />
-              <span className={`text-[10px] font-bold mt-0.5 tracking-tight transition-colors duration-200 ${isActive ? 'text-white' : 'text-gray-600'}`}>
+              <Icon className={`w-5 h-5 shrink-0 transition-colors duration-200 ${isActive ? 'text-white' : 'text-gray-500'}`} />
+              <span className={`text-[9.5px] font-bold mt-0.5 tracking-tight whitespace-nowrap transition-colors duration-200 ${isActive ? 'text-white' : 'text-gray-600'}`}>
                 {item.label}
               </span>
             </Link>

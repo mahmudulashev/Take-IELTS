@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import Sidebar from '../components/layout/Sidebar'
 import { useAuth } from '../context/AuthContext'
 import { formatDate } from '../lib/scoring'
-import { Flame, Award, BookOpen, Headphones, ArrowRight, History, CheckCircle2 } from 'lucide-react'
+import { Flame, Award, BookOpen, Headphones, PenLine, ArrowRight, History, CheckCircle2 } from 'lucide-react'
 
 export default function DashboardPage() {
   const { user, sessionChecked, signOut, results, stats } = useAuth()
@@ -231,11 +231,15 @@ export default function DashboardPage() {
                       className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
                         res.test_type === 'reading'
                           ? 'bg-[#FFF0F0] text-[#FF3131]'
+                          : res.test_type === 'writing'
+                          ? 'bg-purple-50 text-purple-600'
                           : 'bg-blue-50 text-blue-600'
                       }`}
                     >
                       {res.test_type === 'reading' ? (
                         <><BookOpen className="w-[13px] h-[13px]" />Reading</>
+                      ) : res.test_type === 'writing' ? (
+                        <><PenLine className="w-[13px] h-[13px]" />Writing</>
                       ) : (
                         <><Headphones className="w-[13px] h-[13px]" />Listening</>
                       )}
@@ -247,7 +251,9 @@ export default function DashboardPage() {
 
                   <div className="flex items-center gap-3 shrink-0">
                     <span className="hidden sm:inline text-sm font-semibold text-gray-700">
-                      {res.score} / {res.total_questions || 40}
+                      {res.test_type === 'writing'
+                        ? `${res.score} so'z`
+                        : `${res.score} / ${res.total_questions || 40}`}
                     </span>
                     <span
                       className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold ${
