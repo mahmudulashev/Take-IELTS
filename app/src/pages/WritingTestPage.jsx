@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import Sidebar from '../components/layout/Sidebar'
 import { useAuth } from '../context/AuthContext'
-import { getPromptById, WRITING_PACKS } from '../data/writing-prompts'
+import { getPromptById } from '../data/writing-prompts'
 import {
   countWords, evaluateEssay, saveDraft, readDraft, clearDraft,
 } from '../lib/writing'
@@ -90,10 +90,10 @@ export default function WritingTestPage() {
   useEffect(() => {
     if (!started || result) return
     const id = setInterval(() => {
-      if (essayRef.current.trim()) saveDraft({ promptId: prompt.id, essay: essayRef.current })
+      if (essayRef.current.trim()) saveDraft({ promptId: packId, essay: essayRef.current })
     }, 8000)
     const onLeave = () => {
-      if (essayRef.current.trim()) saveDraft({ promptId: prompt.id, essay: essayRef.current })
+      if (essayRef.current.trim()) saveDraft({ promptId: packId, essay: essayRef.current })
     }
     window.addEventListener('pagehide', onLeave)
     document.addEventListener('visibilitychange', onLeave)
@@ -102,7 +102,7 @@ export default function WritingTestPage() {
       window.removeEventListener('pagehide', onLeave)
       document.removeEventListener('visibilitychange', onLeave)
     }
-  }, [started, result, prompt.id])
+  }, [started, result, packId])
 
   // Tasodifan yopishdan ogohlantirish
   useEffect(() => {
@@ -132,8 +132,8 @@ export default function WritingTestPage() {
     clearInterval(timerRef.current)
 
     const res = await evaluateEssay({
-      promptId: prompt.id,
-      promptText: prompt.text,
+      promptId: packId,
+      promptText: prompt?.text ?? '',
       essay,
       timeSpent: TOTAL_SECONDS - timeLeft,
     })
@@ -148,7 +148,7 @@ export default function WritingTestPage() {
     clearDraft()
     setResult(res.data)
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [essay, wordCount, prompt, timeLeft, evaluating])
+  }, [essay, wordCount, prompt, packId, timeLeft, evaluating])
 
   // Vaqt tugasa avtomatik yuborish
   useEffect(() => {

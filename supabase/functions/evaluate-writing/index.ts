@@ -40,6 +40,15 @@ const UNLIMITED_EMAILS = [
   'urgutmahmud@gmail.com',
 ].map((e) => e.toLowerCase())
 
+/**
+ * UID bo'yicha ham tekshiramiz — email Google hisobida o'zgarishi
+ * mumkin, `auth.users.id` esa hech qachon o'zgarmaydi.
+ * Ikkisidan biri mos kelsa yetarli.
+ */
+const UNLIMITED_USER_IDS = [
+  'e38efacb-c6c0-4206-848b-92449d79ee64',   // Mahmud Ulashev
+]
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -188,7 +197,9 @@ Deno.serve(async (req: Request) => {
     // Email JWT'dan emas, bazadagi auth.users yozuvidan olinadi
     // (admin.auth.getUser tokenni serverda tekshirib qaytargan),
     // shuning uchun uni so'rov bilan soxtalashtirib bo'lmaydi.
-    const isUnlimited = UNLIMITED_EMAILS.includes((user.email ?? '').toLowerCase())
+    const isUnlimited =
+      UNLIMITED_USER_IDS.includes(user.id) ||
+      UNLIMITED_EMAILS.includes((user.email ?? '').toLowerCase())
 
     const { data: attempts } = await admin.rpc('writing_attempts_today', { p_user_id: user.id })
 
