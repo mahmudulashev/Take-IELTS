@@ -7,7 +7,8 @@ import SkillBreakdownCard from '../components/charts/SkillBreakdownCard'
 import DeepAnalyticsSection from '../components/charts/DeepAnalyticsSection'
 import { useAuth } from '../context/AuthContext'
 import { formatDate, formatSeconds } from '../lib/scoring'
-import { BookOpen, Headphones, Calendar, CheckCircle2, XCircle, ChevronRight, X, BarChart3, Trash2 } from 'lucide-react'
+import WritingReports from '../components/writing/WritingReports'
+import { BookOpen, Headphones, PenLine, Calendar, CheckCircle2, XCircle, ChevronRight, X, BarChart3, Trash2 } from 'lucide-react'
 
 export default function ReportsPage() {
   const { user, sessionChecked, signOut, results, clearHistory } = useAuth()
@@ -58,6 +59,7 @@ export default function ReportsPage() {
 
   const readingResults = results.filter(r => r.test_type === 'reading')
   const listeningResults = results.filter(r => r.test_type === 'listening')
+  const writingResults = results.filter(r => r.test_type === 'writing')
   const currentTabResults = activeTab === 'reading' ? readingResults : listeningResults
 
   // Calculate average bands
@@ -125,10 +127,25 @@ export default function ReportsPage() {
                 <Headphones className="w-4 h-4" />
                 <span>Listening ({listeningResults.length})</span>
               </button>
+
+              <button
+                onClick={() => setActiveTab('writing')}
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  activeTab === 'writing'
+                    ? 'bg-[#FF3131] text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <PenLine className="w-4 h-4" />
+                <span>Writing ({writingResults.length})</span>
+              </button>
             </div>
 
             {/* Clear History Button */}
-            {results.length > 0 && (
+            {/* clearHistory() faqat test_results jadvalini tozalaydi —
+                insholar alohida jadvalda. Writing tabida bu tugmani
+                ko'rsatish chalg'ituvchi bo'lardi. */}
+            {results.length > 0 && activeTab !== 'writing' && (
               <button
                 onClick={() => setShowClearModal(true)}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-all"
@@ -140,6 +157,12 @@ export default function ReportsPage() {
           </div>
         </div>
 
+        {/* Writing tabi butunlay boshqacha: 40 ta savol jadvali yo'q,
+            insho matni va uning tahlili bor. */}
+        {activeTab === 'writing' ? (
+          <WritingReports results={writingResults} />
+        ) : (
+        <>
         {/* Stats Summary Cards for selected tab */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm">
@@ -278,6 +301,8 @@ export default function ReportsPage() {
             </div>
           )}
         </div>
+        </>
+        )}
       </main>
 
       {/* Clear Confirmation Modal */}
