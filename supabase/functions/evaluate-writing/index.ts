@@ -18,6 +18,7 @@
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { findSpellingIssues } from './spelling.ts'
 
 const GEMINI_MODEL = 'gemini-2.5-flash'
 const DAILY_LIMIT = 5          // bitta foydalanuvchi uchun kuniga
@@ -46,7 +47,12 @@ function countWords(text: string): number {
  * Modelga "o'zingcha baho ber" demaymiz — har bir mezon uchun nimaga
  * qarash kerakligini aniq aytamiz, aks holda baholar tasodifiy chiqadi.
  */
-function buildPrompt(promptText: string, essay: string, wordCount: number): string {
+function buildPrompt(
+  promptText: string,
+  essay: string,
+  wordCount: number,
+  spellingList: string,
+): string {
   return `You are a senior IELTS examiner with 15 years of experience. Assess this Writing Task 2 response against the official public band descriptors.
 
 TASK PROMPT:
@@ -75,12 +81,15 @@ Calibration anchors — be honest, not kind:
 An inflated score is a disservice — it sends the candidate into the real exam unprepared. When you hesitate between two bands, choose the lower one.
 
 Word count is ${wordCount}. Under 250 words is a Task Response penalty; state it explicitly if it applies.
+${spellingList}
 
 === WHAT TO PRODUCE ===
 
 For each criterion give: the band, a SHORT verbatim quote from the essay that justifies it, and what specifically would raise it by half a band.
 
 Then produce inline annotations: specific spans of the candidate's text that contain a problem. Each annotation's "quote" MUST be copied verbatim, character for character, from the essay so it can be located in the text. Keep quotes short (3-15 words). Produce 5-12 annotations covering a mix of types. If the essay is genuinely strong, still identify the weakest spans — there is always something to sharpen.
+
+Do NOT produce annotations of type "spelling" — spelling is checked separately by a dictionary and any errors are listed above. Cover grammar, vocabulary, cohesion and task instead.
 
 Write all feedback in Uzbek (latin script). Keep quoted English from the essay in English.
 
@@ -179,6 +188,20 @@ Deno.serve(async (req: Request) => {
       }, 500)
     }
 
+    // ---------------------------------------------------------------
+    // 3.5. Imlo — modelga emas, lug'atga ishonamiz
+    // ---------------------------------------------------------------
+    const spellingIssues = findSpellingIssues(essay)
+
+    // Topilgan xatolarni prompt'ga kiritamiz: model ularni bilgan holda
+    // Lexical Resource va umumiy ballni qo'ysin. Aks holda model
+    // "imlo mukammal" deb hisoblab, ballni oshirib yuboradi.
+    const spellingList = spellingIssues.length
+      ? `\nA dictionary check has already found ${spellingIssues.length} misspelled word(s) in this essay: ${
+          spellingIssues.map((s) => `"${s.quote}" (should be "${s.fix}")`).join(', ')
+        }. Factor these into Lexical Resource — spelling is explicitly part of that criterion. Do not claim the spelling is accurate.`
+      : ''
+
     // Model nomlari vaqt o'tishi bilan o'zgaradi va eskilari o'chiriladi.
     // Bittasi 404 bersa keyingisiga o'tamiz — sayt to'xtab qolmasin.
     const MODELS = [GEMINI_MODEL, 'gemini-flash-latest', 'gemini-2.5-flash-lite']
@@ -194,7 +217,7 @@ Deno.serve(async (req: Request) => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: buildPrompt(promptText, essay, wordCount) }] }],
+            contents: [{ parts: [{ text: buildPrompt(promptText, essay, wordCount, spellingList) }] }],
             generationConfig: {
               temperature: 0.3,          // baho barqaror bo'lsin
               responseMimeType: 'application/json',
@@ -288,11 +311,18 @@ Deno.serve(async (req: Request) => {
       feedback: {
         summary: assessment.summary ?? '',
         criteria_feedback: assessment.criteria_feedback ?? {},
-        // Matn ichida belgilash uchun — quote essaydan aynan ko'chirilgan bo'lishi shart
-        annotations: Array.isArray(assessment.annotations)
-          ? assessment.annotations.filter((a: any) =>
-              a && typeof a.quote === 'string' && essay.includes(a.quote))
-          : [],
+        // Matn ichida belgilash uchun — quote essaydan aynan ko'chirilgan bo'lishi shart.
+        // Imlo xatolari lug'atdan keladi (kafolatlangan), qolganlari modeldan.
+        annotations: [
+          ...spellingIssues,
+          ...(Array.isArray(assessment.annotations)
+            ? assessment.annotations.filter((a: any) =>
+                a && typeof a.quote === 'string'
+                && a.type !== 'spelling'          // imloni faqat lug'at aniqlaydi
+                && essay.includes(a.quote))
+            : []),
+        ],
+        spelling_count: spellingIssues.reduce((n, s) => n + s.count, 0),
         next_band: assessment.next_band ?? null,
         strengths: assessment.strengths ?? [],
       },
