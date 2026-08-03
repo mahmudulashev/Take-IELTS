@@ -8,6 +8,7 @@ import {
   BarChart3,
   User,
   LogOut,
+  PenLine
 } from 'lucide-react'
 
 export default function Sidebar({ user, onSignOut }) {
@@ -17,6 +18,7 @@ export default function Sidebar({ user, onSignOut }) {
     { label: 'Bosh sahifa', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Reading Testlar', path: '/reading-packs', icon: BookOpen },
     { label: 'Listening Testlar', path: '/listening-packs', icon: Headphones },
+    { label: 'Writing (AI)', path: '/test/writing', icon: PenLine },
     { label: 'Natijalarim', path: '/reports', icon: BarChart3 },
     { label: 'Profilim', path: '/profile', icon: User },
   ]
@@ -25,6 +27,7 @@ export default function Sidebar({ user, onSignOut }) {
     { label: 'Bosh sahifa', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Reading', path: '/reading-packs', icon: BookOpen },
     { label: 'Listening', path: '/listening-packs', icon: Headphones },
+    { label: 'Writing', path: '/test/writing', icon: PenLine },
     { label: 'Natijalar', path: '/reports', icon: BarChart3 },
     { label: 'Profilim', path: '/profile', icon: User },
   ]

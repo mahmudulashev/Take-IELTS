@@ -9,6 +9,7 @@ const ReadingPacksPage = lazy(() => import('./pages/ReadingPacksPage'))
 const ListeningPacksPage = lazy(() => import('./pages/ListeningPacksPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const ReadingTestPage = lazy(() => import('./pages/ReadingTestPage'))
+const WritingTestPage = lazy(() => import('./pages/WritingTestPage'))
 const ReportsPage = lazy(() => import('./pages/ReportsPage'))
 
 function PageLoader() {
@@ -33,6 +34,7 @@ export default function App() {
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/test/reading" element={<ReadingTestPage />} />
+            <Route path="/test/writing" element={<WritingTestPage />} />
           </Routes>
         </Suspense>
       </ErrorBoundary>
