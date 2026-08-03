@@ -151,35 +151,82 @@ Deno.serve(async (req: Request) => {
     // 4. Gemini
     // ---------------------------------------------------------------
     const apiKey = Deno.env.get('GEMINI_API_KEY')
-    if (!apiKey) return json({ error: 'Server sozlanmagan: GEMINI_API_KEY yo\'q.' }, 500)
-
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: buildPrompt(promptText, essay, wordCount) }] }],
-          generationConfig: {
-            temperature: 0.3,          // baho barqaror bo'lsin
-            responseMimeType: 'application/json',
-          },
-        }),
-      },
-    )
-
-    if (!geminiRes.ok) {
-      const detail = await geminiRes.text()
-      console.error('Gemini xatosi:', geminiRes.status, detail)
-      if (geminiRes.status === 429) {
-        return json({ error: 'Hozir juda ko\'p so\'rov bor. Bir daqiqadan keyin urinib ko\'ring.' }, 429)
-      }
-      return json({ error: 'Baholash xizmati javob bermadi. Keyinroq urinib ko\'ring.' }, 502)
+    if (!apiKey) {
+      return json({
+        error: "Server sozlanmagan: GEMINI_API_KEY o'rnatilmagan. Terminalda: supabase secrets set GEMINI_API_KEY=...",
+      }, 500)
     }
 
-    const geminiJson = await geminiRes.json()
+    // Model nomlari vaqt o'tishi bilan o'zgaradi va eskilari o'chiriladi.
+    // Bittasi 404 bersa keyingisiga o'tamiz — sayt to'xtab qolmasin.
+    const MODELS = [GEMINI_MODEL, 'gemini-flash-latest', 'gemini-2.5-flash-lite']
+
+    let geminiJson: any = null
+    let lastError = ''
+    let lastStatus = 0
+
+    for (const model of MODELS) {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: buildPrompt(promptText, essay, wordCount) }] }],
+            generationConfig: {
+              temperature: 0.3,          // baho barqaror bo'lsin
+              responseMimeType: 'application/json',
+            },
+          }),
+        },
+      )
+
+      if (res.ok) {
+        geminiJson = await res.json()
+        if (model !== GEMINI_MODEL) console.warn(`Zaxira model ishlatildi: ${model}`)
+        break
+      }
+
+      lastStatus = res.status
+      const detail = await res.text()
+      console.error(`Gemini xatosi [${model}]:`, res.status, detail)
+
+      // Google xato JSON'idan tushunarli sababni ajratamiz
+      try {
+        const parsed = JSON.parse(detail)
+        lastError = parsed?.error?.status || parsed?.error?.message || detail.slice(0, 200)
+      } catch {
+        lastError = detail.slice(0, 200)
+      }
+
+      // 404 — model topilmadi, keyingisini sinaymiz.
+      // Qolgan xatolar (kalit, kvota, ruxsat) modelga bog'liq emas — to'xtaymiz.
+      if (res.status !== 404) break
+    }
+
+    if (!geminiJson) {
+      if (lastStatus === 429) {
+        return json({ error: "Kvota tugadi yoki juda ko'p so'rov yuborildi. Bir necha daqiqadan keyin urinib ko'ring." }, 429)
+      }
+      // Sababni foydalanuvchiga ochiq aytamiz — API kaliti hech qachon
+      // xato matniga tushmaydi, faqat Google'ning status kodi va izohi.
+      const hint =
+        lastStatus === 400 ? " — GEMINI_API_KEY noto'g'ri ko'rinadi"
+        : lastStatus === 403 ? ' — Generative Language API yoqilmagan yoki kalitga ruxsat yo\'q'
+        : lastStatus === 404 ? ' — model nomi topilmadi'
+        : ''
+      return json({ error: `Baholash xizmati xatosi (${lastStatus}${hint}): ${lastError}` }, 502)
+    }
+
     const raw = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text
-    if (!raw) return json({ error: 'Baholash natijasi bo\'sh keldi.' }, 502)
+    if (!raw) {
+      const reason = geminiJson?.candidates?.[0]?.finishReason
+      if (reason === 'SAFETY') {
+        return json({ error: 'Insho mazmuni xavfsizlik filtridan o\'tmadi. Boshqa mavzuda yozib ko\'ring.' }, 400)
+      }
+      console.error('Bo\'sh javob:', JSON.stringify(geminiJson).slice(0, 400))
+      return json({ error: `Baholash natijasi bo'sh keldi${reason ? ` (${reason})` : ''}.` }, 502)
+    }
 
     let assessment: any
     try {

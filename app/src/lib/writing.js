@@ -69,14 +69,32 @@ export async function evaluateEssay({ promptId, promptText, essay, timeSpent }) 
     })
 
     if (error) {
-      // Edge Function 4xx/5xx qaytarsa xabar `context` ichida keladi
-      let message = 'Baholashda xatolik yuz berdi.'
+      // Edge Function 4xx/5xx qaytarsa haqiqiy sabab `context` (Response)
+      // ichida bo'ladi. Uni ochib ko'rsatmasak, foydalanuvchi va biz
+      // faqat "xatolik yuz berdi" ko'ramiz va sababni bilmaymiz.
+      let message = null
       let limitReached = false
-      try {
-        const body = await error.context?.json?.()
-        if (body?.error) message = body.error
-        if (body?.limitReached) limitReached = true
-      } catch { /* javob JSON emas */ }
+
+      const ctx = error.context
+      if (ctx) {
+        try {
+          // Response'ni bir marta o'qish mumkin — avval nusxa olamiz
+          const res = typeof ctx.clone === 'function' ? ctx.clone() : ctx
+          const text = typeof res.text === 'function' ? await res.text() : null
+          if (text) {
+            try {
+              const body = JSON.parse(text)
+              if (body?.error) message = body.error
+              if (body?.limitReached) limitReached = true
+            } catch {
+              message = text.slice(0, 300)
+            }
+          }
+        } catch { /* o'qib bo'lmadi */ }
+      }
+
+      if (!message) message = error.message || 'Baholashda xatolik yuz berdi.'
+      console.error('evaluateEssay xatosi:', message, error)
       return { ok: false, error: message, limitReached }
     }
 
