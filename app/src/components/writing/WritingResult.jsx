@@ -305,11 +305,11 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
       <div className="flex flex-col sm:flex-row items-center gap-3">
         <button onClick={onNewEssay}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#FF3131] hover:bg-[#E82C2C] text-white font-bold text-xs transition-colors">
-          <RefreshCw className="w-4 h-4" /> Yangi insho yozish
+          <RefreshCw className="w-4 h-4" /> Shu mavzuni qayta yozish
         </button>
-        <button onClick={() => navigate('/dashboard')}
+        <button onClick={() => navigate('/writing-packs')}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl border border-gray-200 text-gray-700 font-bold text-xs hover:bg-gray-50 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Dashboard
+          <ArrowLeft className="w-4 h-4" /> Boshqa to'plam
         </button>
       </div>
     </div>

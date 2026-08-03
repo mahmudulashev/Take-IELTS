@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import ErrorBoundary from './components/ErrorBoundary'
 
 const LandingPage = lazy(() => import('./pages/LandingPage'))
@@ -9,6 +9,7 @@ const ReadingPacksPage = lazy(() => import('./pages/ReadingPacksPage'))
 const ListeningPacksPage = lazy(() => import('./pages/ListeningPacksPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const ReadingTestPage = lazy(() => import('./pages/ReadingTestPage'))
+const WritingPacksPage = lazy(() => import('./pages/WritingPacksPage'))
 const WritingTestPage = lazy(() => import('./pages/WritingTestPage'))
 const ReportsPage = lazy(() => import('./pages/ReportsPage'))
 
@@ -34,7 +35,10 @@ export default function App() {
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/test/reading" element={<ReadingTestPage />} />
-            <Route path="/test/writing" element={<WritingTestPage />} />
+            <Route path="/writing-packs" element={<WritingPacksPage />} />
+            <Route path="/test/writing/:packId" element={<WritingTestPage />} />
+            {/* Eski havolalar to'plamlar sahifasiga yo'naltiriladi */}
+            <Route path="/test/writing" element={<Navigate to="/writing-packs" replace />} />
           </Routes>
         </Suspense>
       </ErrorBoundary>

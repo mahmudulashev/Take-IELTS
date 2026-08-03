@@ -87,7 +87,7 @@ export default function WritingReports({ results = [] }) {
           baholaydi va xatolarni matn ichida ko'rsatadi.
         </p>
         <Link
-          to="/test/writing"
+          to="/writing-packs"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#FF3131] hover:bg-[#E82C2C] text-white font-bold text-xs transition-colors"
         >
           <PenLine className="w-4 h-4" /> Birinchi inshoni yozish

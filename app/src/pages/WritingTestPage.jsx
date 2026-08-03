@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import Sidebar from '../components/layout/Sidebar'
 import { useAuth } from '../context/AuthContext'
-import { randomPrompt, getPromptById } from '../data/writing-prompts'
+import { getPromptById, WRITING_PACKS } from '../data/writing-prompts'
 import {
   countWords, evaluateEssay, saveDraft, readDraft, clearDraft,
 } from '../lib/writing'
@@ -24,7 +24,9 @@ export default function WritingTestPage() {
   const { user, sessionChecked, signOut } = useAuth()
   const navigate = useNavigate()
 
-  const [prompt, setPrompt] = useState(() => randomPrompt())
+  // Mavzu URL'dan keladi: /test/writing/writing-3
+  const { packId } = useParams()
+  const prompt = getPromptById(packId)
   const [essay, setEssay] = useState('')
   const [started, setStarted] = useState(false)
   const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS)
@@ -52,13 +54,14 @@ export default function WritingTestPage() {
   // ----------------------------------------------------------------
   useEffect(() => {
     const d = readDraft()
-    if (d?.essay) setDraftOffer(d)
-  }, [])
+    // Faqat SHU to'plamning qoralamasi taklif qilinsin — boshqa
+    // mavzuning matnini bu yerga tiklash mantiqsiz bo'lardi.
+    if (d?.essay && d.promptId === packId) setDraftOffer(d)
+    else setDraftOffer(null)
+  }, [packId])
 
   const restoreDraft = () => {
     if (!draftOffer) return
-    const p = getPromptById(draftOffer.promptId)
-    if (p) setPrompt(p)
     setEssay(draftOffer.essay)
     setStarted(true)
     setDraftOffer(null)
@@ -156,7 +159,6 @@ export default function WritingTestPage() {
 
   const startNew = () => {
     clearDraft()
-    setPrompt(randomPrompt(prompt.id))
     setEssay('')
     setResult(null)
     setError(null)
@@ -172,6 +174,7 @@ export default function WritingTestPage() {
     )
   }
   if (!user) return null
+  if (!prompt) return <Navigate to="/writing-packs" replace />
 
   const timeDanger = timeLeft <= 300 && timeLeft > 0
 
@@ -260,9 +263,9 @@ export default function WritingTestPage() {
                   </button>
                 )}
                 {!started && (
-                  <button onClick={() => setPrompt(randomPrompt(prompt.id))}
+                  <button onClick={() => navigate('/writing-packs')}
                     className="w-full mt-2.5 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold text-xs hover:bg-gray-50 transition-colors">
-                    Boshqa mavzu
+                    Boshqa to'plam tanlash
                   </button>
                 )}
               </div>
