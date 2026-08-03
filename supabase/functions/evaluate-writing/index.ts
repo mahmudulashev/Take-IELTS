@@ -18,7 +18,7 @@
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { findSpellingIssues } from './spelling.ts'
+import { findSpellingIssues, isDictionaryActive } from './spelling.ts'
 
 const GEMINI_MODEL = 'gemini-2.5-flash'
 const DAILY_LIMIT = 5          // bitta foydalanuvchi uchun kuniga
@@ -88,6 +88,7 @@ function buildPrompt(
   essay: string,
   wordCount: number,
   spellingList: string,
+  spellingRule: string,
 ): string {
   return `You are a senior IELTS examiner with 15 years of experience. Assess this Writing Task 2 response against the official public band descriptors.
 
@@ -125,7 +126,7 @@ For each criterion give: the band, a SHORT verbatim quote from the essay that ju
 
 Then produce inline annotations: specific spans of the candidate's text that contain a problem. Each annotation's "quote" MUST be copied verbatim, character for character, from the essay so it can be located in the text. Keep quotes short (3-15 words). Produce 5-12 annotations covering a mix of types. If the essay is genuinely strong, still identify the weakest spans — there is always something to sharpen.
 
-Do NOT produce annotations of type "spelling" — spelling is checked separately by a dictionary and any errors are listed above. Cover grammar, vocabulary, cohesion and task instead.
+${spellingRule}
 
 Write all feedback in Uzbek (latin script). Keep quoted English from the essay in English.
 
@@ -241,7 +242,7 @@ Deno.serve(async (req: Request) => {
     // ---------------------------------------------------------------
     // 3.5. Imlo — modelga emas, lug'atga ishonamiz
     // ---------------------------------------------------------------
-    const spellingIssues = findSpellingIssues(essay)
+    const spellingIssues = await findSpellingIssues(essay)
 
     // Topilgan xatolarni prompt'ga kiritamiz: model ularni bilgan holda
     // Lexical Resource va umumiy ballni qo'ysin. Aks holda model
@@ -251,6 +252,13 @@ Deno.serve(async (req: Request) => {
           spellingIssues.map((s) => `"${s.quote}" (should be "${s.fix}")`).join(', ')
         }. Factor these into Lexical Resource — spelling is explicitly part of that criterion. Do not claim the spelling is accurate.`
       : ''
+
+    // Lug'at ishlayotgan bo'lsa imlo faqat undan keladi (aniqroq).
+    // Ishlamasa modelga qaytarib beramiz — aks holda imlo umuman
+    // tekshirilmay qolardi.
+    const spellingRule = isDictionaryActive()
+      ? 'Do NOT produce annotations of type "spelling" — spelling is checked separately by a dictionary and any errors are listed above. Cover grammar, vocabulary, cohesion and task instead.'
+      : 'The dictionary check is unavailable for this request, so you must check spelling yourself. Include annotations of type "spelling" for any misspelled word, quoting it exactly as written.'
 
     // Model nomlari vaqt o'tishi bilan o'zgaradi va eskilari o'chiriladi.
     // Bittasi 404 bersa keyingisiga o'tamiz — sayt to'xtab qolmasin.
@@ -267,7 +275,7 @@ Deno.serve(async (req: Request) => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: buildPrompt(promptText, essay, wordCount, spellingList) }] }],
+            contents: [{ parts: [{ text: buildPrompt(promptText, essay, wordCount, spellingList, spellingRule) }] }],
             generationConfig: {
               temperature: 0.3,          // baho barqaror bo'lsin
               responseMimeType: 'application/json',
@@ -368,7 +376,10 @@ Deno.serve(async (req: Request) => {
           ...(Array.isArray(assessment.annotations)
             ? assessment.annotations.filter((a: any) =>
                 a && typeof a.quote === 'string'
-                && a.type !== 'spelling'          // imloni faqat lug'at aniqlaydi
+                // Lug'at ishlayotgan bo'lsa modelning imlo taxminlarini
+                // qabul qilmaymiz — u xato aytadi. Lug'at ishlamasa
+                // uning imlo annotatsiyalari yagona manba bo'lib qoladi.
+                && (isDictionaryActive() ? a.type !== 'spelling' : true)
                 && essay.includes(a.quote))
             : []),
         ],
