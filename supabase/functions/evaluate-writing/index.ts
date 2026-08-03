@@ -49,6 +49,18 @@ const UNLIMITED_USER_IDS = [
   'e38efacb-c6c0-4206-848b-92449d79ee64',   // Mahmud Ulashev
 ]
 
+/**
+ * Ro'yxatni kodga tegmasdan ham kengaytirish mumkin:
+ *   supabase secrets set UNLIMITED_EMAILS="a@x.com,b@y.com"
+ * Bu holda qayta deploy shart emas — funksiya keyingi so'rovda o'qiydi.
+ */
+function envList(name: string): string[] {
+  return (Deno.env.get(name) ?? '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean)
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -197,9 +209,12 @@ Deno.serve(async (req: Request) => {
     // Email JWT'dan emas, bazadagi auth.users yozuvidan olinadi
     // (admin.auth.getUser tokenni serverda tekshirib qaytargan),
     // shuning uchun uni so'rov bilan soxtalashtirib bo'lmaydi.
+    const email = (user.email ?? '').toLowerCase()
     const isUnlimited =
       UNLIMITED_USER_IDS.includes(user.id) ||
-      UNLIMITED_EMAILS.includes((user.email ?? '').toLowerCase())
+      UNLIMITED_EMAILS.includes(email) ||
+      envList('UNLIMITED_EMAILS').includes(email) ||
+      envList('UNLIMITED_USER_IDS').includes(user.id.toLowerCase())
 
     const { data: attempts } = await admin.rpc('writing_attempts_today', { p_user_id: user.id })
 
@@ -207,6 +222,9 @@ Deno.serve(async (req: Request) => {
       return json({
         error: `Kunlik limit tugadi (${DAILY_LIMIT} ta insho). Ertaga qayta urinib ko'ring.`,
         limitReached: true,
+        // Nega limitsiz ro'yxatga tushmagani darrov ko'rinsin.
+        // Bu foydalanuvchining O'Z ma'lumoti — sir emas.
+        checked: { userId: user.id, email },
       }, 429)
     }
 
