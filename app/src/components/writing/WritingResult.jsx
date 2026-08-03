@@ -53,7 +53,10 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 mt-1">
             {result.word_count} so'z · {annotations.length} ta belgilangan joy
-            {typeof result.attemptsToday === 'number' && ` · bugun ${result.attemptsToday}/${result.dailyLimit}`}
+            {typeof result.attemptsToday === 'number' && result.dailyLimit
+              ? ` · bugun ${result.attemptsToday}/${result.dailyLimit}`
+              : ''}
+            {result.unlimited && ' · limitsiz'}
           </p>
         </div>
 

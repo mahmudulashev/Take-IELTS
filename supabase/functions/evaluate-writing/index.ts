@@ -25,6 +25,21 @@ const DAILY_LIMIT = 5          // bitta foydalanuvchi uchun kuniga
 const MIN_WORDS = 50
 const MAX_WORDS = 1000
 
+/**
+ * Kunlik limitdan ozod foydalanuvchilar (sinov va administratsiya uchun).
+ *
+ * DIQQAT: bu ro'yxat faqat SHU FOYDALANUVCHINING shaxsiy limitini
+ * o'chiradi. Google'ning umumiy kvotasi (bepul tierda kuniga ~250
+ * so'rov, butun loyiha uchun) baribir amal qiladi va uni kod bilan
+ * chetlab o'tib bo'lmaydi.
+ *
+ * Email `auth.users` dan olinadi — foydalanuvchi uni so'rov orqali
+ * o'zgartira olmaydi, shuning uchun soxtalashtirib bo'lmaydi.
+ */
+const UNLIMITED_EMAILS = [
+  'urgutmahmud@gmail.com',
+].map((e) => e.toLowerCase())
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -170,8 +185,14 @@ Deno.serve(async (req: Request) => {
     // ---------------------------------------------------------------
     // 3. Kunlik limit
     // ---------------------------------------------------------------
+    // Email JWT'dan emas, bazadagi auth.users yozuvidan olinadi
+    // (admin.auth.getUser tokenni serverda tekshirib qaytargan),
+    // shuning uchun uni so'rov bilan soxtalashtirib bo'lmaydi.
+    const isUnlimited = UNLIMITED_EMAILS.includes((user.email ?? '').toLowerCase())
+
     const { data: attempts } = await admin.rpc('writing_attempts_today', { p_user_id: user.id })
-    if (typeof attempts === 'number' && attempts >= DAILY_LIMIT) {
+
+    if (!isUnlimited && typeof attempts === 'number' && attempts >= DAILY_LIMIT) {
       return json({
         error: `Kunlik limit tugadi (${DAILY_LIMIT} ta insho). Ertaga qayta urinib ko'ring.`,
         limitReached: true,
@@ -344,7 +365,13 @@ Deno.serve(async (req: Request) => {
       return json({ ...record, id: null, saveFailed: true })
     }
 
-    return json({ ...saved, attemptsToday: (attempts ?? 0) + 1, dailyLimit: DAILY_LIMIT })
+    return json({
+      ...saved,
+      attemptsToday: (attempts ?? 0) + 1,
+      // null → UI "bugun 3/5" o'rniga hech narsa ko'rsatmaydi
+      dailyLimit: isUnlimited ? null : DAILY_LIMIT,
+      unlimited: isUnlimited,
+    })
 
   } catch (err) {
     console.error('Kutilmagan xato:', err)
