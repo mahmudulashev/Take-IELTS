@@ -6,9 +6,9 @@ import { randomPrompt, getPromptById } from '../data/writing-prompts'
 import {
   countWords, evaluateEssay, saveDraft, readDraft, clearDraft,
 } from '../lib/writing'
+import WritingResult from '../components/writing/WritingResult'
 import {
-  PenLine, Clock, AlertTriangle, Sparkles, CheckCircle2,
-  ArrowLeft, RefreshCw, Info,
+  PenLine, Clock, AlertTriangle, Sparkles, RefreshCw, Info,
 } from 'lucide-react'
 
 const TOTAL_SECONDS = 40 * 60   // Task 2 uchun rasmiy vaqt
@@ -18,13 +18,6 @@ function formatTime(sec) {
   const m = Math.floor(Math.max(0, sec) / 60)
   const s = Math.max(0, sec) % 60
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-}
-
-function bandClass(band) {
-  const b = parseFloat(band)
-  if (b >= 7) return 'bg-green-100 text-green-700'
-  if (b >= 5.5) return 'bg-blue-100 text-blue-700'
-  return 'bg-red-100 text-red-700'
 }
 
 export default function WritingTestPage() {
@@ -181,7 +174,6 @@ export default function WritingTestPage() {
   if (!user) return null
 
   const timeDanger = timeLeft <= 300 && timeLeft > 0
-  const fb = result?.feedback || {}
 
   return (
     <div className="min-h-screen bg-[#F7F8FC] flex flex-col lg:flex-row">
@@ -189,7 +181,8 @@ export default function WritingTestPage() {
 
       <main className="flex-1 min-w-0 w-full lg:ml-[260px] min-h-screen p-4 sm:p-6 md:p-10 pb-24 lg:pb-10">
 
-        {/* Sarlavha */}
+        {/* Sarlavha — natija chiqqanda WritingResult o'zinikini ko'rsatadi */}
+        {!result && (
         <div className="bg-white rounded-[24px] p-5 sm:p-6 md:p-8 border border-gray-100 shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF3131] uppercase tracking-wider bg-[#FFF0F0] px-3 py-1 rounded-full mb-2">
@@ -213,6 +206,7 @@ export default function WritingTestPage() {
             </div>
           )}
         </div>
+        )}
 
         {/* Qoralama taklifi */}
         {draftOffer && !started && !result && (
@@ -237,135 +231,7 @@ export default function WritingTestPage() {
 
         {/* ---------------- NATIJA ---------------- */}
         {result ? (
-          <div className="space-y-6">
-
-            <div className="bg-white rounded-[24px] p-6 md:p-8 border border-gray-100 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 mb-6">
-                <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Umumiy baho</p>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-5xl font-extrabold text-[#FF3131]">{result.band_overall ?? '—'}</span>
-                    <span className="text-sm font-semibold text-gray-400">/ 9.0</span>
-                  </div>
-                </div>
-                <div className="text-xs text-gray-500 sm:text-right">
-                  <p>{result.word_count} so'z</p>
-                  {typeof result.attemptsToday === 'number' && (
-                    <p className="mt-1">Bugun: {result.attemptsToday} / {result.dailyLimit}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-                {[
-                  ['Task Response', result.band_task, 'task_response'],
-                  ['Coherence & Cohesion', result.band_coherence, 'coherence_cohesion'],
-                  ['Lexical Resource', result.band_lexical, 'lexical_resource'],
-                  ['Grammatical Range', result.band_grammar, 'grammatical_range'],
-                ].map(([label, value]) => (
-                  <div key={label} className="bg-gray-50 rounded-2xl p-4">
-                    <p className="text-[11px] font-bold text-gray-500 leading-tight mb-2">{label}</p>
-                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-extrabold ${bandClass(value)}`}>
-                      {value ?? '—'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {fb.summary && (
-                <p className="text-sm text-gray-700 leading-relaxed bg-[#FFF9F9] border border-[#FF3131]/10 rounded-2xl p-4">
-                  {fb.summary}
-                </p>
-              )}
-
-              <div className="flex items-start gap-2 mt-5 text-[11px] text-gray-400 leading-relaxed">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                <p>
-                  Bu <strong>taxminiy baho</strong> — sun'iy intellekt rasmiy band descriptor'lar
-                  asosida hisoblaydi, lekin rasmiy IELTS ekspertining bahosi emas.
-                  Haqiqiy imtihon natijasi farq qilishi mumkin.
-                </p>
-              </div>
-            </div>
-
-            {/* Mezonlar bo'yicha izoh */}
-            {fb.criteria_feedback && Object.keys(fb.criteria_feedback).length > 0 && (
-              <div className="bg-white rounded-[24px] p-6 md:p-8 border border-gray-100 shadow-sm">
-                <h3 className="font-bold text-gray-900 text-lg mb-5">Mezonlar bo'yicha tahlil</h3>
-                <div className="space-y-4">
-                  {Object.entries(fb.criteria_feedback).map(([key, text]) => (
-                    <div key={key} className="border-l-2 border-gray-100 pl-4">
-                      <p className="text-xs font-bold text-gray-900 mb-1 capitalize">
-                        {key.replace(/_/g, ' ')}
-                      </p>
-                      <p className="text-xs text-gray-600 leading-relaxed">{text}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Kuchli tomonlar / tavsiyalar */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {fb.strengths?.length > 0 && (
-                <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm">
-                  <h3 className="font-bold text-gray-900 text-sm mb-4 flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-green-500" /> Kuchli tomonlar
-                  </h3>
-                  <ul className="space-y-2.5">
-                    {fb.strengths.map((s, i) => (
-                      <li key={i} className="text-xs text-gray-600 leading-relaxed flex gap-2">
-                        <span className="text-green-500 shrink-0">•</span><span>{s}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {fb.improvements?.length > 0 && (
-                <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm">
-                  <h3 className="font-bold text-gray-900 text-sm mb-4 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#FF3131]" /> Nimani yaxshilash kerak
-                  </h3>
-                  <ul className="space-y-2.5">
-                    {fb.improvements.map((s, i) => (
-                      <li key={i} className="text-xs text-gray-600 leading-relaxed flex gap-2">
-                        <span className="text-[#FF3131] shrink-0">•</span><span>{s}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-
-            {/* Tuzatishlar */}
-            {fb.corrections?.length > 0 && (
-              <div className="bg-white rounded-[24px] p-6 md:p-8 border border-gray-100 shadow-sm">
-                <h3 className="font-bold text-gray-900 text-lg mb-5">Jumlalar bo'yicha tuzatishlar</h3>
-                <div className="space-y-4">
-                  {fb.corrections.map((c, i) => (
-                    <div key={i} className="bg-gray-50 rounded-2xl p-4">
-                      <p className="text-xs text-red-600 line-through mb-1.5 leading-relaxed">{c.original}</p>
-                      <p className="text-xs text-green-700 font-semibold mb-2 leading-relaxed">{c.corrected}</p>
-                      {c.why && <p className="text-[11px] text-gray-500 leading-relaxed">{c.why}</p>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              <button onClick={startNew}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#FF3131] hover:bg-[#E82C2C] text-white font-bold text-xs transition-colors">
-                <RefreshCw className="w-4 h-4" /> Yangi insho yozish
-              </button>
-              <button onClick={() => navigate('/dashboard')}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl border border-gray-200 text-gray-700 font-bold text-xs hover:bg-gray-50 transition-colors">
-                <ArrowLeft className="w-4 h-4" /> Dashboard
-              </button>
-            </div>
-          </div>
-
+          <WritingResult result={result} prompt={prompt} onNewEssay={startNew} />
         ) : (
           /* ---------------- YOZISH ---------------- */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

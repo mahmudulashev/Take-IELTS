@@ -47,7 +47,7 @@ function countWords(text: string): number {
  * qarash kerakligini aniq aytamiz, aks holda baholar tasodifiy chiqadi.
  */
 function buildPrompt(promptText: string, essay: string, wordCount: number): string {
-  return `You are an experienced IELTS examiner. Assess the candidate's Writing Task 2 response using the official public band descriptors.
+  return `You are a senior IELTS examiner with 15 years of experience. Assess this Writing Task 2 response against the official public band descriptors.
 
 TASK PROMPT:
 """
@@ -59,41 +59,63 @@ CANDIDATE'S ESSAY (${wordCount} words):
 ${essay}
 """
 
-Assess these four criteria independently, each 0.0-9.0 in 0.5 steps:
+=== SCORING DISCIPLINE — READ BEFORE SCORING ===
 
-1. task_response — Does it address all parts of the prompt? Is a clear position maintained throughout? Are ideas developed and supported? Note: under 250 words is a penalty.
-2. coherence_cohesion — Logical progression, paragraphing, cohesive devices used naturally rather than mechanically.
-3. lexical_resource — Range and precision of vocabulary, collocation, word formation, spelling.
-4. grammatical_range — Variety of structures, accuracy, punctuation, error density and whether errors impede communication.
+Assess the four criteria SEPARATELY. Score each one on its own descriptor before looking at the others. Do not form an overall impression first and then spread it across four boxes.
 
-Overall band = average of the four, rounded to the nearest 0.5 (.25 rounds up, .75 rounds up).
+It is uncommon for all four criteria to land on the same number. If your four scores come out identical, you have not assessed them independently — go back and re-read each descriptor, find the specific weakest feature in that criterion, and score that criterion on its own merits. A candidate with strong grammar often has weaker task development; a candidate with rich vocabulary often has cohesion problems.
 
-Be strict and realistic. Most candidates score 5.5-6.5. Do not inflate scores to be encouraging — an inflated score misleads the candidate about their exam readiness.
+Calibration anchors — be honest, not kind:
+- Band 9: error-free, fully natural, sophisticated throughout. Extremely rare. A competent essay by a strong learner is NOT band 9.
+- Band 8: wide range, occasional slips only, fully developed argument.
+- Band 7: good control with some errors; ideas developed but may lack focus in places.
+- Band 6: generally effective, noticeable errors that do not impede meaning. THIS IS THE MOST COMMON REAL SCORE.
+- Band 5: limited range, frequent errors, underdeveloped ideas.
 
-Write all feedback in Uzbek (latin script), except quoted English examples from the essay.
+An inflated score is a disservice — it sends the candidate into the real exam unprepared. When you hesitate between two bands, choose the lower one.
 
-Return ONLY valid JSON, no markdown fences, in exactly this shape:
+Word count is ${wordCount}. Under 250 words is a Task Response penalty; state it explicitly if it applies.
+
+=== WHAT TO PRODUCE ===
+
+For each criterion give: the band, a SHORT verbatim quote from the essay that justifies it, and what specifically would raise it by half a band.
+
+Then produce inline annotations: specific spans of the candidate's text that contain a problem. Each annotation's "quote" MUST be copied verbatim, character for character, from the essay so it can be located in the text. Keep quotes short (3-15 words). Produce 5-12 annotations covering a mix of types. If the essay is genuinely strong, still identify the weakest spans — there is always something to sharpen.
+
+Write all feedback in Uzbek (latin script). Keep quoted English from the essay in English.
+
+Return ONLY valid JSON, no markdown fences, exactly this shape:
 {
   "task_response": 6.0,
   "coherence_cohesion": 6.5,
   "lexical_resource": 5.5,
   "grammatical_range": 6.0,
   "overall": 6.0,
-  "summary": "2-3 jumlada umumiy baho va asosiy xulosa",
+  "summary": "2-3 jumla: eng muhim kuchli tomon va eng muhim zaiflik",
   "criteria_feedback": {
-    "task_response": "nima yaxshi, nima yetishmaydi",
-    "coherence_cohesion": "...",
-    "lexical_resource": "...",
-    "grammatical_range": "..."
+    "task_response":     { "why": "nega aynan shu ball", "evidence": "essaydan qisqa iqtibos", "to_improve": "yarim ball ko'tarish uchun aniq nima qilish kerak" },
+    "coherence_cohesion":{ "why": "...", "evidence": "...", "to_improve": "..." },
+    "lexical_resource":  { "why": "...", "evidence": "...", "to_improve": "..." },
+    "grammatical_range": { "why": "...", "evidence": "...", "to_improve": "..." }
   },
-  "strengths": ["kuchli tomon 1", "kuchli tomon 2"],
-  "improvements": ["aniq tavsiya 1", "aniq tavsiya 2", "aniq tavsiya 3"],
-  "corrections": [
-    { "original": "essaydagi aynan jumla", "corrected": "tuzatilgan variant", "why": "qisqa izoh" }
-  ]
+  "annotations": [
+    {
+      "quote": "verbatim span copied exactly from the essay",
+      "type": "grammar",
+      "severity": "high",
+      "fix": "tuzatilgan variant",
+      "note": "nega xato — bir jumlada"
+    }
+  ],
+  "next_band": {
+    "target": 6.5,
+    "actions": ["aniq, bajariladigan qadam 1", "qadam 2", "qadam 3"]
+  },
+  "strengths": ["aniq kuchli tomon, umumiy maqtov emas"]
 }
 
-Include 3-6 corrections drawn verbatim from the essay. If the essay is too short or off-topic to assess, still return the JSON with low bands and explain why in "summary".`
+"type" must be one of: grammar, vocabulary, cohesion, task, spelling.
+"severity" must be one of: high, medium, low.`
 }
 
 Deno.serve(async (req: Request) => {
@@ -266,9 +288,13 @@ Deno.serve(async (req: Request) => {
       feedback: {
         summary: assessment.summary ?? '',
         criteria_feedback: assessment.criteria_feedback ?? {},
+        // Matn ichida belgilash uchun — quote essaydan aynan ko'chirilgan bo'lishi shart
+        annotations: Array.isArray(assessment.annotations)
+          ? assessment.annotations.filter((a: any) =>
+              a && typeof a.quote === 'string' && essay.includes(a.quote))
+          : [],
+        next_band: assessment.next_band ?? null,
         strengths: assessment.strengths ?? [],
-        improvements: assessment.improvements ?? [],
-        corrections: assessment.corrections ?? [],
       },
       model: GEMINI_MODEL,
     }
