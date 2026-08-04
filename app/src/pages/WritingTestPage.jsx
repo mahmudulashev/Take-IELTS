@@ -8,7 +8,7 @@ import {
 } from '../lib/writing'
 import WritingResult from '../components/writing/WritingResult'
 import {
-  PenLine, Clock, AlertTriangle, Sparkles, RefreshCw, Info,
+  PenLine, Clock, AlertTriangle, Sparkles, RefreshCw, Info, Pause, Play,
 } from 'lucide-react'
 
 const TOTAL_SECONDS = 40 * 60   // Task 2 uchun rasmiy vaqt
@@ -34,6 +34,7 @@ export default function WritingTestPage() {
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
   const [draftOffer, setDraftOffer] = useState(null)
+  const [paused, setPaused] = useState(false)
 
   const essayRef = useRef('')
   const timerRef = useRef(null)
@@ -71,7 +72,7 @@ export default function WritingTestPage() {
   // Taymer
   // ----------------------------------------------------------------
   useEffect(() => {
-    if (!started || result) return
+    if (!started || result || paused) return
     timerRef.current = setInterval(() => {
       setTimeLeft((t) => {
         if (t <= 1) {
@@ -82,7 +83,7 @@ export default function WritingTestPage() {
       })
     }, 1000)
     return () => clearInterval(timerRef.current)
-  }, [started, result])
+  }, [started, result, paused])
 
   // ----------------------------------------------------------------
   // Avtosaqlash — har 8 soniyada va sahifa yopilishidan oldin
@@ -152,10 +153,10 @@ export default function WritingTestPage() {
 
   // Vaqt tugasa avtomatik yuborish
   useEffect(() => {
-    if (started && timeLeft === 0 && !result && !evaluating && wordCount >= 50) {
+    if (started && !paused && timeLeft === 0 && !result && !evaluating && wordCount >= 50) {
       handleSubmit()
     }
-  }, [timeLeft, started, result, evaluating, wordCount, handleSubmit])
+  }, [timeLeft, started, paused, result, evaluating, wordCount, handleSubmit])
 
   const startNew = () => {
     clearDraft()
@@ -164,6 +165,7 @@ export default function WritingTestPage() {
     setError(null)
     setTimeLeft(TOTAL_SECONDS)
     setStarted(false)
+    setPaused(false)
   }
 
   if (!sessionChecked) {
@@ -201,11 +203,30 @@ export default function WritingTestPage() {
           </div>
 
           {started && !result && (
-            <div className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold font-timer text-lg shrink-0 ${
-              timeDanger ? 'bg-red-50 text-[#FF3131]' : 'bg-gray-50 text-gray-900'
-            }`}>
-              <Clock className="w-5 h-5" />
-              <span>{formatTime(timeLeft)}</span>
+            <div className="flex items-center gap-2.5 shrink-0">
+              <div className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold font-timer text-lg ${
+                paused ? 'bg-amber-50 text-amber-700'
+                : timeDanger ? 'bg-red-50 text-[#FF3131]'
+                : 'bg-gray-50 text-gray-900'
+              }`}>
+                <Clock className="w-5 h-5" />
+                <span>{formatTime(timeLeft)}</span>
+              </div>
+
+              <button
+                onClick={() => setPaused((p) => !p)}
+                disabled={evaluating}
+                title={paused ? 'Davom ettirish' : "Vaqtni to'xtatib turish"}
+                className={`inline-flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-xs transition-colors disabled:opacity-50 ${
+                  paused
+                    ? 'bg-[#FF3131] hover:bg-[#E82C2C] text-white'
+                    : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {paused
+                  ? <><Play className="w-4 h-4" /> Davom ettirish</>
+                  : <><Pause className="w-4 h-4" /> Pauza</>}
+              </button>
             </div>
           )}
         </div>
@@ -280,15 +301,42 @@ export default function WritingTestPage() {
                   </span>
                 </div>
 
-                <textarea
-                  value={essay}
-                  onChange={(e) => setEssay(e.target.value)}
-                  onFocus={() => !started && setStarted(true)}
-                  disabled={evaluating}
-                  placeholder="Inshoyingizni shu yerga yozing…"
-                  spellCheck={false}
-                  className="w-full h-[420px] p-4 rounded-xl border border-gray-200 focus:border-[#FF3131] focus:ring-2 focus:ring-[#FF3131]/10 outline-none text-sm leading-relaxed resize-none font-sans disabled:bg-gray-50"
-                />
+                {/* Pauzada matn maydoni bloklanadi.
+                    Aks holda pauza vaqtdan qochish yo'liga aylanadi:
+                    taymer to'xtab turgan holda yozishda davom etish
+                    imtihon simulyatsiyasining ma'nosini yo'qotadi. */}
+                <div className="relative">
+                  <textarea
+                    value={essay}
+                    onChange={(e) => setEssay(e.target.value)}
+                    onFocus={() => !started && setStarted(true)}
+                    disabled={evaluating || paused}
+                    placeholder="Inshoyingizni shu yerga yozing…"
+                    spellCheck={false}
+                    className="w-full h-[420px] p-4 rounded-xl border border-gray-200 focus:border-[#FF3131] focus:ring-2 focus:ring-[#FF3131]/10 outline-none text-sm leading-relaxed resize-none font-sans disabled:bg-gray-50"
+                  />
+
+                  {paused && (
+                    <div className="absolute inset-0 rounded-xl bg-white/85 backdrop-blur-sm flex flex-col items-center justify-center gap-4 text-center px-6">
+                      <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <Pause className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-extrabold text-gray-900 mb-1">Vaqt to'xtatildi</p>
+                        <p className="text-xs text-gray-500 leading-relaxed max-w-xs">
+                          Matningiz saqlanib turibdi. Yozishni davom ettirish uchun
+                          taymerni qayta ishga tushiring.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setPaused(false)}
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#FF3131] hover:bg-[#E82C2C] text-white font-bold text-xs transition-colors"
+                      >
+                        <Play className="w-4 h-4" /> Davom ettirish
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 {error && (
                   <div className="mt-4 flex items-start gap-2 text-xs text-[#FF3131] bg-[#FFF0F0] rounded-xl p-3.5">
@@ -299,7 +347,7 @@ export default function WritingTestPage() {
 
                 <button
                   onClick={handleSubmit}
-                  disabled={evaluating || wordCount < 50}
+                  disabled={evaluating || paused || wordCount < 50}
                   className="w-full mt-4 py-3.5 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-bold text-xs transition-colors disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
                 >
                   {evaluating
