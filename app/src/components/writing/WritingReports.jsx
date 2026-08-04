@@ -2,7 +2,9 @@ import React, { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import WritingResult from './WritingResult'
 import { formatDate } from '../../lib/scoring'
-import { PenLine, ChevronRight, ArrowLeft, TrendingUp } from 'lucide-react'
+import { deleteWritingResult } from '../../lib/writing'
+import { useAuth } from '../../context/AuthContext'
+import { PenLine, ChevronRight, ArrowLeft, TrendingUp, Trash2 } from 'lucide-react'
 
 /**
  * "Natijalarim" sahifasining Writing tabi.
@@ -27,7 +29,24 @@ const CRITERIA = [
 ]
 
 export default function WritingReports({ results = [] }) {
+  const { refreshResults } = useAuth()
   const [selected, setSelected] = useState(null)
+  const [confirmDelete, setConfirmDelete] = useState(null)   // o'chiriladigan yozuv
+  const [deleting, setDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    if (!confirmDelete || deleting) return
+    setDeleting(true)
+    const res = await deleteWritingResult(confirmDelete.id)
+    setDeleting(false)
+    if (!res.ok) {
+      console.error('Inshoni o\'chirish xatosi:', res.error)
+      return
+    }
+    setConfirmDelete(null)
+    if (selected?.id === confirmDelete.id) setSelected(null)
+    await refreshResults()
+  }
 
   // `results` — AuthContext normalizatsiyasidan kelgan qatorlar.
   // To'liq tahlil `writing` maydonida turadi.
@@ -141,10 +160,13 @@ export default function WritingReports({ results = [] }) {
 
         <div className="divide-y divide-gray-100">
           {rows.map((row, idx) => (
-            <button
+            <div
               key={row.id || idx}
               onClick={() => setSelected(row)}
-              className="w-full p-5 flex items-center justify-between gap-4 hover:bg-gray-50/60 transition-colors text-left"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter') setSelected(row) }}
+              className="w-full p-5 flex items-center justify-between gap-4 hover:bg-gray-50/60 transition-colors text-left cursor-pointer"
             >
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold text-gray-900 truncate mb-1">
@@ -176,12 +198,54 @@ export default function WritingReports({ results = [] }) {
                 <span className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold ${bandBadge(row.band_overall)}`}>
                   {row.band_overall ?? '—'}
                 </span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setConfirmDelete(row) }}
+                  aria-label="Inshoni o'chirish"
+                  title="Inshoni o'chirish"
+                  className="p-2 rounded-lg text-gray-300 hover:text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
                 <ChevronRight className="w-4 h-4 text-gray-300" />
               </div>
-            </button>
+            </div>
           ))}
         </div>
       </div>
+
+      {/* Bitta inshoni o'chirishni tasdiqlash */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-gray-100 text-center">
+            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-extrabold text-gray-900 mb-2">Inshoni o'chirish</h3>
+            <p className="text-xs text-gray-500 mb-1.5 leading-relaxed">
+              {confirmDelete.word_count} so'zlik insho, Band {confirmDelete.band_overall ?? '—'}.
+            </p>
+            <p className="text-xs text-gray-500 mb-6 leading-relaxed">
+              Matn va AI tahlili bazadan butunlay o'chiriladi. Ortga qaytarib bo'lmaydi.
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                disabled={deleting}
+                className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-bold text-xs hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Bekor qilish
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 py-3 rounded-xl bg-red-600 text-white font-bold text-xs hover:bg-red-700 transition-colors shadow-md shadow-red-600/20 disabled:opacity-50"
+              >
+                {deleting ? "O'chirilmoqda..." : "Ha, O'chirish"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

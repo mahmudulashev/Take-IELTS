@@ -61,6 +61,15 @@ export const WRITING_PACKS = [
     difficulty: 'Qiyin',
     text: 'Traditional skills and ways of life are disappearing in many countries. Why is this happening? Is it a positive or negative development?',
   },
+  {
+    id: 'writing-6',
+    number: 6,
+    title: 'Writing Practice 6',
+    type: 'Agree / Disagree',
+    topic: 'Education & Technology',
+    difficulty: "O'rta",
+    text: 'Computers are widely used in education, and some people think that teachers will no longer play an important role in the classroom. To what extent do you agree?',
+  },
 ]
 
 /** To'plamni id bo'yicha topish */

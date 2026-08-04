@@ -8,10 +8,11 @@ import DeepAnalyticsSection from '../components/charts/DeepAnalyticsSection'
 import { useAuth } from '../context/AuthContext'
 import { formatDate, formatSeconds } from '../lib/scoring'
 import WritingReports from '../components/writing/WritingReports'
+import { clearWritingHistory } from '../lib/writing'
 import { BookOpen, Headphones, PenLine, Calendar, CheckCircle2, XCircle, ChevronRight, X, BarChart3, Trash2 } from 'lucide-react'
 
 export default function ReportsPage() {
-  const { user, sessionChecked, signOut, results, clearHistory } = useAuth()
+  const { user, sessionChecked, signOut, results, clearHistory, refreshResults } = useAuth()
   const [activeTab, setActiveTab] = useState('reading') // 'reading' or 'listening'
   const [selectedResult, setSelectedResult] = useState(null) // For detail modal
   const [showClearModal, setShowClearModal] = useState(false)
@@ -53,14 +54,29 @@ export default function ReportsPage() {
   }
 
   const handleConfirmClear = async () => {
-    await clearHistory()
+    if (activeTab === 'writing') {
+      const res = await clearWritingHistory()
+      if (!res.ok) {
+        console.error('Insholarni o\'chirish xatosi:', res.error)
+      }
+      await refreshResults()
+    } else {
+      await clearHistory()
+    }
     setShowClearModal(false)
   }
+
 
   const readingResults = results.filter(r => r.test_type === 'reading')
   const listeningResults = results.filter(r => r.test_type === 'listening')
   const writingResults = results.filter(r => r.test_type === 'writing')
   const currentTabResults = activeTab === 'reading' ? readingResults : listeningResults
+
+  // Tozalash tugmasi faol tabda yozuv bo'lgandagina ko'rinadi.
+  // Writing alohida hisoblanadi — u boshqa jadvaldan o'chiriladi.
+  const currentClearCount = activeTab === 'writing'
+    ? writingResults.length
+    : results.filter(r => r.test_type !== 'writing').length
 
   // Calculate average bands
   const getAvgBand = (arr) => {
@@ -142,10 +158,9 @@ export default function ReportsPage() {
             </div>
 
             {/* Clear History Button */}
-            {/* clearHistory() faqat test_results jadvalini tozalaydi —
-                insholar alohida jadvalda. Writing tabida bu tugmani
-                ko'rsatish chalg'ituvchi bo'lardi. */}
-            {results.length > 0 && activeTab !== 'writing' && (
+            {/* Writing insholari alohida jadvalda — handleConfirmClear
+                faol tabga qarab tegishli funksiyani chaqiradi. */}
+            {currentClearCount > 0 && (
               <button
                 onClick={() => setShowClearModal(true)}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-all"
@@ -312,9 +327,13 @@ export default function ReportsPage() {
             <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-extrabold text-gray-900 mb-2">Natijalar tarixini tozalash</h3>
+            <h3 className="text-lg font-extrabold text-gray-900 mb-2">
+              {activeTab === 'writing' ? 'Insholarni o\'chirish' : 'Natijalar tarixini tozalash'}
+            </h3>
             <p className="text-xs text-gray-500 mb-6">
-              Barcha topshirilgan testlar tarixi va grafik statistikalari o'chirib tashlanadi. Bu amalni ortga qaytarib bo'lmaydi!
+              {activeTab === 'writing'
+                ? `Yozilgan ${writingResults.length} ta insho, ularning matni va AI tahlili bazadan butunlay o'chiriladi. Bu amalni ortga qaytarib bo'lmaydi!`
+                : "Barcha topshirilgan testlar tarixi va grafik statistikalari o'chirib tashlanadi. Bu amalni ortga qaytarib bo'lmaydi!"}
             </p>
             <div className="flex items-center gap-3">
               <button

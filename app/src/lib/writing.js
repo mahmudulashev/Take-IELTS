@@ -110,6 +110,65 @@ export async function evaluateEssay({ promptId, promptText, essay, timeSpent }) 
 }
 
 /**
+ * Bitta inshoni o'chirish.
+ *
+ * RLS'da "insho: o'zinikini o'chirish" policy'si bor, ya'ni baza
+ * darajasida ham begona yozuvni o'chirib bo'lmaydi. Bu yerdagi
+ * `user_id` filtri — ikkinchi qatlam.
+ */
+export async function deleteWritingResult(id) {
+  if (!isSupabaseConfigured || !supabase) {
+    return { ok: false, error: 'Supabase sozlanmagan.' }
+  }
+
+  const { data: sessionData } = await supabase.auth.getSession()
+  const userId = sessionData?.session?.user?.id
+  if (!userId) return { ok: false, error: 'Avval tizimga kiring.' }
+
+  const { error } = await supabase
+    .from('writing_results')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId)
+
+  if (error) {
+    console.warn('deleteWritingResult:', error)
+    return { ok: false, error: error.message }
+  }
+  return { ok: true }
+}
+
+/**
+ * Barcha insholarni o'chirish.
+ *
+ * DIQQAT: test natijalaridan farqli o'laroq bu yerda "tozalash vaqti"
+ * hiylasi ishlatilmaydi — yozuvlar bazadan haqiqatan o'chiriladi va
+ * qaytarib bo'lmaydi. Chaqirishdan oldin tasdiqlash so'ralishi shart.
+ */
+export async function clearWritingHistory() {
+  if (!isSupabaseConfigured || !supabase) {
+    return { ok: false, error: 'Supabase sozlanmagan.' }
+  }
+
+  const { data: sessionData } = await supabase.auth.getSession()
+  const userId = sessionData?.session?.user?.id
+  if (!userId) return { ok: false, error: 'Avval tizimga kiring.' }
+
+  const { error } = await supabase
+    .from('writing_results')
+    .delete()
+    .eq('user_id', userId)
+
+  if (error) {
+    console.warn('clearWritingHistory:', error)
+    return { ok: false, error: error.message }
+  }
+
+  clearDraft()
+  return { ok: true }
+}
+
+/**
  * Foydalanuvchining oldingi Writing natijalari.
  * RLS tufayli faqat o'ziniki qaytadi, lekin filtrni baribir
  * ochiq yozamiz — himoya ikki qatlamli bo'lsin.
