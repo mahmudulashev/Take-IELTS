@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext'
 import { formatDate, formatSeconds } from '../lib/scoring'
 import WritingReports from '../components/writing/WritingReports'
 import { clearWritingHistory } from '../lib/writing'
+import { deleteTestResult } from '../lib/supabase'
 import { BookOpen, Headphones, PenLine, Calendar, CheckCircle2, XCircle, ChevronRight, X, BarChart3, Trash2 } from 'lucide-react'
 
 export default function ReportsPage() {
@@ -16,6 +17,8 @@ export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState('reading') // 'reading' or 'listening'
   const [selectedResult, setSelectedResult] = useState(null) // For detail modal
   const [showClearModal, setShowClearModal] = useState(false)
+  const [confirmDeleteOne, setConfirmDeleteOne] = useState(null)   // bitta natijani o'chirish
+  const [deletingOne, setDeletingOne] = useState(false)
   const navigate = useNavigate()
 
   // Correct answer keys for details analysis
@@ -51,6 +54,19 @@ export default function ReportsPage() {
   const handleSignOut = async () => {
     await signOut()
     navigate('/')
+  }
+
+  const handleDeleteOne = async () => {
+    if (!confirmDeleteOne || deletingOne) return
+    setDeletingOne(true)
+    const res = await deleteTestResult(confirmDeleteOne.id)
+    setDeletingOne(false)
+    if (!res.ok) {
+      console.error('Natijani o\'chirish xatosi:', res.error)
+      return
+    }
+    setConfirmDeleteOne(null)
+    await refreshResults()
   }
 
   const handleConfirmClear = async () => {
@@ -270,6 +286,14 @@ export default function ReportsPage() {
                             <span>Batafsil Tahlil</span>
                             <ChevronRight className="w-3.5 h-3.5" />
                           </button>
+                          <button
+                            onClick={() => setConfirmDeleteOne(res)}
+                            aria-label="Natijani o'chirish"
+                            title="Natijani o'chirish"
+                            className="ml-1.5 p-2 rounded-lg text-gray-300 hover:text-red-600 hover:bg-red-50 transition-colors align-middle"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -302,13 +326,22 @@ export default function ReportsPage() {
                         <p className="text-[11px] text-gray-400 font-medium">To'g'ri javoblar</p>
                         <p className="text-sm font-extrabold text-gray-900">{res.score} / {res.total_questions || 40}</p>
                       </div>
-                      <button
-                        onClick={() => setSelectedResult(res)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-bold transition-colors"
-                      >
-                        <span>Batafsil</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => setSelectedResult(res)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-bold transition-colors"
+                        >
+                          <span>Batafsil</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteOne(res)}
+                          aria-label="Natijani o'chirish"
+                          className="p-2 rounded-lg text-gray-300 hover:text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -347,6 +380,41 @@ export default function ReportsPage() {
                 className="flex-1 py-3 rounded-xl bg-red-600 text-white font-bold text-xs hover:bg-red-700 transition-colors shadow-md shadow-red-600/20"
               >
                 Ha, Barchasini O'chirish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bitta natijani o'chirishni tasdiqlash */}
+      {confirmDeleteOne && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-gray-100 text-center">
+            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-extrabold text-gray-900 mb-2">Natijani o'chirish</h3>
+            <p className="text-xs text-gray-500 mb-1.5">
+              {resultTestName(confirmDeleteOne)} · {formatDate(confirmDeleteOne.completed_at)}
+            </p>
+            <p className="text-xs text-gray-500 mb-6">
+              {confirmDeleteOne.score} / {confirmDeleteOne.total_questions || 40} · Band {confirmDeleteOne.band_score}.
+              Bu yozuv bazadan butunlay o'chiriladi.
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setConfirmDeleteOne(null)}
+                disabled={deletingOne}
+                className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-bold text-xs hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Bekor qilish
+              </button>
+              <button
+                onClick={handleDeleteOne}
+                disabled={deletingOne}
+                className="flex-1 py-3 rounded-xl bg-red-600 text-white font-bold text-xs hover:bg-red-700 transition-colors shadow-md shadow-red-600/20 disabled:opacity-50"
+              >
+                {deletingOne ? "O'chirilmoqda..." : "Ha, O'chirish"}
               </button>
             </div>
           </div>

@@ -475,6 +475,55 @@ export async function syncLocalResultsToSupabase({ force = false } = {}) {
 }
 
 /**
+ * Bitta test natijasini o'chirish.
+ *
+ * Ikki joydan o'chiriladi: localStorage va Supabase. Faqat bittasidan
+ * o'chirilsa, natija keyingi sinxronlashda qaytib keladi.
+ */
+export async function deleteTestResult(id) {
+  if (!id) return { ok: false, error: 'ID yo\'q' }
+
+  // 1. localStorage
+  try {
+    const all = JSON.parse(localStorage.getItem(STORAGE_KEYS.RESULTS) || '[]')
+    localStorage.setItem(
+      STORAGE_KEYS.RESULTS,
+      JSON.stringify(all.filter(r => r.id !== id)),
+    )
+    // Sinxronlangan ID'lar ro'yxatidan ham olib tashlaymiz
+    const synced = readSyncedIds()
+    synced.delete(id)
+    localStorage.setItem(STORAGE_KEYS.SYNCED_IDS, JSON.stringify([...synced]))
+  } catch (e) {
+    console.warn('Local delete error:', e)
+  }
+
+  // 2. Supabase
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const user = await getUser()
+      if (user?.id) {
+        const { error } = await supabase
+          .from('test_results')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', user.id)      // begona yozuvga tegmaslik kafolati
+        if (error) throw error
+      }
+    } catch (e) {
+      console.warn('Supabase delete error:', e)
+      return { ok: false, error: e.message }
+    }
+  }
+
+  try {
+    window.dispatchEvent(new CustomEvent('ielts:results-updated'))
+  } catch (e) { /* eski brauzer */ }
+
+  return { ok: true }
+}
+
+/**
  * Natijalar tarixini tozalash (Ham Local, Ham Supabase-dan kafolatli va doimiy o'chiradi!)
  */
 export async function clearTestHistory() {
