@@ -268,43 +268,77 @@ Deno.serve(async (req: Request) => {
     let lastError = ''
     let lastStatus = 0
 
+    // Har bir urinishda bir xil so'rov yuboriladi — bir marta tayyorlaymiz.
+    // Nomi `geminiBody`, chunki `body` yuqorida so'rov tanasi uchun band.
+    const geminiBody = JSON.stringify({
+      contents: [{ parts: [{ text: buildPrompt(promptText, essay, wordCount, spellingList, spellingRule) }] }],
+      generationConfig: {
+        temperature: 0.3,          // baho barqaror bo'lsin
+        responseMimeType: 'application/json',
+      },
+    })
+
+    // 503 UNAVAILABLE va 500 — Google tomonidagi vaqtinchalik yuklama.
+    // Google hujjatlari bunday holatda qayta urinishni tavsiya qiladi.
+    // Kutish vaqti oshib boradi: 1s, 2s, 4s — serverni yanada
+    // yuklamaslik uchun (exponential backoff).
+    const TRANSIENT = new Set([500, 502, 503, 504])
+    const MAX_ATTEMPTS = 3
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+    outer:
     for (const model of MODELS) {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: buildPrompt(promptText, essay, wordCount, spellingList, spellingRule) }] }],
-            generationConfig: {
-              temperature: 0.3,          // baho barqaror bo'lsin
-              responseMimeType: 'application/json',
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        let res: Response
+        try {
+          res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+              body: geminiBody,
             },
-          }),
-        },
-      )
+          )
+        } catch (netErr) {
+          // Tarmoq uzilishi ham vaqtinchalik — qayta urinamiz
+          lastStatus = 0
+          lastError = String(netErr)
+          console.error(`Tarmoq xatosi [${model}] urinish ${attempt}:`, netErr)
+          if (attempt < MAX_ATTEMPTS) { await sleep(1000 * 2 ** (attempt - 1)); continue }
+          break
+        }
 
-      if (res.ok) {
-        geminiJson = await res.json()
-        if (model !== GEMINI_MODEL) console.warn(`Zaxira model ishlatildi: ${model}`)
-        break
+        if (res.ok) {
+          geminiJson = await res.json()
+          if (model !== GEMINI_MODEL) console.warn(`Zaxira model ishlatildi: ${model}`)
+          if (attempt > 1) console.warn(`${attempt}-urinishda muvaffaqiyat`)
+          break outer
+        }
+
+        lastStatus = res.status
+        const detail = await res.text()
+        console.error(`Gemini xatosi [${model}] urinish ${attempt}:`, res.status, detail)
+
+        // Google xato JSON'idan tushunarli sababni ajratamiz
+        try {
+          const parsed = JSON.parse(detail)
+          lastError = parsed?.error?.status || parsed?.error?.message || detail.slice(0, 200)
+        } catch {
+          lastError = detail.slice(0, 200)
+        }
+
+        // Vaqtinchalik xato — kutib qayta urinamiz
+        if (TRANSIENT.has(res.status) && attempt < MAX_ATTEMPTS) {
+          await sleep(1000 * 2 ** (attempt - 1))
+          continue
+        }
+
+        // 404 — bu model yo'q, keyingi modelga o'tamiz
+        if (res.status === 404) break
+
+        // Kalit, ruxsat, kvota xatolari — qayta urinish yordam bermaydi
+        break outer
       }
-
-      lastStatus = res.status
-      const detail = await res.text()
-      console.error(`Gemini xatosi [${model}]:`, res.status, detail)
-
-      // Google xato JSON'idan tushunarli sababni ajratamiz
-      try {
-        const parsed = JSON.parse(detail)
-        lastError = parsed?.error?.status || parsed?.error?.message || detail.slice(0, 200)
-      } catch {
-        lastError = detail.slice(0, 200)
-      }
-
-      // 404 — model topilmadi, keyingisini sinaymiz.
-      // Qolgan xatolar (kalit, kvota, ruxsat) modelga bog'liq emas — to'xtaymiz.
-      if (res.status !== 404) break
     }
 
     if (!geminiJson) {
@@ -313,6 +347,15 @@ Deno.serve(async (req: Request) => {
       }
       // Sababni foydalanuvchiga ochiq aytamiz — API kaliti hech qachon
       // xato matniga tushmaydi, faqat Google'ning status kodi va izohi.
+      // Vaqtinchalik yuklama — foydalanuvchiga tushunarli tilda aytamiz.
+      // Bu yerga yetib kelgan bo'lsak, 3 marta qayta urinib ko'rilgan.
+      if (TRANSIENT.has(lastStatus) || lastStatus === 0) {
+        return json({
+          error: "Google baholash xizmati hozir band. Insho matningiz saqlanib qoldi — 1-2 daqiqadan keyin \"Topshirish\" tugmasini qayta bosing.",
+          retryable: true,
+        }, 503)
+      }
+
       const hint =
         lastStatus === 400 ? " — GEMINI_API_KEY noto'g'ri ko'rinadi"
         : lastStatus === 403 ? ' — Generative Language API yoqilmagan yoki kalitga ruxsat yo\'q'
