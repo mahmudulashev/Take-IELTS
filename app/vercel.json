@@ -1,16 +1,12 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-
-  "//rewrites": "SPA fallback, LEKIN kengaytmasi bor yo'llar chetlab o'tiladi. Sabab: /assets/main-XXXX.js topilmasa va u ham index.html ga yo'naltirilsa, brauzer JS o'rniga HTML oladi va 'disallowed MIME type' xatosi chiqadi. Endi topilmagan fayl halol 404 qaytaradi.",
   "rewrites": [
     {
       "source": "/((?!.*\\.[a-zA-Z0-9]+$).*)",
       "destination": "/index.html"
     }
   ],
-
-  "//headers": "index.html hech qachon keshlanmasin — u yangi asset nomlarini ko'rsatadi. Keshlanib qolsa foydalanuvchi o'chirilgan eski fayllarni so'raydi va sayt ishlamaydi. Asset nomlarida hash bor, shuning uchun ularni abadiy keshlash xavfsiz.",
   "headers": [
     {
       "source": "/",

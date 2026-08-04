@@ -2,18 +2,12 @@
   "buildCommand": "npm --prefix app install && npm --prefix app run build",
   "installCommand": "npm install",
   "outputDirectory": "app/dist",
-
-  "//": "Bu fayl Vercel Root Directory = repo ildizi bo'lganda o'qiladi. Root Directory = app bo'lsa app/vercel.json ishlaydi. Ikkalasi bir xil qoidalarni saqlashi kerak — birini o'zgartirsangiz ikkinchisini ham yangilang.",
-
-  "//rewrites": "Kengaytmasi bor yo'llar SPA fallback'dan chetlab o'tiladi, aks holda topilmagan /assets/*.js o'rniga index.html qaytariladi va brauzer 'disallowed MIME type' xatosi beradi.",
   "rewrites": [
     {
       "source": "/((?!.*\\.[a-zA-Z0-9]+$).*)",
       "destination": "/index.html"
     }
   ],
-
-  "//headers": "index.html keshlanmaydi (yangi asset nomlarini ko'rsatadi), assetlar esa nomida hash borligi uchun abadiy keshlanadi.",
   "headers": [
     {
       "source": "/",
