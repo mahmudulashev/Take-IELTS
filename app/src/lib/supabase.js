@@ -120,6 +120,16 @@ export async function signOut() {
   }
   localStorage.removeItem(STORAGE_KEYS.USER)
   localStorage.removeItem(STORAGE_KEYS.PROFILE)
+
+  // Natijalar keshini ham tozalaymiz. Shu paytgacha ular bulutga
+  // sinxronlangan (login'da avtomatik bajariladi), shuning uchun
+  // yo'qolmaydi. Tozalamasak, shu brauzerga kirgan keyingi
+  // foydalanuvchi oldingi odamning natijalarini ko'rardi.
+  localStorage.removeItem(STORAGE_KEYS.RESULTS)
+  localStorage.removeItem(STORAGE_KEYS.SYNCED_IDS)
+  localStorage.removeItem(STORAGE_KEYS.CLEARED_AT)
+  localStorage.removeItem('ielts_writing_draft')
+
   window.location.href = '/'
 }
 
@@ -315,10 +325,14 @@ export async function getTestResults(limit = 100) {
   const clearedAtStr = localStorage.getItem(STORAGE_KEYS.CLEARED_AT)
   const clearedAt = clearedAtStr ? new Date(clearedAtStr) : null
 
+  // Bir marta o'qiymiz — quyida ham, bulut so'rovida ham kerak
+  const currentUser = await getUser()
+  const currentId = currentUser?.id ?? null
+
   let supabaseResults = []
   if (isSupabaseConfigured && supabase) {
     try {
-      const user = await getUser()
+      const user = currentUser
       // DIQQAT: user_id filtri shart — busiz har bir foydalanuvchi
       // boshqalarning natijalarini ham ko'radi.
       if (user?.id) {
@@ -337,11 +351,20 @@ export async function getTestResults(limit = 100) {
     }
   }
 
-  const localResults = JSON.parse(localStorage.getItem(STORAGE_KEYS.RESULTS) || '[]')
+  const allLocal = JSON.parse(localStorage.getItem(STORAGE_KEYS.RESULTS) || '[]')
+
+  // DIQQAT: localStorage brauzerga tegishli, foydalanuvchiga emas.
+  // Filtrsiz qo'shsak quyidagilar boshqa odamning hisobida ko'rinadi:
+  //   - login qilishdan oldin "guest-user" nomi bilan saqlangan testlar
+  //   - shu brauzerda boshqa akkaunt bilan topshirilgan testlar
+  // Aynan shu sabab dashboard'da "o'zidan o'zi" testlar paydo bo'lardi.
+  const localResults = currentId
+    ? allLocal.filter(r => !r.user_id || r.user_id === currentId || r.user_id === 'guest-user')
+    : allLocal.filter(r => !r.user_id || r.user_id === 'guest-user')
 
   // Barcha mahalliy va Supabase testlarini dublikatsiz birlashtirish
   const combinedMap = new Map()
-  
+
   for (const item of localResults) {
     const key = item.id || `${item.test_id}-${item.completed_at}`
     combinedMap.set(key, item)
@@ -434,6 +457,16 @@ export async function syncLocalResultsToSupabase({ force = false } = {}) {
     const { error } = await supabase.from('test_results').upsert(payload)
     if (error) throw error
     markSynced(payload.map(r => r.id))
+
+    // Bulutda user_id yangilandi — local nusxada ham yangilaymiz.
+    // Aks holda yozuv "guest-user" bo'lib qolib, keyin shu brauzerga
+    // kirgan boshqa foydalanuvchining ro'yxatida ham ko'rinardi.
+    const claimed = new Set(payload.map(r => r.id))
+    const updatedLocal = localResults.map(r =>
+      claimed.has(r.id) ? { ...r, user_id: user.id } : r
+    )
+    localStorage.setItem(STORAGE_KEYS.RESULTS, JSON.stringify(updatedLocal))
+
     return { success: true, count: payload.length, message: `${payload.length} ta natija Supabase ga saqlandi!` }
   } catch (err) {
     console.warn('Sync error:', err)

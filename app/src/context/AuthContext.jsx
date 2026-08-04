@@ -52,7 +52,17 @@ function readLocalResults(limit = 100) {
   try {
     const raw = localStorage.getItem('ielts_test_results')
     const all = raw ? JSON.parse(raw) : []
-    return all.slice(0, limit)
+
+    // localStorage brauzerga tegishli, foydalanuvchiga emas.
+    // Filtrsiz o'qisak, boshqa akkaunt bilan yoki login'gacha
+    // topshirilgan testlar shu foydalanuvchining natijalari
+    // bo'lib ko'rinadi va statistikani buzadi.
+    const me = readLocalUser()
+    const filtered = all.filter(
+      (r) => !r.user_id || r.user_id === 'guest-user' || r.user_id === me?.id,
+    )
+
+    return filtered.slice(0, limit)
   } catch { return [] }
 }
 
