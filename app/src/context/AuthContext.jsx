@@ -228,9 +228,16 @@ export function AuthProvider({ children }) {
   }, [])
 
   const clearHistory = useCallback(async () => {
-    await supabaseClearHistory()
-    setResults([])
-    setStats({ totalTests: 0, avgBand: '0.0', bestBand: '0.0', lastTest: null })
+    const res = await supabaseClearHistory()
+
+    // Bulutdan o'chirish muvaffaqiyatsiz bo'lsa ekranni tozalamaymiz —
+    // aks holda foydalanuvchi "tozalandi" deb o'ylaydi, keyin sahifani
+    // yangilaganda natijalar qaytib keladi.
+    if (res?.ok !== false) {
+      setResults([])
+      setStats({ totalTests: 0, avgBand: '0.0', bestBand: '0.0', lastTest: null })
+    }
+    return res ?? { ok: true }
   }, [])
 
   const signOut = async () => {

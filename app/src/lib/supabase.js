@@ -533,21 +533,53 @@ export async function clearTestHistory() {
   localStorage.removeItem('ielts_results')
   localStorage.setItem(STORAGE_KEYS.RESULTS, '[]')
   
+  let failure = null
+
   if (isSupabaseConfigured && supabase) {
     try {
       const user = await getUser()
       if (user?.id) {
+        // Avval nechta yozuv borligini sanaymiz
+        const { count: before } = await supabase
+          .from('test_results')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+
         // DIQQAT: faqat shu foydalanuvchining natijalari o'chiriladi.
         // Bu yerga hech qachon filtersiz delete qo'shmang — u butun jadvalni tozalaydi.
-        await supabase.from('test_results').delete().eq('user_id', user.id)
+        //
+        // `.select()` MUHIM: RLS'da DELETE policy'si bo'lmasa Supabase
+        // XATO BERMAYDI, shunchaki 0 ta qator o'chiradi. Usiz bu jim
+        // muvaffaqiyatsizlikni sezmaymiz va foydalanuvchi "tugma
+        // ishlamayapti" deb qoladi.
+        const { data, error } = await supabase
+          .from('test_results')
+          .delete()
+          .eq('user_id', user.id)
+          .select('id')
+
+        if (error) throw error
+
+        const deleted = data?.length ?? 0
+        if ((before ?? 0) > 0 && deleted === 0) {
+          failure = `${before} ta natija topildi, lekin bittasi ham o'chirilmadi. Bazada DELETE ruxsati (RLS policy) yo'q — supabase/rls-setup.sql ni qayta ishga tushiring.`
+        }
       }
     } catch (e) {
       console.warn('Supabase delete history error:', e)
+      failure = e.message
     }
   }
 
-  // Barcha ochiq ko'rinishlar (dashboard, hisobotlar) darhol tozalansin
-  try {
-    window.dispatchEvent(new CustomEvent('ielts:results-updated'))
-  } catch (e) { /* SSR yoki eski brauzer */ }
+  // Barcha ochiq ko'rinishlar (dashboard, hisobotlar) darhol tozalansin.
+  // Bulutdan o'chirish muvaffaqiyatsiz bo'lsa hodisani YUBORMAYMIZ —
+  // aks holda tinglovchi bulutdan qayta yuklab, endigina tozalangan
+  // ro'yxatni qaytarib qo'yadi va tugma ishlamagandek ko'rinadi.
+  if (!failure) {
+    try {
+      window.dispatchEvent(new CustomEvent('ielts:results-updated'))
+    } catch (e) { /* SSR yoki eski brauzer */ }
+  }
+
+  return { ok: !failure, error: failure }
 }

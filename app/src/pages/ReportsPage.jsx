@@ -19,6 +19,7 @@ export default function ReportsPage() {
   const [showClearModal, setShowClearModal] = useState(false)
   const [confirmDeleteOne, setConfirmDeleteOne] = useState(null)   // bitta natijani o'chirish
   const [deletingOne, setDeletingOne] = useState(false)
+  const [deleteError, setDeleteError] = useState(null)
   const navigate = useNavigate()
 
   // Correct answer keys for details analysis
@@ -63,21 +64,34 @@ export default function ReportsPage() {
     setDeletingOne(false)
     if (!res.ok) {
       console.error('Natijani o\'chirish xatosi:', res.error)
+      setDeleteError(res.error)
+      setConfirmDeleteOne(null)
       return
     }
+    setDeleteError(null)
     setConfirmDeleteOne(null)
     await refreshResults()
   }
 
   const handleConfirmClear = async () => {
+    setDeleteError(null)
     if (activeTab === 'writing') {
       const res = await clearWritingHistory()
       if (!res.ok) {
+        // Jim muvaffaqiyatsizlikni yashirmaymiz — foydalanuvchi
+        // "tozalandi" deb o'ylab, keyin natijalarni qayta ko'rmasin.
         console.error('Insholarni o\'chirish xatosi:', res.error)
+        setDeleteError(res.error)
+        await refreshResults()
+        setShowClearModal(false)
+        return
       }
       await refreshResults()
     } else {
-      await clearHistory()
+      const res = await clearHistory()
+      if (res?.ok === false) {
+        setDeleteError(res.error)
+      }
     }
     setShowClearModal(false)
   }
@@ -118,6 +132,23 @@ export default function ReportsPage() {
       <Sidebar user={user} onSignOut={handleSignOut} />
 
       <main className="flex-1 min-w-0 w-full lg:ml-[260px] min-h-screen p-4 sm:p-6 md:p-10 pb-24 lg:pb-10">
+        {deleteError && (
+          <div className="bg-white rounded-[20px] p-5 border border-red-200 shadow-sm mb-6 flex items-start gap-3">
+            <XCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-gray-900 mb-1">O'chirib bo'lmadi</p>
+              <p className="text-xs text-gray-600 leading-relaxed">{deleteError}</p>
+            </div>
+            <button
+              onClick={() => setDeleteError(null)}
+              className="text-gray-400 hover:text-gray-900 shrink-0"
+              aria-label="Yopish"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Page Header */}
         <div className="bg-white rounded-[24px] p-5 sm:p-6 md:p-8 border border-gray-100 shadow-sm mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>

@@ -125,17 +125,31 @@ export async function deleteWritingResult(id) {
   const userId = sessionData?.session?.user?.id
   if (!userId) return { ok: false, error: 'Avval tizimga kiring.' }
 
-  const { error } = await supabase
+  // `.select()` MUHIM: usiz Supabase o'chirilgan qatorlar sonini
+  // qaytarmaydi. RLS'da DELETE policy'si bo'lmasa, so'rov XATO
+  // BERMAYDI — shunchaki 0 ta qator o'chiradi va muvaffaqiyat
+  // qaytaradi. Natijada kod "o'chirildi" deb hisoblaydi, yozuv esa
+  // joyida qoladi. Bu jim xatoni ko'rinadigan qilamiz.
+  const { data, error } = await supabase
     .from('writing_results')
     .delete()
     .eq('id', id)
     .eq('user_id', userId)
+    .select('id')
 
   if (error) {
     console.warn('deleteWritingResult:', error)
     return { ok: false, error: error.message }
   }
-  return { ok: true }
+
+  if (!data || data.length === 0) {
+    return {
+      ok: false,
+      error: "Yozuv o'chirilmadi. Bazada DELETE ruxsati (RLS policy) yo'q bo'lishi mumkin — supabase/writing-setup.sql ni qayta ishga tushiring.",
+    }
+  }
+
+  return { ok: true, deleted: data.length }
 }
 
 /**
@@ -154,18 +168,37 @@ export async function clearWritingHistory() {
   const userId = sessionData?.session?.user?.id
   if (!userId) return { ok: false, error: 'Avval tizimga kiring.' }
 
-  const { error } = await supabase
+  // Avval nechta yozuv borligini bilib olamiz — o'chirish haqiqatan
+  // ishlaganini tekshirish uchun.
+  const { count: before } = await supabase
+    .from('writing_results')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+
+  const { data, error } = await supabase
     .from('writing_results')
     .delete()
     .eq('user_id', userId)
+    .select('id')
 
   if (error) {
     console.warn('clearWritingHistory:', error)
     return { ok: false, error: error.message }
   }
 
+  const deleted = data?.length ?? 0
+
+  // RLS'da DELETE policy'si yo'q bo'lsa xato chiqmaydi, lekin
+  // hech narsa o'chmaydi. Shu holatni tutamiz.
+  if ((before ?? 0) > 0 && deleted === 0) {
+    return {
+      ok: false,
+      error: `${before} ta insho topildi, lekin bittasi ham o'chirilmadi. Bazada DELETE ruxsati (RLS policy) yo'q — supabase/writing-setup.sql ni qayta ishga tushiring.`,
+    }
+  }
+
   clearDraft()
-  return { ok: true }
+  return { ok: true, deleted }
 }
 
 /**
