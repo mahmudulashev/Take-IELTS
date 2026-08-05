@@ -68,7 +68,7 @@ export const WRITING_PACKS = [
     type: 'Agree / Disagree',
     topic: 'Education & Technology',
     difficulty: "O'rta",
-    text: 'Computers are widely used in education, and some people think that teachers will no longer play an important role in the classroom. To what extent do you agree?',
+    text: 'Computers are widely used in education, and some people think that computers will play an important role in the classroom. To what extent do you agree?',
   },
 ]
 
