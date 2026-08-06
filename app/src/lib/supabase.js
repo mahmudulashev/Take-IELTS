@@ -77,6 +77,104 @@ export async function signInWithGoogle() {
 }
 
 /**
+ * Email + parol bilan ro'yxatdan o'tish.
+ *
+ * Supabase sozlamasiga qarab ikki xil ishlaydi:
+ *   - "Confirm email" YOQILGAN  → tasdiqlash xati yuboriladi, session null
+ *   - "Confirm email" O'CHIRILGAN → darhol kiritiladi, session bor
+ * Ikkalasini ham qo'llab-quvvatlaymiz.
+ */
+export async function signUpWithEmail({ email, password, fullName }) {
+  if (!isSupabaseConfigured || !supabase) {
+    return { ok: false, error: 'Supabase sozlanmagan.' }
+  }
+
+  const { data, error } = await supabase.auth.signUp({
+    email: email.trim(),
+    password,
+    options: {
+      data: { full_name: fullName?.trim() || '' },
+      emailRedirectTo: `${window.location.origin}/auth`,
+    },
+  })
+
+  if (error) return { ok: false, error: translateAuthError(error) }
+
+  if (data.session?.user) {
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(data.session.user))
+    return { ok: true, session: data.session, needsConfirmation: false }
+  }
+
+  // Session yo'q — email tasdiqlash kutilmoqda
+  return { ok: true, session: null, needsConfirmation: true }
+}
+
+/** Email + parol bilan kirish */
+export async function signInWithEmail({ email, password }) {
+  if (!isSupabaseConfigured || !supabase) {
+    return { ok: false, error: 'Supabase sozlanmagan.' }
+  }
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email.trim(),
+    password,
+  })
+
+  if (error) return { ok: false, error: translateAuthError(error) }
+
+  if (data.session?.user) {
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(data.session.user))
+  }
+  return { ok: true, session: data.session }
+}
+
+/** Parolni tiklash xatini yuborish */
+export async function sendPasswordReset(email) {
+  if (!isSupabaseConfigured || !supabase) {
+    return { ok: false, error: 'Supabase sozlanmagan.' }
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+    redirectTo: `${window.location.origin}/auth`,
+  })
+
+  if (error) return { ok: false, error: translateAuthError(error) }
+  return { ok: true }
+}
+
+/**
+ * Supabase xatolari inglizcha keladi. Foydalanuvchiga tushunarli
+ * bo'lishi uchun eng ko'p uchraydiganlarini tarjima qilamiz.
+ */
+function translateAuthError(error) {
+  const msg = (error?.message || '').toLowerCase()
+
+  if (msg.includes('invalid login credentials')) {
+    return "Email yoki parol noto'g'ri."
+  }
+  if (msg.includes('email not confirmed')) {
+    return 'Email hali tasdiqlanmagan. Pochtangizdagi havolani bosing.'
+  }
+  if (msg.includes('user already registered') || msg.includes('already been registered')) {
+    return "Bu email allaqachon ro'yxatdan o'tgan. Kirish bo'limidan foydalaning."
+  }
+  if (msg.includes('password should be at least')) {
+    return "Parol juda qisqa — kamida 6 ta belgi bo'lishi kerak."
+  }
+  if (msg.includes('unable to validate email') || msg.includes('invalid email')) {
+    return "Email manzili noto'g'ri yozilgan."
+  }
+  if (msg.includes('rate limit') || msg.includes('too many requests')) {
+    return "Juda ko'p urinish. Bir necha daqiqadan keyin qayta urinib ko'ring."
+  }
+  if (msg.includes('signups not allowed') || msg.includes('signup is disabled')) {
+    return "Ro'yxatdan o'tish hozircha yopiq."
+  }
+
+  return error?.message || 'Kutilmagan xatolik yuz berdi.'
+}
+
+/**
  * OAuth Callback ishlov berish
  */
 export async function completeOAuthSignIn() {

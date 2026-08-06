@@ -70,6 +70,15 @@ export const WRITING_PACKS = [
     difficulty: "O'rta",
     text: 'Computers are widely used in education, and some people think that computers will play an important role in the classroom. To what extent do you agree?',
   },
+  {
+    id: 'writing-7',
+    number: 7,
+    title: 'Writing Practice 7',
+    type: 'Agree / Disagree',
+    topic: 'Education',
+    difficulty: "O'rta",
+    text: 'Many people join distance-learning programs (study material, post, TV, Internet) and study at home, but some people think that it cannot bring the same benefit as attending colleges or universities does. Do you agree or disagree?',
+  },
 ]
 
 /** To'plamni id bo'yicha topish */
