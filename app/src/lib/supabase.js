@@ -79,10 +79,13 @@ export async function signInWithGoogle() {
 /**
  * Email + parol bilan ro'yxatdan o'tish.
  *
- * Supabase sozlamasiga qarab ikki xil ishlaydi:
- *   - "Confirm email" YOQILGAN  → tasdiqlash xati yuboriladi, session null
- *   - "Confirm email" O'CHIRILGAN → darhol kiritiladi, session bor
- * Ikkalasini ham qo'llab-quvvatlaymiz.
+ * Loyiha email tasdiqlashsiz ishlashga mo'ljallangan:
+ * Supabase → Authentication → Providers → Email → "Confirm email" O'CHIRILGAN.
+ * Bu holda `signUp` darhol session qaytaradi va foydalanuvchi kiritiladi.
+ *
+ * Agar sozlama tasodifan yoqilgan bo'lsa, session null keladi. U holda
+ * ham foydalanuvchi qorong'uda qolmasligi uchun xabar ko'rsatamiz —
+ * lekin bu kutilmagan holat, sozlamani tekshirish kerak.
  */
 export async function signUpWithEmail({ email, password, fullName }) {
   if (!isSupabaseConfigured || !supabase) {

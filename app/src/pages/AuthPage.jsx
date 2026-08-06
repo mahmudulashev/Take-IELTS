@@ -116,6 +116,8 @@ export default function AuthPage() {
 
       if (!res.ok) return setError(res.error)
 
+      // Odatda bu yerga kelmaydi: "Confirm email" o'chirilgan bo'lsa
+      // signUp darhol session qaytaradi va pastdagi navigate ishlaydi.
       if (res.needsConfirmation) {
         return setNotice(
           `${email} manziliga tasdiqlash havolasi yuborildi. Havolani bosgach tizimga kira olasiz.`,
