@@ -79,6 +79,15 @@ export const WRITING_PACKS = [
     difficulty: "O'rta",
     text: 'Many people join distance-learning programs (study material, post, TV, Internet) and study at home, but some people think that it cannot bring the same benefit as attending colleges or universities does. Do you agree or disagree?',
   },
+  {
+    id: 'writing-8',
+    number: 8,
+    title: 'Writing Practice 8',
+    type: 'Agree / Disagree',
+    topic: 'Education & Assessment',
+    difficulty: 'Qiyin',
+    text: 'Too much emphasis is placed on testing these days. The need to prepare for tests and examinations is a restriction on teachers and also exerts unnecessary pressure on young learners, and they never learn to be creative. To what extent do you agree or disagree?',
+  },
 ]
 
 /** To'plamni id bo'yicha topish */

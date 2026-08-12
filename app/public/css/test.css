@@ -755,3 +755,30 @@
     font-size: 15px !important;
   }
 }
+
+/* ============================================================
+   sr-only — faqat ekran o'quvchilar uchun matn
+   ============================================================
+   Savol tugmalarida shunday markup ishlatiladi:
+     <span class="sr-only">Q1</span><span>1</span>
+   Ko'zga faqat "1" ko'rinishi kerak, "Q1" esa ekran o'quvchi
+   uchun kontekst beradi.
+
+   listening-test-2/3/4.html bu klassni ishlatgan, lekin hech
+   qayerda aniqlamagan edi — natijada ikkala span ham ko'rinib,
+   tugmalarda "Q11", "Q22" ... "Q1010" chiqardi.
+
+   `display: none` ishlatilmaydi — u matnni ekran o'quvchidan
+   ham yashiradi va klassning ma'nosi yo'qoladi.
+   ============================================================ */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
