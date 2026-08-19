@@ -169,7 +169,29 @@
   // ---------------------------------------------------------------
   // Xatolarni tutish
   // ---------------------------------------------------------------
+  // Faqat real xatolar banner ko'rsatsin. Dev-server (Vite HMR) websocket
+  // xatolari foydalanuvchiga tegishli emas: ular faqat ishlab chiqishda
+  // yuz beradi (masalan, brauzer konsolida 'WebSocket closed without
+  // opened'), ishlab chiqarishda esa umuman bo'lmaydi. Ularni xato deb
+  // hisoblamaymiz — aks holda statik test sahifasida asossiz ogohlantirish
+  // chiqib, foydalanuvchini chalg'itadi.
+  function isBenignError(err) {
+    if (!err) return false;
+    var message = String(err.message || '');
+    var stack = String(err.stack || '');
+    return (
+      /WebSocket closed without opened/i.test(message) ||
+      /failed to connect to websocket/i.test(message) ||
+      /@vite\/client/.test(stack) ||
+      /@react-refresh/.test(stack)
+    );
+  }
+
   function handleError(err) {
+    if (isBenignError(err)) {
+      console.debug('[test-guard] ahamiyatsiz dev-xato o\'tkazib yuborildi:', err);
+      return;
+    }
     console.error('[test-guard] xato tutildi:', err);
     saveDraft('error');
 

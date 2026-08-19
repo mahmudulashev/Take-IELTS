@@ -1,5 +1,5 @@
 /**
- * IELTS Writing Task 2 — 5 ta belgilangan to'plam.
+ * IELTS Writing Task 2 — 9 ta belgilangan to'plam.
  *
  * Reading/Listening kabi har bir to'plam o'zgarmas: foydalanuvchi
  * "Writing Practice 3" ni tanlasa, har safar aynan o'sha mavzu
@@ -7,6 +7,8 @@
  *   - natijalarni to'plam bo'yicha solishtirish mumkin
  *   - "topshirilgan / topshirilmagan" holati mantiqiy bo'ladi
  *   - foydalanuvchi bir mavzuni qayta yozib, o'sishini ko'radi
+ *
+ * Yangi to'plam qo'shganda shu sarlavhadagi sonni ham yangilang.
  *
  * `id` qiymati `test_id` sifatida bazaga yoziladi — o'zgartirmang,
  * aks holda eski natijalar to'plamga bog'lanmay qoladi.
@@ -87,6 +89,15 @@ export const WRITING_PACKS = [
     topic: 'Education & Assessment',
     difficulty: 'Qiyin',
     text: 'Too much emphasis is placed on testing these days. The need to prepare for tests and examinations is a restriction on teachers and also exerts unnecessary pressure on young learners, and they never learn to be creative. To what extent do you agree or disagree?',
+  },
+  {
+    id: 'writing-9',
+    number: 9,
+    title: 'Writing Practice 9',
+    type: 'Opinion',
+    topic: 'Language & Culture',
+    difficulty: "O'rta",
+    text: 'Some people argue that learning a second language involves learning the culture of the country where this language is spoken. What is your opinion?',
   },
 ]
 
