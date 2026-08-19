@@ -18,7 +18,11 @@
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { findSpellingIssues, isDictionaryActive } from './spelling.ts'
+import { findSpellingIssues, isDictionaryActive, warmDictionary } from './spelling.ts'
+
+// Sovuq startda lug'at yuklanishi so'rov kelishini kutmasin — fon rejimida
+// darrov boshlanadi va autentifikatsiya bilan bir vaqtda tugaydi.
+warmDictionary()
 
 const GEMINI_MODEL = 'gemini-3.6-flash'
 const DAILY_LIMIT = 5          // bitta foydalanuvchi uchun kuniga
@@ -137,7 +141,7 @@ ${spellingList}
 
 For each criterion give: the band, a SHORT verbatim quote from the essay that justifies it, and what specifically would raise it by half a band.
 
-Then produce inline annotations: specific spans of the candidate's text that contain a problem. Each annotation's "quote" MUST be copied verbatim, character for character, from the essay so it can be located in the text. Keep quotes short (3-15 words). Produce 5-12 annotations covering a mix of types. If the essay is genuinely strong, still identify the weakest spans — there is always something to sharpen.
+Then produce inline annotations: specific spans of the candidate's text that contain a problem. Each annotation's "quote" MUST be copied verbatim, character for character, from the essay so it can be located in the text. Keep quotes short (3-15 words). Produce 5-8 annotations covering a mix of types — pick the most instructive ones rather than listing everything. If the essay is genuinely strong, still identify the weakest spans — there is always something to sharpen.
 
 NEVER present correct English as an error. Before writing each annotation ask: is this span actually WRONG, or merely PLAIN? Both are worth annotating, but they must not look the same to the candidate:
   - genuinely wrong → state the error directly in "note".
@@ -215,6 +219,14 @@ Deno.serve(async (req: Request) => {
     }
 
     const wordCount = countWords(essay)
+
+    // Imlo tekshiruvini shu yerda BOSHLAYMIZ, lekin kutmaymiz: quyidagi
+    // limit so'rovi (baza) bilan parallel ketadi. Natijasi prompt
+    // qurilishidan oldin kerak bo'ladi.
+    const spellingPromise = wordCount >= MIN_WORDS && wordCount <= MAX_WORDS
+      ? findSpellingIssues(essay)
+      : Promise.resolve([])
+
     if (wordCount < MIN_WORDS) {
       return json({ error: `Insho juda qisqa (${wordCount} so'z). Kamida ${MIN_WORDS} so'z yozing.` }, 400)
     }
@@ -260,7 +272,7 @@ Deno.serve(async (req: Request) => {
     // ---------------------------------------------------------------
     // 3.5. Imlo — modelga emas, lug'atga ishonamiz
     // ---------------------------------------------------------------
-    const spellingIssues = await findSpellingIssues(essay)
+    const spellingIssues = await spellingPromise
 
     // Topilgan xatolarni prompt'ga kiritamiz: model ularni bilgan holda
     // Lexical Resource va umumiy ballni qo'ysin. Aks holda model
@@ -291,13 +303,28 @@ Deno.serve(async (req: Request) => {
 
     // Har bir urinishda bir xil so'rov yuboriladi — bir marta tayyorlaymiz.
     // Nomi `geminiBody`, chunki `body` yuqorida so'rov tanasi uchun band.
-    const geminiBody = JSON.stringify({
-      contents: [{ parts: [{ text: buildPrompt(promptText, essay, wordCount, spellingList, spellingRule) }] }],
+    //
+    // `thinkingLevel` — tezlik va sifat orasidagi asosiy tugma.
+    // 'low' da baholash sezilarli tezlashadi, lekin sifat pasayadi:
+    // to'rt mezonni mustaqil taqqoslash va band chegarasini to'g'ri
+    // tanlash uchun model'ga o'ylash vaqti kerak ekan. Shuning uchun
+    // 'medium' — tezlik uchun quyidagi ikki optimizatsiyaga tayanamiz
+    // (lug'atni oldindan yuklash + chiqish hajmini qisqartirish).
+    const promptText_ = buildPrompt(promptText, essay, wordCount, spellingList, spellingRule)
+    const buildGeminiBody = (withThinking: boolean) => JSON.stringify({
+      contents: [{ parts: [{ text: promptText_ }] }],
       generationConfig: {
         temperature: 0.3,          // baho barqaror bo'lsin
         responseMimeType: 'application/json',
+        ...(withThinking ? { thinkingConfig: { thinkingLevel: 'medium' } } : {}),
       },
     })
+
+    // Eski modellar `thinkingLevel` ni tanimaydi va 400 qaytaradi.
+    // Bunday holatda shu paramsiz bir marta qayta yuboramiz — zaxira
+    // model tufayli sayt to'xtab qolmasin.
+    let geminiBody = buildGeminiBody(true)
+    let thinkingRejected = false
 
     // 503 UNAVAILABLE va 500 — Google tomonidagi vaqtinchalik yuklama.
     // Google hujjatlari bunday holatda qayta urinishni tavsiya qiladi.
@@ -347,6 +374,14 @@ Deno.serve(async (req: Request) => {
           lastError = parsed?.error?.status || parsed?.error?.message || detail.slice(0, 200)
         } catch {
           lastError = detail.slice(0, 200)
+        }
+
+        // `thinkingLevel` qo'llab-quvvatlanmasa — shu paramsiz qayta yuboramiz
+        if (res.status === 400 && !thinkingRejected && /thinking/i.test(detail)) {
+          thinkingRejected = true
+          geminiBody = buildGeminiBody(false)
+          console.warn(`[${model}] thinkingLevel qabul qilinmadi — paramsiz qayta yuborilmoqda`)
+          continue
         }
 
         // Vaqtinchalik xato — kutib qayta urinamiz. Urinishlar tugasa

@@ -34,10 +34,31 @@ let DICT: Set<string> | null = null
 let DICT_INDEX: Map<string, string[]> | null = null
 let dictLoadFailed = false
 
-async function loadDictionary(): Promise<boolean> {
-  if (DICT) return true
-  if (dictLoadFailed) return false
+/**
+ * Bir vaqtning o'zida kelgan so'rovlar lug'atni ikki marta yuklamasin —
+ * hammasi shu bitta promise'ni kutadi.
+ */
+let loadPromise: Promise<boolean> | null = null
 
+/**
+ * Lug'atni oldindan yuklashni boshlaydi (kutmasdan).
+ * `index.ts` buni modul yuklanishida chaqiradi: sovuq startda 2.4MB
+ * yuklanishi foydalanuvchi autentifikatsiyasi va limit so'rovi bilan
+ * bir vaqtda ketadi, ketma-ket emas.
+ */
+export function warmDictionary(): void {
+  loadDictionary().catch(() => {})
+}
+
+function loadDictionary(): Promise<boolean> {
+  if (DICT) return Promise.resolve(true)
+  if (dictLoadFailed) return Promise.resolve(false)
+  if (loadPromise) return loadPromise
+  loadPromise = fetchDictionary()
+  return loadPromise
+}
+
+async function fetchDictionary(): Promise<boolean> {
   try {
     const res = await fetch(WORD_LIST_URL)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
