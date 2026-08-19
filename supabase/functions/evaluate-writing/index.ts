@@ -106,16 +106,29 @@ ${essay}
 
 Assess the four criteria SEPARATELY. Score each one on its own descriptor before looking at the others. Do not form an overall impression first and then spread it across four boxes.
 
-It is uncommon for all four criteria to land on the same number. If your four scores come out identical, you have not assessed them independently — go back and re-read each descriptor, find the specific weakest feature in that criterion, and score that criterion on its own merits. A candidate with strong grammar often has weaker task development; a candidate with rich vocabulary often has cohesion problems.
+The four criteria often differ — a candidate with strong grammar often has weaker task development; a candidate with rich vocabulary often has cohesion problems. But do NOT manufacture a spread. If the essay is genuinely uniform, four identical numbers are the correct answer, and pushing one criterion down just to make the profile look varied is a scoring error. Every number must be defensible from its own descriptor alone, with nothing borrowed from the other three.
 
-Calibration anchors — be honest, not kind:
+Calibration anchors — be honest, not kind. IELTS is reported in HALF bands, and the half bands are not hedges: they are where most real candidates actually land. Use them.
 - Band 9: error-free, fully natural, sophisticated throughout. Extremely rare. A competent essay by a strong learner is NOT band 9.
 - Band 8: wide range, occasional slips only, fully developed argument.
+- Band 7.5: band 7 with clear band 8 stretches — noticeably wider range or tighter control than a plain 7.
 - Band 7: good control with some errors; ideas developed but may lack focus in places.
+- Band 6.5: clearly more than "generally effective" but short of band 7 — better development, wider range, or fewer errors than a plain 6. VERY COMMON for a competent learner.
 - Band 6: generally effective, noticeable errors that do not impede meaning. THIS IS THE MOST COMMON REAL SCORE.
+- Band 5.5: band 5 with band 6 stretches — errors are frequent but meaning mostly survives.
 - Band 5: limited range, frequent errors, underdeveloped ideas.
 
-An inflated score is a disservice — it sends the candidate into the real exam unprepared. When you hesitate between two bands, choose the lower one.
+The realistic centre of gravity for a motivated learner is 5.5-7.0. Scores at the extremes must be earned by the text, not produced by rounding.
+
+An inflated score is a disservice — it sends the candidate into the real exam unprepared. But over-correction is an equal error: deducting for something the descriptor does not penalise is just as wrong as inflating. If an essay genuinely sits between two bands, report the HALF band; do not default downward.
+
+=== LEXICAL RESOURCE — THE MOST MIS-SCORED CRITERION ===
+
+Two different things get confused here. Keep them apart:
+  (a) Vocabulary that is WRONG — wrong word, broken collocation, wrong word form, misspelling. This costs band.
+  (b) Vocabulary that is SIMPLE BUT CORRECT — "very important", "a lot of", "big mistake". This caps the ceiling; it does NOT drag the score down into band 5.
+
+Band 5 lexis means the reader is confused, or the wrong word is used repeatedly. If every word is used correctly and the meaning is never in doubt, the FLOOR is band 6 however plain the vocabulary is. Reserve 5.5 and below for essays where wrong word choice actually damages meaning.
 
 Word count is ${wordCount}. Under 250 words is a Task Response penalty; state it explicitly if it applies.
 ${spellingList}
@@ -125,6 +138,11 @@ ${spellingList}
 For each criterion give: the band, a SHORT verbatim quote from the essay that justifies it, and what specifically would raise it by half a band.
 
 Then produce inline annotations: specific spans of the candidate's text that contain a problem. Each annotation's "quote" MUST be copied verbatim, character for character, from the essay so it can be located in the text. Keep quotes short (3-15 words). Produce 5-12 annotations covering a mix of types. If the essay is genuinely strong, still identify the weakest spans — there is always something to sharpen.
+
+NEVER present correct English as an error. Before writing each annotation ask: is this span actually WRONG, or merely PLAIN? Both are worth annotating, but they must not look the same to the candidate:
+  - genuinely wrong → state the error directly in "note".
+  - correct but improvable → "note" MUST begin with "Xato emas — yaxshilash:" and then explain the stronger option.
+A candidate who is told that correct English is a mistake loses trust in the whole report and learns the wrong lesson.
 
 ${spellingRule}
 
