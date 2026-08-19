@@ -37,8 +37,13 @@ Thumbs.db
 !.vscode/extensions.json
 .idea/
 
-# Cache directories
+# Cache & local data directories
 .cache/
 .eslintcache
 .vite/
 .turbo/
+.freebuff/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
