@@ -20,7 +20,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { findSpellingIssues, isDictionaryActive } from './spelling.ts'
 
-const GEMINI_MODEL = 'gemini-2.5-flash'
+const GEMINI_MODEL = 'gemini-3.6-flash'
 const DAILY_LIMIT = 5          // bitta foydalanuvchi uchun kuniga
 const MIN_WORDS = 50
 const MAX_WORDS = 1000
@@ -262,9 +262,12 @@ Deno.serve(async (req: Request) => {
 
     // Model nomlari vaqt o'tishi bilan o'zgaradi va eskilari o'chiriladi.
     // Bittasi 404 bersa keyingisiga o'tamiz — sayt to'xtab qolmasin.
-    const MODELS = [GEMINI_MODEL, 'gemini-flash-latest', 'gemini-2.5-flash-lite']
+    // `gemini-2.5-flash` 2026-yil avgustda yangi foydalanuvchilar uchun
+    // yopildi (404 NOT_FOUND) — Google o'rniga 3.6-flash'ni tavsiya qildi.
+    const MODELS = [GEMINI_MODEL, 'gemini-flash-latest', 'gemini-3.5-flash-lite']
 
     let geminiJson: any = null
+    let usedModel = GEMINI_MODEL
     let lastError = ''
     let lastStatus = 0
 
@@ -310,6 +313,7 @@ Deno.serve(async (req: Request) => {
 
         if (res.ok) {
           geminiJson = await res.json()
+          usedModel = model
           if (model !== GEMINI_MODEL) console.warn(`Zaxira model ishlatildi: ${model}`)
           if (attempt > 1) console.warn(`${attempt}-urinishda muvaffaqiyat`)
           break outer
@@ -327,10 +331,16 @@ Deno.serve(async (req: Request) => {
           lastError = detail.slice(0, 200)
         }
 
-        // Vaqtinchalik xato — kutib qayta urinamiz
-        if (TRANSIENT.has(res.status) && attempt < MAX_ATTEMPTS) {
-          await sleep(1000 * 2 ** (attempt - 1))
-          continue
+        // Vaqtinchalik xato — kutib qayta urinamiz. Urinishlar tugasa
+        // shu model band demakdir: `break` bilan keyingi modelga o'tamiz
+        // (ilgari bu yerda `break outer` bo'lib, zaxira modellar
+        // umuman sinalmay qolar edi — 503 to'g'ridan-to'g'ri qaytardi).
+        if (TRANSIENT.has(res.status)) {
+          if (attempt < MAX_ATTEMPTS) {
+            await sleep(1000 * 2 ** (attempt - 1))
+            continue
+          }
+          break
         }
 
         // 404 — bu model yo'q, keyingi modelga o'tamiz
@@ -430,7 +440,7 @@ Deno.serve(async (req: Request) => {
         next_band: assessment.next_band ?? null,
         strengths: assessment.strengths ?? [],
       },
-      model: GEMINI_MODEL,
+      model: usedModel,
     }
 
     // ---------------------------------------------------------------
