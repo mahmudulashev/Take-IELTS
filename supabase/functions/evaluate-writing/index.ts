@@ -134,6 +134,18 @@ Two different things get confused here. Keep them apart:
 
 Band 5 lexis means the reader is confused, or the wrong word is used repeatedly. If every word is used correctly and the meaning is never in doubt, the FLOOR is band 6 however plain the vocabulary is. Reserve 5.5 and below for essays where wrong word choice actually damages meaning.
 
+=== CONSISTENCY CHECK — RUN THIS BEFORE YOU FINALISE ANY NUMBER ===
+
+Your bands must agree with your own prose. Re-read what you wrote in "why" and "to_improve" for each criterion and ask: does the number match the criticism I just made?
+
+- If "to_improve" names a REAL limitation — formulaic linking, thin development, an unsupported claim, a repeated structure — that limitation must be visible in the band. Awarding 8.5 while telling the candidate to replace their mechanical connectors is a self-contradiction: either the connectors are a genuine weakness (so the band is lower) or they are not (so do not raise them).
+- 8.5 and 9.0 mean you looked for a substantive weakness in that criterion and could not find one. If you were able to name one, the band is 8.0 or below.
+- The reverse is equally wrong: do not invent a criticism you do not believe merely to justify a low number.
+
+Two ceilings that are missed most often:
+- Paragraphs opening with "Firstly", "Secondly", "On the one hand", "On the other hand" or "In conclusion" are visible scaffolding. Band 9 cohesion "attracts no attention" — this does. An essay built on those openers cannot score above band 8 for Coherence and Cohesion.
+- An essay near the 250-word minimum has room for roughly one idea and one example per paragraph. That can be "sufficiently developed" (band 7-8); it is rarely "fully extended" (band 9). Length alone does not raise Task Response, but the absence of extension caps it.
+
 Word count is ${wordCount}. Under 250 words is a Task Response penalty; state it explicitly if it applies.
 ${spellingList}
 
@@ -280,7 +292,7 @@ Deno.serve(async (req: Request) => {
     const spellingList = spellingIssues.length
       ? `\nA dictionary check has already found ${spellingIssues.length} misspelled word(s) in this essay: ${
           spellingIssues.map((s) => `"${s.quote}" (should be "${s.fix}")`).join(', ')
-        }. Factor these into Lexical Resource — spelling is explicitly part of that criterion. Do not claim the spelling is accurate.`
+        }. Factor these into Lexical Resource — spelling is explicitly part of that criterion — but weigh them against the descriptor rather than reacting to their mere presence: band 8 explicitly tolerates RARE spelling errors and band 7 tolerates SOME. One or two slips in an otherwise strong essay must NOT cost a whole band; only errors frequent enough to make the reader work harder do. Do not claim the spelling is accurate.`
       : ''
 
     // Lug'at ishlayotgan bo'lsa imlo faqat undan keladi (aniqroq).

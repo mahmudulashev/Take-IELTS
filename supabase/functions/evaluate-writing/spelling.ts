@@ -21,7 +21,7 @@
  */
 
 import {
-  nearestWord, indexByFirstLetter, isCheckable,
+  nearestWord, indexByFirstLetter, isCheckable, hasKnownStem, ALLOWLIST,
 } from './spellcheck-core.ts'
 
 const WORD_LIST_URL = 'https://cdn.jsdelivr.net/npm/word-list@2.0.0/words.txt'
@@ -277,13 +277,26 @@ export async function findSpellingIssues(essay: string): Promise<SpellingIssue[]
     let correct = COMMON_MISSPELLINGS[lower] ?? null
 
     // --- 2-bosqich: lug'atda yo'q + 1 tahrir masofasida so'z bor ---
-    if (!correct && hasDict && DICT && DICT_INDEX) {
+    //
+    // DIQQAT: bu bosqich BOSH HARFLI so'zlarga umuman tegmaydi.
+    // Sababi: word-list da millat va til nomlari yo'q, shuning uchun
+    // gap boshidagi "Japanese" lug'atda topilmay, undan 1 harf naridagi
+    // "japanise" ga "tuzatilardi" — mavjud bo'lmagan so'zga. Bunday
+    // false positive baholovchiga imlo xatosi bo'lib ko'rinadi va
+    // Lexical Resource ballini asossiz tushiradi. Gap boshidagi
+    // haqiqiy terish xatolari 1-bosqich ro'yxatida qoladi.
+    const capitalized = word[0] !== word[0].toLowerCase()
+
+    if (!correct && !capitalized && hasDict && DICT && DICT_INDEX) {
       const clean = lower.replace(/^'+|'+$/g, '')
       if (
         clean.length >= 4 &&
         !DICT.has(clean) &&
         // Egalik shakli: "student's" -> "student" tekshiriladi
         !DICT.has(clean.replace(/'s$/, '')) &&
+        // Qo'shimchali shakl ("francas" = "franca" + s) xato emas
+        !hasKnownStem(clean, DICT) &&
+        !ALLOWLIST.has(clean) &&
         isCheckable(word, m.index, essay.slice(Math.max(0, m.index - 3), m.index))
       ) {
         correct = nearestWord(clean, DICT, DICT_INDEX, 1)

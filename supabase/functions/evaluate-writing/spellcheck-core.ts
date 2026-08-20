@@ -51,6 +51,33 @@ export function editDistance(a: string, b: string, max = 2): number {
  * nomzodlar tekshiriladi — terish xatolarida birinchi harf
  * kamdan-kam o'zgaradi.
  */
+// 'y' ataylab yo'q: u so'z ichida unli vazifasini bajarsa ham,
+// TERISH XATOSI sifatida y<->e almashuvi kam uchraydi. Uni unli deb
+// hisoblasak, "stady" uchun "stade" ham "study" bilan teng ball olib,
+// tasodifan birinchi kelgani tanlanadi.
+const VOWELS = new Set(['a', 'e', 'i', 'o', 'u'])
+
+/**
+ * Bir xil tahrir masofasidagi nomzodlarni saralash uchun.
+ *
+ * NIMA UCHUN KERAK: "stady" so'zi "study" dan ham, "shady" dan ham
+ * atigi 1 masofada. Birinchi uchraganini olsak, talabaga "shady"
+ * taklif qilinadi — u esa aslida "study" deb yozmoqchi bo'lgan.
+ * Terish xatolarida UNLI harf almashishi undosh almashishidan
+ * ancha ko'p uchraydi, shuning uchun unli almashgan nomzod ustun.
+ */
+function candidateScore(word: string, cand: string): number {
+  if (word.length !== cand.length) return 0   // qo'shish/tushirish
+  let diffs = 0
+  let vowelOnly = true
+  for (let i = 0; i < word.length; i++) {
+    if (word[i] === cand[i]) continue
+    diffs++
+    if (!VOWELS.has(word[i]) || !VOWELS.has(cand[i])) vowelOnly = false
+  }
+  return diffs === 1 && vowelOnly ? 2 : 1
+}
+
 export function nearestWord(
   word: string,
   dict: Set<string>,
@@ -60,14 +87,19 @@ export function nearestWord(
   const candidates = byFirstLetter.get(word[0]) ?? []
   let best: string | null = null
   let bestDist = maxDist + 1
+  let bestScore = -1
 
   for (const cand of candidates) {
     if (Math.abs(cand.length - word.length) > maxDist) continue
     const d = editDistance(word, cand, maxDist)
-    if (d < bestDist) {
+    if (d > maxDist) continue
+    const score = candidateScore(word, cand)
+    // Erta to'xtamaymiz: bir xil masofadagi barcha nomzodlar
+    // ko'rib chiqilib, eng ishonarlisi tanlanadi.
+    if (d < bestDist || (d === bestDist && score > bestScore)) {
       bestDist = d
+      bestScore = score
       best = cand
-      if (d === 1) break        // 1 dan yaxshirog'i bo'lmaydi
     }
   }
   return bestDist <= maxDist ? best : null
@@ -97,3 +129,47 @@ export function isCheckable(word: string, index: number, prevChar: string): bool
   }
   return true
 }
+
+/**
+ * So'z lug'atdagi biror so'zning oddiy grammatik shaklimi?
+ *
+ * NIMA UCHUN KERAK: word-list kabi ro'yxatlarda hamma qo'shimchali
+ * shakl bo'lmaydi. "lingua francas" dagi "francas" lug'atda yo'q, lekin
+ * u "franca" ning ko'pligi — xato emas. Bunday so'zlarni tekshirmasak,
+ * tahrir masofasi ularga eng yaqin BEGONA so'zni taklif qiladi
+ * ("francas" -> "fracas"), bu esa foydalanuvchini chalg'itadi.
+ */
+export function hasKnownStem(word: string, dict: Set<string>): boolean {
+  const suffixes = ["s", "es", "ed", "ing", "ly", "er", "est", "'s"]
+  for (const suf of suffixes) {
+    if (!word.endsWith(suf)) continue
+    const stem = word.slice(0, word.length - suf.length)
+    if (stem.length < 3) continue
+    if (dict.has(stem)) return true
+    // "hoping" -> "hope": oxirgi 'e' tushib qolgan
+    if (dict.has(stem + 'e')) return true
+    // "running" -> "run": oxirgi undosh ikkilangan
+    if (
+      stem.length > 2 &&
+      stem[stem.length - 1] === stem[stem.length - 2] &&
+      dict.has(stem.slice(0, -1))
+    ) return true
+    // "studies" -> "study"
+    if (stem.endsWith('i') && dict.has(stem.slice(0, -1) + 'y')) return true
+  }
+  return false
+}
+
+/**
+ * Lug'atda kam uchraydigan, lekin insholarda normal ishlatiladigan
+ * so'zlar. Bularni tekshiruvdan chiqaramiz.
+ */
+export const ALLOWLIST = new Set([
+  'lingua', 'franca', 'francas', 'lingue',
+  'globalisation', 'globalization', 'urbanisation', 'urbanization',
+  'specialisation', 'specialization', 'socialisation', 'socialization',
+  'wellbeing', 'workforce', 'workplace', 'healthcare', 'lifestyle',
+  'smartphone', 'smartphones', 'online', 'offline', 'internet',
+  'multinational', 'multinationals', 'sustainability', 'employability',
+  'coursework', 'fieldwork', 'upskilling', 'overconsumption',
+])
