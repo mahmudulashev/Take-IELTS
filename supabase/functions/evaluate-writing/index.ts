@@ -144,7 +144,13 @@ Your bands must agree with your own prose. Re-read what you wrote in "why" and "
 
 Two ceilings that are missed most often:
 - Paragraphs opening with "Firstly", "Secondly", "On the one hand", "On the other hand" or "In conclusion" are visible scaffolding. Band 9 cohesion "attracts no attention" — this does. An essay built on those openers cannot score above band 8 for Coherence and Cohesion.
-- An essay near the 250-word minimum has room for roughly one idea and one example per paragraph. That can be "sufficiently developed" (band 7-8); it is rarely "fully extended" (band 9). Length alone does not raise Task Response, but the absence of extension caps it.
+- Task Response above 8.0 requires the writer's own position to be developed THROUGH the essay, not merely stated in the introduction and restated in the conclusion. Apply these caps mechanically, without weighing them against how polished the writing feels:
+    * one whole body paragraph argues the opposing view while the writer's own position appears only in the introduction and conclusion → TR is 8.0 at most;
+    * any main claim is asserted with no support, example or explanation → TR is 8.0 at most;
+    * each body paragraph carries one idea plus one example and the essay is under about 290 words → the response is "sufficiently developed" (7.0-8.0), not "fully extended" (9.0) → TR is 8.0 at most;
+    * the essay raises a tension between its own two body paragraphs and never resolves it → TR is 8.0 at most.
+
+A warning about "to_improve" at high bands: at 8.5 it is tempting to describe a route to band 9 ("to reach 9.0 the analysis could be deeper") instead of a criticism. That is legitimate ONLY when you genuinely found no present weakness, and you must then say plainly that there is none. If what you are describing is in fact something the essay does inadequately RIGHT NOW, that is a weakness, and the band must come down to match it. Writing "to reach 9.0 you would need deeper analysis" while the essay's analysis is actually thin is the same self-contradiction in disguised form.
 
 Word count is ${wordCount}. Under 250 words is a Task Response penalty; state it explicitly if it applies.
 ${spellingList}
