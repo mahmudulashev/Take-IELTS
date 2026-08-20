@@ -1,5 +1,5 @@
 /**
- * IELTS Writing Task 2 — 9 ta belgilangan to'plam.
+ * IELTS Writing Task 2 — 10 ta belgilangan to'plam.
  *
  * Reading/Listening kabi har bir to'plam o'zgarmas: foydalanuvchi
  * "Writing Practice 3" ni tanlasa, har safar aynan o'sha mavzu
@@ -98,6 +98,15 @@ export const WRITING_PACKS = [
     topic: 'Language & Culture',
     difficulty: "O'rta",
     text: 'Some people argue that learning a second language involves learning the culture of the country where this language is spoken. What is your opinion?',
+  },
+  {
+    id: 'writing-10',
+    number: 10,
+    title: 'Writing Practice 10',
+    type: 'Agree / Disagree',
+    topic: 'Work & Technology',
+    difficulty: "O'rta",
+    text: 'Many employees may work at home with modern technology. Some people claim that it benefits only workers, but not employers. Do you agree or disagree?',
   },
 ]
 
