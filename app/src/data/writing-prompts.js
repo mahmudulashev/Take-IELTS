@@ -1,5 +1,5 @@
 /**
- * IELTS Writing Task 2 — 10 ta belgilangan to'plam.
+ * IELTS Writing Task 2 — 11 ta belgilangan to'plam.
  *
  * Reading/Listening kabi har bir to'plam o'zgarmas: foydalanuvchi
  * "Writing Practice 3" ni tanlasa, har safar aynan o'sha mavzu
@@ -107,6 +107,15 @@ export const WRITING_PACKS = [
     topic: 'Work & Technology',
     difficulty: "O'rta",
     text: 'Many employees may work at home with modern technology. Some people claim that it benefits only workers, but not employers. Do you agree or disagree?',
+  },
+  {
+    id: 'writing-11',
+    number: 11,
+    title: 'Writing Practice 11',
+    type: 'Agree / Disagree',
+    topic: 'Education & Society',
+    difficulty: "O'rta",
+    text: 'Some people believe that unpaid community service should be a compulsory part of high school programmes. To what extent do you agree or disagree?',
   },
 ]
 
