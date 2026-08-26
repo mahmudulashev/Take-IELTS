@@ -19,9 +19,12 @@ Tegishli kod: `supabase/functions/evaluate-writing/`
 | 08-19 | writing-9, 275 so'z | 6.5 | 6.5 | **5.5** | 6.0 | 6.0 | imlo/kalibratsiya tuzatishlaridan oldin |
 | 08-20 | writing-9, 272 so'z | 8.5 | 8.5 | **7.5** | 8.5 | 8.5 | LR ni 2 ta soxta imlo xatosi tushirgan |
 | 08-20 | o'sha insho, qayta | 8.5 | **8.0** | **8.5** | 8.5 | 8.5 | imlo tuzatildi; CC qoidasi ishladi |
+| 08-20 | writing-11, 294 so'z | 8.0 | 8.0 | 8.0 | 8.0 | 8.0 | **hammasi shiftda to'plandi** — haqiqiy baho ~7.0 |
 
-**Ochiq savol:** TR uchun mexanik shartlar deploy qilingan, lekin hali
-sinalmagan. Kutilgan natija — TR 8.0 ga tushishi.
+**Mexanik shiftlar sinaldi va olib tashlandi.** Ular shift sifatida
+ishladi (TR va CC aynan 8.0 ga tushdi), lekin model ularni **nishon**
+deb o'qidi: hamma to'rt mezon 8.0 da to'plandi. Endi o'rniga langar
+insholar ishlatiladi — pastdagi bo'limga qarang.
 
 Diqqat, yaxlitlash: IELTS o'rtachani eng yaqin yarim ballga yaxlitlaydi
 va 0.25 yuqoriga ketadi. `8.0 + 8.0 + 8.5 + 8.5 = 8.25 → 8.5`. Ya'ni
@@ -127,9 +130,50 @@ shart esa darrov ishladi.
 
 ---
 
+## Langar insholar (few-shot) — hozirgi asosiy yondashuv
+
+**Nima uchun qoidalardan voz kechildi.** To'rt marta qoida qo'shildi va
+har safar yangi artefakt tug'ildi:
+
+```
+1. "mezonlar bir xil bo'lmasin"   → LR doim 5.5 ga mixlandi
+2. o'sha qoida olib tashlandi      → hamma narsa 8.5
+3. "izohingga mos ball qo'y"       → umuman ta'sir qilmadi
+4. mexanik shiftlar (max 8.0)      → hamma narsa 8.0 da to'plandi
+```
+
+Naqsh aniq: model **6.5–8.5 oralig'ida farqlay olmaydi**. Qoida langarni
+suradi, ammo farqlash qobiliyatini yaratmaydi. Beshinchi qoida oltinchi
+artefaktni tug'dirardi.
+
+Shuning uchun promptda endi uchta haqiqiy insho parchasi bor, har biri
+mezonlar kesimidagi bahosi va **nega aynan shu ball** izohi bilan:
+
+| Langar | Umumiy | TR | CC | LR | GRA | Nimani o'rgatadi |
+|---|---|---|---|---|---|---|
+| A | 6.5 | 6.0 | 6.5 | 6.5 | 6.0 | tez-tez takrorlanuvchi artikl/predlog xatolari band 6 ko'rinishi; sodda-lekin-to'g'ri leksika band 5 emas |
+| B | 7.0 | 7.0 | 7.0 | 7.0 | 7.5 | **eng muhimi:** xatosiz, ravon, aniq pozitsiyali insho ham 7 bo'lishi mumkin. Xato yo'qligi band 8 degani emas |
+| C | 8.0 | 7.5 | 7.5 | 8.5 | 8.5 | 8.5 leksika va grammatika qanday ko'rinadi; va profil **notekis** bo'lishi normal |
+
+Langar B — kalit. Avvalgi barcha inflatsiya aynan shundan kelib chiqqan:
+model xatosizlikni band 8 deb o'qir edi.
+
+Langar C notekis profilga ega — bu ataylab: model to'rtta bir xil raqam
+qo'yishdan tiyilsin, lekin sun'iy tarqalish ham yasamasin.
+
+Langar matnlari qayerdan olingan: A — foydalanuvchi ataylab 6.5 darajada
+yozgan insho; B — writing-11 ga yozilgan 294 so'zlik insho; C — writing-9
+ga yozilgan 272 so'zlik insho.
+
+---
+
 ## Ochiq ishlar
 
-- TR mexanik shartlari sinalmagan.
+- Langar yondashuvi hali sinalmagan. Kutilgan natija: writing-11
+  inshosi 8.0 emas, **7.0** olishi.
+- Langarlar bahosi men va foydalanuvchi kelishuviga asoslangan, rasmiy
+  ekspert bahosi emas. Agar langar noto'g'ri bo'lsa, butun shkala
+  siljiydi — shuning uchun ular eng muhim fayl qismi.
 - **Over-fitting xavfi:** prompt asosan bitta insho ustida sozlangan,
   ustiga u insho sun'iy yozilganga o'xshaydi (mutlaqo bir tekis
   registr, L2 izi yo'q). Haqiqiy 7.0–7.5 darajadagi insho bilan

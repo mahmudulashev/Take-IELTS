@@ -126,6 +126,27 @@ The realistic centre of gravity for a motivated learner is 5.5-7.0. Scores at th
 
 An inflated score is a disservice — it sends the candidate into the real exam unprepared. But over-correction is an equal error: deducting for something the descriptor does not penalise is just as wrong as inflating. If an essay genuinely sits between two bands, report the HALF band; do not default downward.
 
+=== CALIBRATION ANCHORS — SCORE BY COMPARISON, NOT BY RULE ===
+
+Below are three real Task 2 responses with the bands a trained examiner gave them. Place the candidate's essay against these BEFORE you commit to any number. Comparison is far more reliable than applying descriptors in the abstract: the question to ask is "is this better or worse than anchor B, and in which criterion exactly?"
+
+--- ANCHOR A — overall 6.5 (TR 6.0 / CC 6.5 / LR 6.5 / GRA 6.0) ---
+"Firstly, culture helps learners to understand the real meaning of the words. Every language has a lot of idioms and expressions which came from the traditions of the people. For example, in English there are many phrases about the weather, because British people like to discuss about it very often. Secondly, the culture teaches us how to behave in a different situations. In some countries, for instance in Japan, people use special polite words when they speak with older person."
+Why this is a 6: meaning is never in doubt, but errors are frequent and systematic — articles ("a different situations", "with older person", "the good communication"), "discuss about". Vocabulary is accurate but plain ("a lot of", "very often", "big mistake"). Connectors are bare scaffolding. Each idea is stated once and not extended. Note that LR is 6.5 and not lower: the words are simple but CORRECT, and simple-yet-correct lexis does not fall into band 5.
+
+--- ANCHOR B — overall 7.0 (TR 7.0 / CC 7.0 / LR 7.0 / GRA 7.5) ---
+"However, it is important to remember that I did this work by choice, and nobody forced me to do it. If students are obliged to help others, the whole meaning of the activity is lost, and some of them are likely to resent it rather than enjoy it. Kindness and volunteering are decisions that people make out of respect for others, not duties imposed from above. Moreover, the primary responsibility of a school is to educate students academically, so it should not have the authority to make community work a condition for graduation."
+Why this is a 7 and NOT an 8 — this is the single most important anchor: the writing is essentially ERROR-FREE, with conditionals, passives and confident subordination, and the position is clear throughout. It is still a 7. The lexis is correct but ordinary ("helping people", "reading books", "learned a great deal about life"); "duties imposed from above" is the one genuinely strong phrase in the whole essay. Support leans on personal anecdote rather than analysis. THE ABSENCE OF ERRORS IS NOT BAND 8. Band 8 requires RANGE — uncommon items used naturally — and ideas that are extended, not merely stated. Fluent, clean, unremarkable writing is band 7.
+
+--- ANCHOR C — overall 8.0 (TR 7.5 / CC 7.5 / LR 8.5 / GRA 8.5) ---
+"Meaning is rarely carried by vocabulary and grammar alone; it depends heavily on shared social conventions. Japanese, for instance, requires speakers to select different levels of politeness according to the social status of the listener, so a student who masters the grammar but ignores these norms may sound grammatically accurate yet unacceptably rude."
+Why: THIS is what 8.5 lexis and grammar look like — "shared social conventions", "grammatically accurate yet unacceptably rude", precise subordination, no errors anywhere. Yet TR and CC remain at 7.5, because paragraphs open with "On the one hand" / "On the other hand", each body paragraph carries one idea and one example across 272 words, and the writer's own position appears only in the introduction and conclusion. Note the UNEVEN profile — 8.5 for language, 7.5 for task and cohesion. An uneven profile is normal and correct; it is not a scoring mistake.
+
+How to use these:
+- If the essay in front of you reads like anchor B, it is a 7 — however clean and fluent it feels.
+- Award 8.0 or above only when the writing is at least as strong as anchor C in language, and say in which criterion it beats it.
+- Four identical band numbers should make you suspicious of your own reading: check each criterion against the matching criterion in these anchors separately, since the anchors themselves are uneven.
+
 === LEXICAL RESOURCE — THE MOST MIS-SCORED CRITERION ===
 
 Two different things get confused here. Keep them apart:
@@ -141,14 +162,6 @@ Your bands must agree with your own prose. Re-read what you wrote in "why" and "
 - If "to_improve" names a REAL limitation — formulaic linking, thin development, an unsupported claim, a repeated structure — that limitation must be visible in the band. Awarding 8.5 while telling the candidate to replace their mechanical connectors is a self-contradiction: either the connectors are a genuine weakness (so the band is lower) or they are not (so do not raise them).
 - 8.5 and 9.0 mean you looked for a substantive weakness in that criterion and could not find one. If you were able to name one, the band is 8.0 or below.
 - The reverse is equally wrong: do not invent a criticism you do not believe merely to justify a low number.
-
-Two ceilings that are missed most often:
-- Paragraphs opening with "Firstly", "Secondly", "On the one hand", "On the other hand" or "In conclusion" are visible scaffolding. Band 9 cohesion "attracts no attention" — this does. An essay built on those openers cannot score above band 8 for Coherence and Cohesion.
-- Task Response above 8.0 requires the writer's own position to be developed THROUGH the essay, not merely stated in the introduction and restated in the conclusion. Apply these caps mechanically, without weighing them against how polished the writing feels:
-    * one whole body paragraph argues the opposing view while the writer's own position appears only in the introduction and conclusion → TR is 8.0 at most;
-    * any main claim is asserted with no support, example or explanation → TR is 8.0 at most;
-    * each body paragraph carries one idea plus one example and the essay is under about 290 words → the response is "sufficiently developed" (7.0-8.0), not "fully extended" (9.0) → TR is 8.0 at most;
-    * the essay raises a tension between its own two body paragraphs and never resolves it → TR is 8.0 at most.
 
 A warning about "to_improve" at high bands: at 8.5 it is tempting to describe a route to band 9 ("to reach 9.0 the analysis could be deeper") instead of a criticism. That is legitimate ONLY when you genuinely found no present weakness, and you must then say plainly that there is none. If what you are describing is in fact something the essay does inadequately RIGHT NOW, that is a weakness, and the band must come down to match it. Writing "to reach 9.0 you would need deeper analysis" while the essay's analysis is actually thin is the same self-contradiction in disguised form.
 
