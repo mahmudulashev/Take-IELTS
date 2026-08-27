@@ -6,6 +6,8 @@
 
 Reading, Listening va Writing bo'limlari · AI baholash · natijalar tahlili
 
+[**Saytni ochish →**](https://take-ielts.vercel.app)
+
 <p>
   <img alt="React" src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black">
   <img alt="Vite" src="https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite&logoColor=white">
