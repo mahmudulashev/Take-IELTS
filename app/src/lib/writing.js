@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from './supabase'
+import { supabase, isSupabaseConfigured, describeFetchError } from './supabase'
 
 /**
  * Writing insholarini baholash — Supabase Edge Function orqali.
@@ -206,23 +206,39 @@ export async function clearWritingHistory() {
  * RLS tufayli faqat o'ziniki qaytadi, lekin filtrni baribir
  * ochiq yozamiz — himoya ikki qatlamli bo'lsin.
  */
-export async function getWritingResults(limit = 50) {
-  if (!isSupabaseConfigured || !supabase) return []
+export async function getWritingResultsWithStatus(limit = 50) {
+  // Sozlanmagan yoki tizimga kirilmagan holat — bu aloqa xatosi EMAS,
+  // shuning uchun ogohlantirish ko'rsatilmaydi.
+  if (!isSupabaseConfigured || !supabase) return { results: [], error: null }
 
-  const { data: sessionData } = await supabase.auth.getSession()
-  const userId = sessionData?.session?.user?.id
-  if (!userId) return []
+  try {
+    const { data: sessionData } = await supabase.auth.getSession()
+    const userId = sessionData?.session?.user?.id
+    if (!userId) return { results: [], error: null }
 
-  const { data, error } = await supabase
-    .from('writing_results')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(limit)
+    const { data, error } = await supabase
+      .from('writing_results')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limit)
 
-  if (error) {
-    console.warn('getWritingResults:', error)
-    return []
+    if (error) {
+      // DIQQAT: bu yerda bo'sh ro'yxat qaytarib, xatoni yutib yuborish
+      // mumkin emas. Aks holda insholar bazada tursa ham ekranda
+      // "hali insho yozilmagan" chiqadi.
+      console.warn('getWritingResults:', error)
+      return { results: [], error: describeFetchError(error) }
+    }
+    return { results: data || [], error: null }
+  } catch (e) {
+    console.warn('getWritingResults:', e)
+    return { results: [], error: describeFetchError(e) }
   }
-  return data || []
+}
+
+/** Eski chaqiruvlar uchun moslik qatlami — faqat massiv qaytaradi. */
+export async function getWritingResults(limit = 50) {
+  const { results } = await getWritingResultsWithStatus(limit)
+  return results
 }

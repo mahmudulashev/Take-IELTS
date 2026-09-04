@@ -420,9 +420,35 @@ export async function saveTestResult({ testType, testId, score, totalQuestions =
 }
 
 /**
- * Natijalarni olish (Tozalash vaqtidan oldingi barcha eskirgan natijalar filtrlanadi)
+ * Aloqa xatosini foydalanuvchi tushunadigan xabarga aylantiradi.
+ *
+ * NIMA UCHUN KERAK: ilgari bulut so'rovi muvaffaqiyatsiz bo'lsa, funksiya
+ * jimgina bo'sh ro'yxat qaytarardi. Ekranda "hali test topshirilmagan"
+ * degan yozuv chiqardi — ya'ni "ma'lumot yo'q" va "serverga ulanib
+ * bo'lmadi" bir xil ko'rinardi. Supabase loyihasi bepul tarifda pauzaga
+ * tushganda aynan shu sodir bo'ldi va natijalar o'chib ketgandek tuyuldi.
  */
-export async function getTestResults(limit = 100) {
+export function describeFetchError(err) {
+  const raw = (err?.message || String(err || '')).toLowerCase()
+
+  if (raw.includes('failed to fetch') || raw.includes('networkerror') || raw.includes('load failed')) {
+    return 'Serverga ulanib bo\'lmadi. Internet aloqangizni tekshiring.'
+  }
+  if (raw.includes('timeout') || raw.includes('timed out') || raw.includes('521') || raw.includes('503')) {
+    return 'Server javob bermayapti — ma\'lumotlar bazasi vaqtincha to\'xtatilgan bo\'lishi mumkin.'
+  }
+  return 'Serverdan natijalarni olishda xatolik yuz berdi.'
+}
+
+/**
+ * Natijalarni olish (Tozalash vaqtidan oldingi barcha eskirgan natijalar filtrlanadi).
+ *
+ * Qaytaradi: `{ results, error }`
+ *   - `error === null` → bulut bilan aloqa muvaffaqiyatli
+ *   - `error` matn    → aloqa uzilgan; `results` faqat localStorage'dan,
+ *                       ya'ni TO'LIQ EMAS. Interfeys buni ochiq aytishi shart.
+ */
+export async function getTestResultsWithStatus(limit = 100) {
   const clearedAtStr = localStorage.getItem(STORAGE_KEYS.CLEARED_AT)
   const clearedAt = clearedAtStr ? new Date(clearedAtStr) : null
 
@@ -431,6 +457,7 @@ export async function getTestResults(limit = 100) {
   const currentId = currentUser?.id ?? null
 
   let supabaseResults = []
+  let fetchError = null
   if (isSupabaseConfigured && supabase) {
     try {
       const user = currentUser
@@ -443,11 +470,16 @@ export async function getTestResults(limit = 100) {
           .eq('user_id', user.id)
           .order('completed_at', { ascending: false })
           .limit(limit)
-        if (data && !error) {
+        if (error) {
+          // Xatoni yashirmaymiz — yuqoriga uzatamiz.
+          fetchError = describeFetchError(error)
+          console.warn('getTestResults:', error)
+        } else if (data) {
           supabaseResults = data
         }
       }
     } catch (e) {
+      fetchError = describeFetchError(e)
       console.warn('Supabase fetch error:', e)
     }
   }
@@ -490,7 +522,16 @@ export async function getTestResults(limit = 100) {
     })
   }
 
-  return allMerged.slice(0, limit)
+  return { results: allMerged.slice(0, limit), error: fetchError }
+}
+
+/**
+ * Eski chaqiruvlar uchun moslik qatlami — faqat massiv qaytaradi.
+ * Aloqa holati ham kerak bo'lsa `getTestResultsWithStatus` ishlating.
+ */
+export async function getTestResults(limit = 100) {
+  const { results } = await getTestResultsWithStatus(limit)
+  return results
 }
 
 /**

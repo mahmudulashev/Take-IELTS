@@ -4,7 +4,7 @@ import WritingResult from './WritingResult'
 import { formatDate } from '../../lib/scoring'
 import { deleteWritingResult } from '../../lib/writing'
 import { useAuth } from '../../context/AuthContext'
-import { PenLine, ChevronRight, ArrowLeft, TrendingUp, Trash2 } from 'lucide-react'
+import { PenLine, ChevronRight, ArrowLeft, TrendingUp, Trash2, WifiOff } from 'lucide-react'
 
 /**
  * "Natijalarim" sahifasining Writing tabi.
@@ -28,7 +28,7 @@ const CRITERIA = [
   ['band_grammar', 'GRA'],
 ]
 
-export default function WritingReports({ results = [] }) {
+export default function WritingReports({ results = [], syncError = null }) {
   const { refreshResults } = useAuth()
   const [selected, setSelected] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(null)   // o'chiriladigan yozuv
@@ -89,6 +89,27 @@ export default function WritingReports({ results = [] }) {
         </button>
 
         <WritingResult result={selected} onNewEssay={() => setSelected(null)} />
+      </div>
+    )
+  }
+
+  // ---------------- Aloqa uzilgan holat ----------------
+  // Bo'sh ro'yxat ikki xil sabab bilan bo'ladi: insho yozilmagan yoki
+  // serverdan o'qib bo'lmagan. Ikkinchisini "insho yo'q" deb ko'rsatish
+  // foydalanuvchini ma'lumotim o'chibdi deb o'ylashga majbur qiladi.
+  if (!rows.length && syncError) {
+    return (
+      <div className="bg-white rounded-[24px] p-12 border border-gray-100 shadow-sm text-center">
+        <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto mb-4">
+          <WifiOff className="w-5 h-5" />
+        </div>
+        <p className="text-base font-bold text-gray-700 mb-1.5">
+          Insholarni yuklab bo'lmadi
+        </p>
+        <p className="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed">
+          {syncError} Yozgan insholaringiz bazada saqlanib turibdi — aloqa
+          tiklangach ular shu yerda qaytadi.
+        </p>
       </div>
     )
   }

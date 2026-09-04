@@ -3,13 +3,13 @@ import {
   getSession, 
   signOut as supabaseSignOut, 
   onAuthStateChange, 
-  getTestResults as fetchResults, 
-  getStats as fetchStats,
+  getTestResultsWithStatus as fetchResults,
   clearTestHistory as supabaseClearHistory,
   syncLocalResultsToSupabase,
-  isSupabaseConfigured
+  isSupabaseConfigured,
+  describeFetchError
 } from '../lib/supabase'
-import { getWritingResults } from '../lib/writing'
+import { getWritingResultsWithStatus as fetchWriting } from '../lib/writing'
 
 /**
  * Writing natijalari alohida jadvalda (`writing_results`) saqlanadi,
@@ -92,6 +92,11 @@ export function AuthProvider({ children }) {
   const [stats, setStats] = useState(() => computeStats(readLocalResults()))
   const [dataReady, setDataReady] = useState(true)
 
+  // Bulut bilan aloqa uzilganda `results` faqat localStorage'dan keladi,
+  // ya'ni to'liq emas. Interfeys buni "natija yo'q" deb ko'rsatmasligi
+  // uchun xato matnini alohida saqlaymiz.
+  const [syncError, setSyncError] = useState(null)
+
   useEffect(() => {
     async function init() {
       const session = await getSession()
@@ -136,13 +141,15 @@ export function AuthProvider({ children }) {
       if (cancelled) return
 
       try {
-        const [testRows, writingRows] = await Promise.all([fetchResults(100), getWritingResults(50)])
+        const [testRes, writingRes] = await Promise.all([fetchResults(100), fetchWriting(50)])
         if (cancelled) return
-        const merged = mergeAll(testRows, writingRows)
+        const merged = mergeAll(testRes.results, writingRes.results)
         setResults(merged)
         setStats(computeStats(merged))
+        setSyncError(testRes.error || writingRes.error || null)
       } catch (e) {
-        // Keep localStorage data on error
+        // localStorage ma'lumoti ekranda qoladi, lekin u to'liq emasligini aytamiz
+        if (!cancelled) setSyncError(describeFetchError(e))
       }
     }
 
@@ -182,14 +189,18 @@ export function AuthProvider({ children }) {
       setStats(computeStats(local))
 
       // 2-bosqich: fonda bulut bilan birlashtirish (Writing ham qo'shiladi)
-      Promise.all([fetchResults(100), getWritingResults(50)])
-        .then(([testRows, writingRows]) => {
+      Promise.all([fetchResults(100), fetchWriting(50)])
+        .then(([testRes, writingRes]) => {
           if (cancelled) return
-          const merged = mergeAll(testRows, writingRows)
+          const merged = mergeAll(testRes.results, writingRes.results)
           setResults(merged)
           setStats(computeStats(merged))
+          setSyncError(testRes.error || writingRes.error || null)
         })
-        .catch(() => { /* xato bo'lsa local ma'lumot qoladi */ })
+        .catch((e) => {
+          // Local ma'lumot qoladi — lekin jim qolmaymiz
+          if (!cancelled) setSyncError(describeFetchError(e))
+        })
     }
 
     function onStorage(e) {
@@ -221,10 +232,15 @@ export function AuthProvider({ children }) {
   }, [])
 
   const refreshResults = useCallback(async () => {
-    const [testRows, writingRows] = await Promise.all([fetchResults(100), getWritingResults(50)])
-    const merged = mergeAll(testRows, writingRows)
-    setResults(merged)
-    setStats(computeStats(merged))
+    try {
+      const [testRes, writingRes] = await Promise.all([fetchResults(100), fetchWriting(50)])
+      const merged = mergeAll(testRes.results, writingRes.results)
+      setResults(merged)
+      setStats(computeStats(merged))
+      setSyncError(testRes.error || writingRes.error || null)
+    } catch (e) {
+      setSyncError(describeFetchError(e))
+    }
   }, [])
 
   const clearHistory = useCallback(async () => {
@@ -243,12 +259,13 @@ export function AuthProvider({ children }) {
   const signOut = async () => {
     await supabaseSignOut()
     setUser(null)
+    setSyncError(null)
     setResults([])
     setStats({ totalTests: 0, avgBand: '0.0', bestBand: '0.0', lastTest: null })
   }
 
   return (
-    <AuthContext.Provider value={{ user, sessionChecked, signOut, results, stats, dataReady, refreshResults, clearHistory }}>
+    <AuthContext.Provider value={{ user, sessionChecked, signOut, results, stats, dataReady, syncError, refreshResults, clearHistory }}>
       {children}
     </AuthContext.Provider>
   )

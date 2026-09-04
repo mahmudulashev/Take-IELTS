@@ -10,16 +10,17 @@ import { formatDate, formatSeconds } from '../lib/scoring'
 import WritingReports from '../components/writing/WritingReports'
 import { clearWritingHistory } from '../lib/writing'
 import { deleteTestResult } from '../lib/supabase'
-import { BookOpen, Headphones, PenLine, Calendar, CheckCircle2, XCircle, ChevronRight, X, BarChart3, Trash2 } from 'lucide-react'
+import { BookOpen, Headphones, PenLine, Calendar, CheckCircle2, XCircle, ChevronRight, X, BarChart3, Trash2, WifiOff, RefreshCw } from 'lucide-react'
 
 export default function ReportsPage() {
-  const { user, sessionChecked, signOut, results, clearHistory, refreshResults } = useAuth()
+  const { user, sessionChecked, signOut, results, clearHistory, refreshResults, syncError } = useAuth()
   const [activeTab, setActiveTab] = useState('reading') // 'reading' or 'listening'
   const [selectedResult, setSelectedResult] = useState(null) // For detail modal
   const [showClearModal, setShowClearModal] = useState(false)
   const [confirmDeleteOne, setConfirmDeleteOne] = useState(null)   // bitta natijani o'chirish
   const [deletingOne, setDeletingOne] = useState(false)
   const [deleteError, setDeleteError] = useState(null)
+  const [retrying, setRetrying] = useState(false)
   const navigate = useNavigate()
 
   // Correct answer keys for details analysis
@@ -55,6 +56,13 @@ export default function ReportsPage() {
   const handleSignOut = async () => {
     await signOut()
     navigate('/')
+  }
+
+  const handleRetrySync = async () => {
+    if (retrying) return
+    setRetrying(true)
+    await refreshResults()
+    setRetrying(false)
   }
 
   const handleDeleteOne = async () => {
@@ -149,6 +157,36 @@ export default function ReportsPage() {
           </div>
         )}
 
+        {/* Bulut bilan aloqa uzilgan holat.
+            MUHIM: bu bannersiz ekran "natija yo'q" deb ko'rinadi va
+            foydalanuvchi ma'lumotlari o'chgan deb o'ylaydi. Aslida
+            natijalar bazada turadi, shunchaki o'qib bo'lmayapti. */}
+        {syncError && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 flex items-start gap-3">
+            <div className="w-9 h-9 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+              <WifiOff className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-gray-900 mb-1">
+                Natijalar to'liq ko'rsatilmayapti
+              </p>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                {syncError} Quyidagi ro'yxat faqat shu brauzerda saqlangan
+                natijalardan iborat — <strong>ma'lumotlaringiz o'chmagan</strong>,
+                aloqa tiklangach hammasi qaytadi.
+              </p>
+            </div>
+            <button
+              onClick={handleRetrySync}
+              disabled={retrying}
+              className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-300 text-amber-800 hover:bg-amber-100 disabled:opacity-50 text-xs font-bold transition-all"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${retrying ? 'animate-spin' : ''}`} />
+              <span>{retrying ? 'Tekshirilmoqda…' : 'Qayta urinish'}</span>
+            </button>
+          </div>
+        )}
+
         {/* Page Header */}
         <div className="bg-white rounded-[24px] p-5 sm:p-6 md:p-8 border border-gray-100 shadow-sm mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -222,7 +260,7 @@ export default function ReportsPage() {
         {/* Writing tabi butunlay boshqacha: 40 ta savol jadvali yo'q,
             insho matni va uning tahlili bor. */}
         {activeTab === 'writing' ? (
-          <WritingReports results={writingResults} />
+          <WritingReports results={writingResults} syncError={syncError} />
         ) : (
         <>
         {/* Stats Summary Cards for selected tab */}
@@ -269,7 +307,9 @@ export default function ReportsPage() {
 
           {currentTabResults.length === 0 ? (
             <div className="p-12 text-center text-gray-400 font-semibold text-sm">
-              Ushbu bo'lim bo'yicha hali test topshirilmagan.
+              {syncError
+                ? 'Natijalarni serverdan o\'qib bo\'lmadi. Yuqoridagi "Qayta urinish" tugmasini bosing.'
+                : 'Ushbu bo\'lim bo\'yicha hali test topshirilmagan.'}
             </div>
           ) : (
             <div>
