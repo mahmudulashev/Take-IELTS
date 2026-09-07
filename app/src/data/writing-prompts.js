@@ -1,5 +1,5 @@
 /**
- * IELTS Writing Task 2 — 11 ta belgilangan to'plam.
+ * IELTS Writing Task 2 — 13 ta belgilangan to'plam.
  *
  * Reading/Listening kabi har bir to'plam o'zgarmas: foydalanuvchi
  * "Writing Practice 3" ni tanlasa, har safar aynan o'sha mavzu
@@ -116,6 +116,24 @@ export const WRITING_PACKS = [
     topic: 'Education & Society',
     difficulty: "O'rta",
     text: 'Some people believe that unpaid community service should be a compulsory part of high school programmes. To what extent do you agree or disagree?',
+  },
+  {
+    id: 'writing-12',
+    number: 12,
+    title: 'Writing Practice 12',
+    type: 'Discussion + Opinion',
+    topic: 'Gender & Employment',
+    difficulty: "O'rta",
+    text: 'Some people agree that all kinds of jobs should be equally open to men and women. Others think that some jobs should only be suitable for men and women respectively. Discuss both views and give your own opinion.',
+  },
+  {
+    id: 'writing-13',
+    number: 13,
+    title: 'Writing Practice 13',
+    type: 'Discussion + Opinion',
+    topic: 'Work & Employment',
+    difficulty: "O'rta",
+    text: 'Some employers are willing to give their workers a certain amount of unpaid sabbatical time, believing this benefits the individual and the organisation. Other employers see no merit in this arrangement and discourage it. Discuss both views and give your own opinion.',
   },
 ]
 
