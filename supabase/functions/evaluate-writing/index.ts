@@ -37,20 +37,19 @@ const MAX_WORDS = 1000
  * so'rov, butun loyiha uchun) baribir amal qiladi va uni kod bilan
  * chetlab o'tib bo'lmaydi.
  *
- * Email `auth.users` dan olinadi — foydalanuvchi uni so'rov orqali
- * o'zgartira olmaydi, shuning uchun soxtalashtirib bo'lmaydi.
- */
-const UNLIMITED_EMAILS = [
-  'urgutmahmud@gmail.com',
-].map((e) => e.toLowerCase())
-
-/**
- * UID bo'yicha ham tekshiramiz — email Google hisobida o'zgarishi
- * mumkin, `auth.users.id` esa hech qachon o'zgarmaydi.
- * Ikkisidan biri mos kelsa yetarli.
+ * NIMA UCHUN BU YERDA EMAIL YO'Q:
+ * Repo ochiq, email esa spam yig'uvchi skanerlar uchun tayyor o'lja.
+ * UID bu vazifani har jihatdan yaxshiroq bajaradi — u noaniq
+ * identifikator (u bilan hech kimga murojaat qilib bo'lmaydi) va
+ * hech qachon o'zgarmaydi, email esa Google hisobida almashishi mumkin.
+ *
+ * UID `auth.users` dan olinadi (`admin.auth.getUser` tokenni serverda
+ * tekshiradi), shuning uchun uni so'rov bilan soxtalashtirib bo'lmaydi.
+ *
+ * Ro'yxatni kengaytirish kerak bo'lsa — pastdagi `envList` izohiga qarang.
  */
 const UNLIMITED_USER_IDS = [
-  'e38efacb-c6c0-4206-848b-92449d79ee64',   // Mahmud Ulashev
+  'e38efacb-c6c0-4206-848b-92449d79ee64',   // loyiha egasi
 ]
 
 /**
@@ -274,7 +273,6 @@ Deno.serve(async (req: Request) => {
     const email = (user.email ?? '').toLowerCase()
     const isUnlimited =
       UNLIMITED_USER_IDS.includes(user.id) ||
-      UNLIMITED_EMAILS.includes(email) ||
       envList('UNLIMITED_EMAILS').includes(email) ||
       envList('UNLIMITED_USER_IDS').includes(user.id.toLowerCase())
 
