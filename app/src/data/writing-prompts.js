@@ -1,5 +1,5 @@
 /**
- * IELTS Writing Task 2 — 13 ta belgilangan to'plam.
+ * IELTS Writing Task 2 — 15 ta belgilangan to'plam.
  *
  * Reading/Listening kabi har bir to'plam o'zgarmas: foydalanuvchi
  * "Writing Practice 3" ni tanlasa, har safar aynan o'sha mavzu
@@ -134,6 +134,24 @@ export const WRITING_PACKS = [
     topic: 'Work & Employment',
     difficulty: "O'rta",
     text: 'Some employers are willing to give their workers a certain amount of unpaid sabbatical time, believing this benefits the individual and the organisation. Other employers see no merit in this arrangement and discourage it. Discuss both views and give your own opinion.',
+  },
+  {
+    id: 'writing-14',
+    number: 14,
+    title: 'Writing Practice 14',
+    type: 'Discussion + Opinion',
+    topic: 'Work & Employment',
+    difficulty: "O'rta",
+    text: 'Some people think that changing jobs periodically is good. What is your opinion? Consider these opposing views, and give your own opinion.',
+  },
+  {
+    id: 'writing-15',
+    number: 15,
+    title: 'Writing Practice 15',
+    type: 'Two-part question',
+    topic: 'Work & Well-being',
+    difficulty: 'Qiyin',
+    text: 'As most people spend a major part of adult life at the place of work, job satisfaction is an important part of individual well-being. What are the factors that contribute to job satisfaction? Are all the expectations for job satisfaction realistic?',
   },
 ]
 

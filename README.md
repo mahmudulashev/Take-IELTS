@@ -33,7 +33,7 @@ o'tishi bilan qanday o'zgarayotganini grafiklarda ko'rsatadi.
 |---|---|
 | **Reading** | 5 ta to'liq test · 3 passage · 40 savol · 60 daqiqa · avtomatik ball |
 | **Listening** | 4 ta faol test · audio bilan · 40 savol · avtomatik ball |
-| **Writing** | Task 2 uchun 11 ta mavzu · AI baholash · to'rt mezon bo'yicha band |
+| **Writing** | Task 2 uchun 15 ta mavzu · AI baholash · to'rt mezon bo'yicha band |
 | **Hisobotlar** | Band score dinamikasi, mezonlar kesimi, chuqur tahlil bo'limi |
 | **Profil** | Supabase auth (email/parol va Google), natijalar tarixi |
 
