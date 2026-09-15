@@ -32,9 +32,7 @@ export default function Task1Chart({ chart }) {
 // ---------------------------------------------------------------
 const W = 640
 const H = 300
-// l: 60 — "500,000" kabi olti xonali o'q yozuvlari sig'ishi uchun
-const PAD = { l: 60, r: 12, t: 12, b: 44 }
-const PLOT_W = W - PAD.l - PAD.r
+const PAD = { r: 12, t: 12, b: 44 }
 const PLOT_H = H - PAD.t - PAD.b
 
 const yOf = (v, max) => PAD.t + PLOT_H - (v / max) * PLOT_H
@@ -43,15 +41,30 @@ function seriesMax(series) {
   return niceMax(Math.max(...series.flatMap((s) => s.values)))
 }
 
-function Grid({ ticks, max }) {
+/** Seriya rangi: ma'lumotda berilgan bo'lsa o'sha, aks holda umumiy palitra */
+const seriesColor = (s, i) => s.color || colorAt(i)
+
+/**
+ * Y o'qi belgilari va chap bo'shliq. Bo'shliq eng uzun yozuvga qarab
+ * hisoblanadi — "500,000" kabi uzun sonlar chetdan kesilib qolmasin.
+ */
+function yAxis(series) {
+  const max = seriesMax(series)
+  const ticks = axisTicks(max)
+  const longest = Math.max(...ticks.map((t) => formatNumber(t).length))
+  const l = Math.max(40, Math.ceil(longest * 8 + 16))
+  return { max, ticks, l, plotW: W - l - PAD.r }
+}
+
+function Grid({ ticks, max, l }) {
   return (
     <g>
       {ticks.map((t) => {
         const y = yOf(t, max)
         return (
           <g key={t}>
-            <line x1={PAD.l} x2={W - PAD.r} y1={y} y2={y} stroke={t === 0 ? '#9CA3AF' : '#E5E7EB'} strokeWidth="1" />
-            <text x={PAD.l - 8} y={y + 4} textAnchor="end" fontSize="12" fill="#6B7280">
+            <line x1={l} x2={W - PAD.r} y1={y} y2={y} stroke={t === 0 ? '#9CA3AF' : '#E5E7EB'} strokeWidth="1" />
+            <text x={l - 8} y={y + 4} textAnchor="end" fontSize="12" fill="#6B7280">
               {formatNumber(t)}
             </text>
           </g>
@@ -69,12 +82,12 @@ function CategoryLabel({ x, children }) {
   )
 }
 
-function Legend({ names }) {
+function Legend({ names, colors }) {
   return (
     <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mt-3">
       {names.map((name, i) => (
         <span key={name} className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-gray-600">
-          <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: colorAt(i) }} />
+          <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: colors ? colors[i] : colorAt(i) }} />
           {name}
         </span>
       ))}
@@ -87,17 +100,17 @@ function Legend({ names }) {
 // ---------------------------------------------------------------
 function BarChart({ chart }) {
   const { categories, series } = chart
-  const max = seriesMax(series)
-  const groupW = PLOT_W / categories.length
+  const { max, ticks, l, plotW } = yAxis(series)
+  const groupW = plotW / categories.length
   const innerW = groupW * 0.74
   const barW = innerW / series.length
 
   return (
     <>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label={chart.title}>
-        <Grid ticks={axisTicks(max)} max={max} />
+        <Grid ticks={ticks} max={max} l={l} />
         {categories.map((cat, ci) => {
-          const groupX = PAD.l + ci * groupW
+          const groupX = l + ci * groupW
           const startX = groupX + (groupW - innerW) / 2
           return (
             <g key={cat}>
@@ -111,7 +124,7 @@ function BarChart({ chart }) {
                     width={Math.max(barW - 2, 1)}
                     height={PAD.t + PLOT_H - y}
                     rx="2"
-                    fill={colorAt(si)}
+                    fill={seriesColor(s, si)}
                   />
                 )
               })}
@@ -120,7 +133,7 @@ function BarChart({ chart }) {
           )
         })}
       </svg>
-      <Legend names={series.map((s) => s.name)} />
+      <Legend names={series.map((s) => s.name)} colors={series.map(seriesColor)} />
     </>
   )
 }
@@ -130,16 +143,16 @@ function BarChart({ chart }) {
 // ---------------------------------------------------------------
 function LineChart({ chart }) {
   const { categories, series } = chart
-  const max = seriesMax(series)
+  const { max, ticks, l, plotW } = yAxis(series)
   const inset = 20
   const xOf = (i) => categories.length === 1
-    ? PAD.l + PLOT_W / 2
-    : PAD.l + inset + (i / (categories.length - 1)) * (PLOT_W - inset * 2)
+    ? l + plotW / 2
+    : l + inset + (i / (categories.length - 1)) * (plotW - inset * 2)
 
   return (
     <>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label={chart.title}>
-        <Grid ticks={axisTicks(max)} max={max} />
+        <Grid ticks={ticks} max={max} l={l} />
         {categories.map((cat, i) => (
           <CategoryLabel key={cat} x={xOf(i)}>{cat}</CategoryLabel>
         ))}
@@ -148,18 +161,18 @@ function LineChart({ chart }) {
             <polyline
               points={s.values.map((v, i) => `${xOf(i)},${yOf(v, max)}`).join(' ')}
               fill="none"
-              stroke={colorAt(si)}
+              stroke={seriesColor(s, si)}
               strokeWidth="2.5"
               strokeLinejoin="round"
               strokeLinecap="round"
             />
             {s.values.map((v, i) => (
-              <circle key={i} cx={xOf(i)} cy={yOf(v, max)} r="3.5" fill="#fff" stroke={colorAt(si)} strokeWidth="2" />
+              <circle key={i} cx={xOf(i)} cy={yOf(v, max)} r="3.5" fill="#fff" stroke={seriesColor(s, si)} strokeWidth="2" />
             ))}
           </g>
         ))}
       </svg>
-      <Legend names={series.map((s) => s.name)} />
+      <Legend names={series.map((s) => s.name)} colors={series.map(seriesColor)} />
     </>
   )
 }

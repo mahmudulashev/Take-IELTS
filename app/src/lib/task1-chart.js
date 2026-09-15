@@ -13,7 +13,8 @@
  *   unit       — o'lchov birligi ('%', 'millions', ...)
  *   categories — bar/line: X o'qi; table: ustunlar
  *   series     — bar/line: chiziq/ustun guruhlari; table: qatorlar
- *                [{ name, values: [...] }], values tartibi categories bilan bir xil
+ *                [{ name, values: [...], color? }], values tartibi categories bilan bir xil;
+ *                color berilmasa SERIES_COLORS'dan olinadi
  *   pies       — faqat pie: [{ label, slices: [{ name, value }] }]
  */
 

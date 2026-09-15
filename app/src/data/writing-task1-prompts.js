@@ -143,8 +143,8 @@ export const WRITING_TASK1_PACKS = [
       axisLabel: 'Country',
       categories: ['Cars', 'Computers', 'Books', 'Perfume', 'Cameras'],
       series: [
-        { name: 'France', values: [400000, 380000, 300000, 200000, 150000] },
-        { name: 'UK', values: [450000, 350000, 400000, 140000, 360000] },
+        { name: 'France', values: [400000, 380000, 300000, 200000, 150000], color: '#4A9BD9' },
+        { name: 'UK', values: [450000, 350000, 400000, 140000, 360000], color: '#F47B20' },
       ],
     },
   },
