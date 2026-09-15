@@ -19,6 +19,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { findSpellingIssues, isDictionaryActive, warmDictionary } from './spelling.ts'
+import { normalizeDataChecks, dataCheckAnnotations, overlapsAny } from './task1-checks.ts'
 
 // Sovuq startda lug'at yuklanishi so'rov kelishini kutmasin — fon rejimida
 // darrov boshlanadi va autentifikatsiya bilan bir vaqtda tugaydi.
@@ -225,8 +226,14 @@ Return ONLY valid JSON, no markdown fences, exactly this shape:
  * buzish xavfini tug'diradi. Task 1'ning birinchi mezoni ham boshqa
  * narsani o'lchaydi — overview va ma'lumot aniqligi — shuning uchun
  * Task 2 anchor insholari bu yerga yaramaydi va ataylab kiritilmagan.
- * Task 1 uchun haqiqiy baholangan namunalar to'plangach, ular shu yerga
- * anchor sifatida qo'shiladi.
+ *
+ * ADOLATLI BAHOLASH UCHUN IKKI QATLAM (GRADER-NOTES.md → Task 1):
+ *   1. `taskData` ichida kod hisoblagan tayanch faktlar bor (eng katta
+ *      qiymat, tartib, kesishishlar, o'qish ruxsati) — model hisob-kitobda
+ *      adashmasin.
+ *   2. Model ball qo'yishdan OLDIN har bir da'voni `data_checks` ga yozib
+ *      tekshiradi; noto'g'rilarini kod matndagi belgiga aylantiradi
+ *      (task1-checks.ts).
  *
  * JSON kaliti `task_response` saqlab qolingan: baza ustuni (`band_task`)
  * va interfeys ikkala task uchun bitta. Mezon nomi UI'da almashtiriladi.
@@ -239,77 +246,120 @@ function buildTask1Prompt(
   spellingList: string,
   spellingRule: string,
 ): string {
-  return `You are a senior IELTS examiner with 15 years of experience. Assess this Academic Writing Task 1 response against the official public band descriptors.
+  return `You are a senior IELTS examiner with 15 years of experience. Assess this Academic Writing Task 1 response against the official public band descriptors. Your goal is a FAIR score: the score a careful, trained examiner would give — not kinder, not harsher.
 
 TASK PROMPT:
 """
 ${promptText}
 """
 
-THE VISUAL THE CANDIDATE WAS SHOWN, as exact data:
+THE VISUAL THE CANDIDATE WAS SHOWN — exact data, followed by reference facts:
 """
 ${taskData}
 """
-The candidate saw this as a chart or table, not as text. For bar charts and line graphs they had to read values off an axis, so reasonable approximations ("just under 20", "around 3 million") are CORRECT and must not be penalised. For pie charts and tables the figures were printed, so they should be reported accurately. Treat this data block as the ground truth when checking every figure the candidate cites.
+The candidate saw a chart or table, not this text. The REFERENCE FACTS were computed by code from the data and are always correct — rely on them instead of your own mental arithmetic. They exist ONLY to check accuracy: the candidate is NOT expected to mention them and must not lose marks for leaving most of them out.
 
 CANDIDATE'S RESPONSE (${wordCount} words):
 """
 ${report}
 """
 
-=== WHAT TASK 1 MEASURES — THIS IS NOT AN ESSAY ===
+=== STEP 1 — VERIFY THE DATA BEFORE YOU SCORE ANYTHING ===
 
-The first criterion for Task 1 is TASK ACHIEVEMENT, not Task Response. In the JSON below it is still reported under the key "task_response"; score it strictly as Task Achievement. It asks whether the candidate:
-- gives a clear OVERVIEW of the main trends, differences or stages. This is the single most important feature. Without a recognisable overview, Task Achievement is normally held at band 5 however accurate the details are. The overview may sit in the introduction or the conclusion; it must summarise the big picture, not repeat individual numbers.
-- SELECTS the key features instead of listing every figure mechanically. Reporting all the numbers one by one is a band 5 characteristic, not thoroughness.
-- SUPPORTS the key features with data. Key features described with no figures at all are inadequately illustrated.
+Read the response sentence by sentence and record in "data_checks" EVERY:
+  - figure the candidate states ("18 hours", "52%", "3.1 million", "a quarter");
+  - comparative or superlative claim ("the highest", "the lowest", "the most popular", "more than", "twice as much", "overtook", "the largest share", "in every group");
+  - trend claim ("rose steadily", "fell sharply", "remained stable", "peaked in 2015").
+One sentence can contain several claims — check each one separately. Do not skip claims that look obviously right: nothing is taken on trust.
+
+How to check:
+  - A superlative about the whole visual ("the highest figure in the whole chart", "the lowest overall") must be compared with EVERY value in the visual, not only with the series the sentence is about. Use the "Highest/Lowest value in the whole" reference facts.
+  - A claim that contradicts figures the candidate gives elsewhere in the same response is inaccurate.
+  - "every", "all", "always", "only", "in each" make a claim universal — a single exception makes it inaccurate.
+  - When values are tied, a superlative is true for each of the tied items, unless the candidate says it is the only one.
+  - Differences, ratios and rounded descriptions ("roughly doubled", "a threefold rise", "just over a quarter") are correct when they are arithmetically consistent with the data.
+  - Paraphrased labels ("the oldest group" for 50+) are correct.
+
+Verdicts:
+  - "correct" — matches the data.
+  - "approximation" — not exact, but a fair reading or sensible rounding. The reference facts give the reading tolerance: for bar charts and line graphs a stated figure within that tolerance is an accurate reading. A ranking or superlative is excused only when the true values differ by LESS than the tolerance.
+  - "inaccurate" — a wrong figure, a wrong ranking or superlative, a trend in the wrong direction, a universal claim with an exception, or a self-contradiction.
+Severity (only for "inaccurate"):
+  - "major" — it distorts a key feature or the overview: the wrong overall trend, the wrong largest or smallest category, a reversed central comparison.
+  - "minor" — a local slip that leaves the overall picture intact.
+
+=== STEP 2 — TASK ACHIEVEMENT ===
+
+The first criterion for Task 1 is TASK ACHIEVEMENT, not Task Response. In the JSON it is reported under the key "task_response"; score it strictly as Task Achievement. It asks whether the candidate:
+- gives a clear OVERVIEW of the main trends, differences or stages. Without a recognisable overview, Task Achievement is normally held at band 5, however accurate the details. The overview may be in the introduction or the conclusion; it must summarise the big picture, not repeat numbers.
+- SELECTS the key features and SUPPORTS them with data. Key features are normally the highest and lowest points, the largest changes, the clearest contrasts, and any point where one series overtakes another (see the reference facts). Leaving out a clear crossover or the biggest contrast means key features are not fully covered — that limits the band, but it is an omission, not an inaccuracy.
 - makes COMPARISONS where the data invites them.
-- reports the data ACCURATELY. A misread or wrongly reported figure is an accuracy error; several of them, or one that distorts a key feature, cost band.
-- stays OBJECTIVE. Personal opinions, recommendations, and causes or explanations that are not in the visual are irrelevant content and are penalised.
+- reports the data ACCURATELY (Step 1).
+- stays OBJECTIVE: opinions, recommendations and causes that are not in the visual are irrelevant content.
 
 Task Achievement guide (use the half bands between these):
-- 8 and above: all requirements covered; key features clearly presented, highlighted and illustrated; clear overview.
+- 8 and above: all requirements covered; key features clearly presented, highlighted and illustrated; clear overview; accurate.
 - 7: clear overview of the main trends or differences; key features clearly highlighted but could be more fully extended.
 - 6: an overview is present and information is appropriately selected; key features adequately covered, but some detail may be irrelevant, inappropriate or inaccurate.
 - 5: no clear overview, or details recounted mechanically; key features inadequately covered; a tendency to focus on detail.
 - 4: attempts the task but misses key features or confuses them with detail.
 
-Word count is ${wordCount}. Under 150 words is a Task Achievement penalty; state it explicitly if it applies. Length is not a merit in itself — do not reward a longer response for being longer.
+Accuracy must affect the band PROPORTIONATELY:
+- One minor inaccuracy in an otherwise accurate, well-selected report: about half a band below what the report would otherwise earn.
+- Several minor inaccuracies, or one major inaccuracy: about a full band below, and Task Achievement cannot be 8 or above.
+- Inaccuracies that distort the overview itself: Task Achievement is normally 5 or 6.
+- Approximations are never a deduction.
 
-Coherence & Cohesion, Lexical Resource and Grammatical Range & Accuracy are assessed exactly as in Task 2. For Lexical Resource, Task 1 specifically rewards precise language for describing data: trends (rose steadily, levelled off, fluctuated), comparison (twice as much as, by far the largest share) and approximation (roughly, just over a quarter). Repeating "increased" and "decreased" throughout limits the ceiling.
+Word count is ${wordCount}. Under 150 words is a Task Achievement penalty; state it explicitly if it applies. Length is not a merit in itself.
+
+Coherence & Cohesion, Lexical Resource and Grammatical Range & Accuracy are assessed as in Task 2. For Lexical Resource, Task 1 specifically rewards precise language for describing data: trends (rose steadily, levelled off, fluctuated), comparison (twice as much as, by far the largest share) and approximation (roughly, just over a quarter). Repeating the same verbs throughout limits the ceiling. Inaccurate data is a Task Achievement matter — do NOT also deduct it from Lexical Resource or Grammar.
+
+=== FAIRNESS — DEDUCT ONLY WHAT THE DESCRIPTORS PENALISE ===
+
+- Every deduction must be traceable to something specific: a data check, a named key feature that was left out, or a quoted language problem. If you cannot point to it, do not deduct.
+- Do not deduct for omitting minor details or most of the reference facts.
+- A separate conclusion is not required; an overview in the introduction is enough.
+- Giving many figures is not a fault when they are grouped by trend and compared; it is a fault only when figures are listed mechanically without selection.
+- Do not count the same weakness twice across criteria.
+- Simple but correct vocabulary caps the Lexical Resource ceiling; it does not pull the score into band 5.
 
 === SCORING DISCIPLINE ===
 
-Assess the four criteria SEPARATELY, each against its own descriptor. Do not form an overall impression first and then spread it across four boxes. Do NOT manufacture a spread either: if the response is genuinely uniform, identical numbers are correct.
+Assess the four criteria SEPARATELY, each against its own descriptor. Do not form an overall impression first and spread it across four boxes, and do not manufacture a spread either.
 
-Be honest, not kind. IELTS is reported in HALF bands and most real candidates land on them. Band 9 is extremely rare. Band 6 is the most common real score, and the realistic range for a motivated learner is 5.5-7.0. The absence of errors is not band 8 — band 8 requires range used naturally and a fully developed response. Over-correction is an equal error: do not deduct for something the descriptor does not penalise.
-
-For Lexical Resource: vocabulary that is WRONG (wrong word, broken collocation, wrong form, misspelling) costs band; vocabulary that is SIMPLE BUT CORRECT only caps the ceiling. If every word is used correctly and the meaning is never in doubt, the floor is band 6.
+IELTS is reported in HALF bands and most real candidates land on them. Band 9 is extremely rare. Band 6 is the most common real score; the realistic range for a motivated learner is 5.5-7.0. The absence of errors is not band 8 — band 8 requires range used naturally and a fully developed response. An inflated score sends the candidate into the exam unprepared; an over-harsh one is an equal error.
 
 "overall" is the mean of the four criteria rounded to the nearest half band.
 
 === CONSISTENCY CHECK — BEFORE YOU FINALISE ===
 
-Your bands must agree with your own prose. If "to_improve" names a real present weakness — no overview, a misreported figure, formulaic linking — that weakness must be visible in the band. 8.5 and 9.0 mean you looked for a substantive weakness in that criterion and found none. Do not invent a criticism merely to justify a low number.
+- If any data check is "inaccurate", the Task Achievement "why" must name it with the correct value, and neither "why" nor "summary" may describe the figures as fully accurate.
+- If "to_improve" names a real present weakness — no overview, a misreported figure, an uncovered key feature, formulaic linking — that weakness must be visible in the band.
+- 8.5 and 9.0 mean you looked for a substantive weakness in that criterion and found none.
+- Do not invent a criticism merely to justify a low number.
 ${spellingList}
 
 === WHAT TO PRODUCE ===
 
-For each criterion give: the band, a SHORT verbatim quote from the response that justifies it, and what specifically would raise it by half a band. For Task Achievement, say explicitly whether an overview is present, and name any figure that was reported inaccurately together with the correct value from the data.
+For each criterion: the band, a SHORT verbatim quote that justifies it, and what specifically would raise it by half a band.
 
-Then produce inline annotations: specific spans of the candidate's text that contain a problem. Each annotation's "quote" MUST be copied verbatim, character for character, from the response so it can be located in the text. Keep quotes short (3-15 words). Produce 5-8 annotations covering a mix of types. Use type "task" for inaccurate figures, missing comparisons, irrelevant opinion and other Task Achievement problems.
+Every data check marked "inaccurate" is automatically highlighted in the candidate's text, so do NOT repeat those spans in "annotations". Use 4-7 annotations for language, cohesion and other task problems such as a missing comparison or irrelevant opinion. Each annotation's "quote" MUST be copied verbatim, character for character, from the response. Keep quotes short (3-15 words).
+
+In "data_checks", "quote" must also be copied verbatim from the response — the shortest span that contains the claim.
 
 NEVER present correct English as an error. Before writing each annotation ask: is this span actually WRONG, or merely PLAIN?
   - genuinely wrong → state the error directly in "note".
   - correct but improvable → "note" MUST begin with "Xato emas — yaxshilash:" and then explain the stronger option.
-A figure that is a reasonable reading of a chart is not an error.
 
 ${spellingRule}
 
-Write all feedback in Uzbek (latin script). Keep quoted English from the response in English.
+Write all feedback in Uzbek (latin script), including every "note" and "correct_value". Keep quoted English from the response in English.
 
-Return ONLY valid JSON, no markdown fences, exactly this shape:
+Return ONLY valid JSON, no markdown fences, exactly this shape — fill "data_checks" FIRST:
 {
+  "data_checks": [
+    { "quote": "verbatim span from the response", "claim": "what it asserts, briefly", "verdict": "correct", "correct_value": "grafikdagi haqiqiy qiymat", "severity": "minor", "note": "faqat inaccurate bo'lsa: nega noto'g'ri — bir jumlada" }
+  ],
   "task_response": 6.0,
   "coherence_cohesion": 6.5,
   "lexical_resource": 5.5,
@@ -317,7 +367,7 @@ Return ONLY valid JSON, no markdown fences, exactly this shape:
   "overall": 6.0,
   "summary": "2-3 jumla: eng muhim kuchli tomon va eng muhim zaiflik",
   "criteria_feedback": {
-    "task_response":     { "why": "nega aynan shu ball (overview bormi, raqamlar to'g'rimi)", "evidence": "javobdan qisqa iqtibos", "to_improve": "yarim ball ko'tarish uchun aniq nima qilish kerak" },
+    "task_response":     { "why": "nega aynan shu ball (overview bormi, asosiy xususiyatlar, raqamlar aniqligi)", "evidence": "javobdan qisqa iqtibos", "to_improve": "yarim ball ko'tarish uchun aniq nima qilish kerak" },
     "coherence_cohesion":{ "why": "...", "evidence": "...", "to_improve": "..." },
     "lexical_resource":  { "why": "...", "evidence": "...", "to_improve": "..." },
     "grammatical_range": { "why": "...", "evidence": "...", "to_improve": "..." }
@@ -325,8 +375,8 @@ Return ONLY valid JSON, no markdown fences, exactly this shape:
   "annotations": [
     {
       "quote": "verbatim span copied exactly from the response",
-      "type": "task",
-      "severity": "high",
+      "type": "vocabulary",
+      "severity": "medium",
       "fix": "tuzatilgan variant",
       "note": "nega xato — bir jumlada"
     }
@@ -338,8 +388,9 @@ Return ONLY valid JSON, no markdown fences, exactly this shape:
   "strengths": ["aniq kuchli tomon, umumiy maqtov emas"]
 }
 
+"verdict" must be one of: correct, approximation, inaccurate.
 "type" must be one of: grammar, vocabulary, cohesion, task, spelling.
-"severity" must be one of: high, medium, low.`
+"severity" in annotations must be one of: high, medium, low; in data_checks one of: minor, major.`
 }
 
 Deno.serve(async (req: Request) => {
@@ -626,6 +677,13 @@ Deno.serve(async (req: Request) => {
       return Math.min(9, Math.max(0, Math.round(n * 2) / 2))
     }
 
+    // Task 1: model har bir raqam va solishtiruvchi da'voni `data_checks` ga
+    // yozadi; noto'g'rilari kod bilan matndagi belgiga aylantiriladi —
+    // model ularni `annotations` ga qo'shishni unutsa ham (task1-checks.ts).
+    const dataChecks = taskType === 'task1' ? normalizeDataChecks(assessment.data_checks, essay) : []
+    const taskAnnotations = dataCheckAnnotations(dataChecks)
+    const taskQuotes = taskAnnotations.map((a) => a.quote)
+
     const record = {
       user_id: user.id,
       task_type: taskType,
@@ -642,10 +700,12 @@ Deno.serve(async (req: Request) => {
       feedback: {
         summary: assessment.summary ?? '',
         criteria_feedback: assessment.criteria_feedback ?? {},
+        data_checks: dataChecks,
         // Matn ichida belgilash uchun — quote essaydan aynan ko'chirilgan bo'lishi shart.
         // Imlo xatolari lug'atdan keladi (kafolatlangan), qolganlari modeldan.
         annotations: [
           ...spellingIssues,
+          ...taskAnnotations,
           ...(Array.isArray(assessment.annotations)
             ? assessment.annotations.filter((a: any) =>
                 a && typeof a.quote === 'string'
@@ -653,7 +713,9 @@ Deno.serve(async (req: Request) => {
                 // qabul qilmaymiz — u xato aytadi. Lug'at ishlamasa
                 // uning imlo annotatsiyalari yagona manba bo'lib qoladi.
                 && (isDictionaryActive() ? a.type !== 'spelling' : true)
-                && essay.includes(a.quote))
+                && essay.includes(a.quote)
+                // Ma'lumot tekshiruvi belgilagan joyni ikkinchi marta belgilamaymiz
+                && !overlapsAny(a.quote, taskQuotes))
             : []),
         ],
         spelling_count: spellingIssues.reduce((n, s) => n + s.count, 0),

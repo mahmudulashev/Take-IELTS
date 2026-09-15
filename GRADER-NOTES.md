@@ -189,6 +189,39 @@ birlashtirish o'sha kalibratsiyani buzish xavfini tug'dirardi.
   `band_task`). UI Task 1'da uni "Task Achievement" deb ko'rsatadi.
 - `taskType` yubormagan eski klient avtomatik Task 2 deb qabul qilinadi.
 
+### Birinchi sinov va tuzatish (2026-09-15)
+
+Bar chart javobi (183 so'z) **8.0** oldi (TA 8 / CC 8 / LR 7.5 / GRA 8).
+Javobda aniq xato bor edi: *"18 hours ... which was the highest figure in
+the whole chart"* — aslida eng katta qiymat 19 (Watching TV, 50+), va buni
+javobning o'zi keyingi paragrafda aytgan. Model xatoni belgilamadi va
+xulosada "barcha raqamlar 100% aniq" deb yozdi. TV social media'dan o'zib
+ketgan joy (25–34 → 35–49) ham aytilmagan edi — bu ham ko'rsatilmadi.
+
+Sabab: model "eng yuqori" da'voni faqat gap tegishli seriya ichida
+tekshirgan. Tuzatish — ikki qatlam, ikkalasi ham **adolat** uchun:
+
+- **Tayanch faktlarni kod hisoblaydi** (`lib/task1-chart.js`): butun
+  grafikdagi eng katta/kichik qiymat, har guruhdagi tartib, kesishishlar,
+  tengliklar, o'qish ruxsati. Model hisob-kitobda adashmaydi.
+- **O'qish ruxsati = o'q qadamining choragi** (0–20 o'qda ±1). Shu
+  oraliqdagi raqam to'g'ri o'qilgan hisoblanadi. Tartib/"eng" da'vosi faqat
+  haqiqiy qiymatlar farqi ruxsatdan **kichik** bo'lsa kechiriladi — 18 va 19
+  (farq = 1) kechirilmaydi.
+- **`data_checks` majburiy va birinchi.** Model ball qo'yishdan oldin har
+  bir raqam, solishtirish va trend da'vosini yozib tekshiradi. `inaccurate`
+  larni kod `task` belgisiga aylantiradi (`task1-checks.ts`), UI esa
+  "Ma'lumot aniqligi" bo'limida ko'rsatadi.
+- **Mutanosib jazo:** bitta kichik xato ≈ −0.5; bir nechta kichik yoki
+  bitta asosiy xato ≈ −1 va TA 8 dan past; overview'ni buzuvchi xato → 5–6.
+  Taxminiy qiymat hech qachon jazolanmaydi.
+- **Ortiqcha jazoga qarshi qoidalar:** har bir tushirilgan ball aniq
+  sababga bog'lanishi shart; tenglikdagi "eng" to'g'ri; hisoblangan
+  nisbatlar to'g'ri; ma'lumot xatosi LR/GRA dan qayta tushirilmaydi.
+
+Kutilgan natija: shu javob qayta yuborilsa "highest figure" da'vosi
+`inaccurate` bo'lib belgilanadi, TA taxminan 7–7.5 ga tushadi.
+
 ---
 
 ## Ochiq ishlar

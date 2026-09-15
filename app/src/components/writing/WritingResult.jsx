@@ -15,6 +15,56 @@ const CRITERIA = [
   { key: 'grammatical_range',  field: 'band_grammar',   label: 'Grammatical Range', short: 'Grammatika' },
 ]
 
+/**
+ * Task 1: AI javobdagi har bir raqam va solishtiruvchi da'voni grafik bilan
+ * tekshiradi. Nimalar tekshirilgani ko'rinib tursin — ball nimaga
+ * asoslanganini foydalanuvchi o'zi ko'ra olsin.
+ */
+function DataChecks({ checks }) {
+  const wrong = checks.filter((c) => c.verdict === 'inaccurate')
+  const approx = checks.filter((c) => c.verdict === 'approximation')
+
+  return (
+    <div className="mt-6 rounded-2xl border border-gray-100 p-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+        <h4 className="text-sm font-bold text-gray-900">Ma'lumot aniqligi</h4>
+        <span className="text-xs text-gray-400">
+          {checks.length} ta da'vo tekshirildi · {wrong.length} ta noto'g'ri · {approx.length} ta taxminiy
+        </span>
+      </div>
+
+      {wrong.length === 0 ? (
+        <p className="text-xs text-green-700 bg-green-50 rounded-xl p-3">
+          Keltirilgan raqamlar va solishtirishlar grafikka mos.
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {wrong.map((c, i) => (
+            <li key={i} className="text-xs bg-red-50 rounded-xl p-3 leading-relaxed">
+              <p className="text-gray-800 italic">"{c.quote}"</p>
+              {c.correct_value && (
+                <p className="text-gray-700 mt-1">
+                  <span className="font-bold text-[#FF3131]">To'g'risi: </span>{c.correct_value}
+                </p>
+              )}
+              {c.note && <p className="text-gray-500 mt-1">{c.note}</p>}
+              {c.severity === 'major' && (
+                <p className="text-[11px] font-bold text-[#FF3131] mt-1">Asosiy xususiyatni buzadi</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {approx.length > 0 && (
+        <p className="text-[11px] text-gray-400 mt-3 leading-relaxed">
+          Taxminiy deb qabul qilindi, ball tushirilmadi: {approx.map((c) => `"${c.quote}"`).join(', ')}
+        </p>
+      )}
+    </div>
+  )
+}
+
 function barColor(band) {
   const b = parseFloat(band)
   if (b >= 7) return 'bg-green-500'
@@ -63,7 +113,7 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
             <span>{TASK_CONFIG[task].label} · Tahlil</span>
           </div>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900">
-            Inshoyingiz baholandi
+            {task === 'task1' ? 'Javobingiz baholandi' : 'Inshoyingiz baholandi'}
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 mt-1">
             {result.word_count} so'z · {annotations.length} ta belgilangan joy
@@ -136,12 +186,16 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
             {fb.summary}
           </p>
         )}
+
+        {task === 'task1' && Array.isArray(fb.data_checks) && fb.data_checks.length > 0 && (
+          <DataChecks checks={fb.data_checks} />
+        )}
       </div>
 
       {/* ---------- ASOSIY QISM: belgilangan insho ---------- */}
       <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden">
         <div className="p-6 md:p-8 border-b border-gray-100">
-          <h3 className="font-bold text-gray-900 text-lg mb-1">Inshoyingiz, xatolar belgilangan holda</h3>
+          <h3 className="font-bold text-gray-900 text-lg mb-1">{task === 'task1' ? 'Javobingiz' : 'Inshoyingiz'}, xatolar belgilangan holda</h3>
           <p className="text-xs text-gray-500">
             Rangli joyni bosing — tuzatilgan variant va sababi chiqadi.
           </p>
