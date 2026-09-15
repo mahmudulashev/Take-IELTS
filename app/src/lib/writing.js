@@ -52,7 +52,7 @@ export function clearDraft() {
  * Inshoni baholashga yuborish.
  * @returns {Promise<{ok: boolean, data?: object, error?: string, limitReached?: boolean}>}
  */
-export async function evaluateEssay({ promptId, promptText, essay, timeSpent }) {
+export async function evaluateEssay({ promptId, promptText, essay, timeSpent, taskType = 'task2', taskData }) {
   if (!isSupabaseConfigured || !supabase) {
     return { ok: false, error: 'Baholash xizmati sozlanmagan. Supabase kalitlarini tekshiring.' }
   }
@@ -65,7 +65,7 @@ export async function evaluateEssay({ promptId, promptText, essay, timeSpent }) 
 
   try {
     const { data, error } = await supabase.functions.invoke('evaluate-writing', {
-      body: { promptId, promptText, essay, timeSpent },
+      body: { promptId, promptText, essay, timeSpent, taskType, taskData },
     })
 
     if (error) {

@@ -17,6 +17,8 @@
  * ballining taxminan uchdan ikki qismi.
  */
 
+import { WRITING_TASK1_PACKS } from './writing-task1-prompts'
+
 export const WRITING_PACKS = [
   {
     id: 'writing-1',
@@ -155,9 +157,28 @@ export const WRITING_PACKS = [
   },
 ]
 
-/** To'plamni id bo'yicha topish */
+export { WRITING_TASK1_PACKS }
+
+/**
+ * Task bo'yicha rasmiy talablar. Sahifalar shu yerdan o'qiydi —
+ * vaqt va so'z minimumi bir necha joyda qo'lda yozilib, bir-biridan
+ * ajralib ketmasin.
+ */
+export const TASK_CONFIG = {
+  task1: { label: 'Writing Task 1', seconds: 20 * 60, minWords: 150, criterion: 'Task Achievement', criterionShort: 'TA' },
+  task2: { label: 'Writing Task 2', seconds: 40 * 60, minWords: 250, criterion: 'Task Response', criterionShort: 'TR' },
+}
+
+/** Task 2 to'plamlarida `task` maydoni yo'q — sukut bo'yicha task2 */
+export function taskOf(pack) {
+  return pack?.task === 'task1' ? 'task1' : 'task2'
+}
+
+/** To'plamni id bo'yicha topish (Task 1 va Task 2) */
 export function getPromptById(id) {
-  return WRITING_PACKS.find((p) => p.id === id) || null
+  return WRITING_PACKS.find((p) => p.id === id)
+    || WRITING_TASK1_PACKS.find((p) => p.id === id)
+    || null
 }
 
 /** Eski nom bilan chaqiruvlar buzilmasin */

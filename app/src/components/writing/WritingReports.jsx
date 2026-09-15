@@ -123,7 +123,7 @@ export default function WritingReports({ results = [], syncError = null }) {
         </div>
         <p className="text-base font-bold text-gray-700 mb-1.5">Hali insho yozilmagan</p>
         <p className="text-xs text-gray-500 mb-6 max-w-sm mx-auto leading-relaxed">
-          Writing Task 2 inshosini yozing — AI to'rtta rasmiy mezon bo'yicha
+          Writing Task 1 yoki Task 2 javobini yozing — AI to'rtta rasmiy mezon bo'yicha
           baholaydi va xatolarni matn ichida ko'rsatadi.
         </p>
         <Link
@@ -191,6 +191,9 @@ export default function WritingReports({ results = [], syncError = null }) {
             >
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold text-gray-900 truncate mb-1">
+                  <span className="inline-block align-middle text-[10px] font-extrabold text-[#FF3131] bg-[#FFF0F0] px-1.5 py-0.5 rounded mr-2">
+                    {row.task_type === 'task1' ? 'Task 1' : 'Task 2'}
+                  </span>
                   {row.prompt_text}
                 </p>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-400 font-medium">
@@ -209,7 +212,9 @@ export default function WritingReports({ results = [], syncError = null }) {
               <div className="hidden md:flex items-center gap-2 shrink-0">
                 {CRITERIA.map(([field, label]) => (
                   <div key={field} className="text-center px-2">
-                    <p className="text-[10px] font-bold text-gray-300 uppercase">{label}</p>
+                    <p className="text-[10px] font-bold text-gray-300 uppercase">
+                      {field === 'band_task' && row.task_type === 'task1' ? 'TA' : label}
+                    </p>
                     <p className="text-xs font-bold text-gray-600">{row[field] ?? '—'}</p>
                   </div>
                 ))}

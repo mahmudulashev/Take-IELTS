@@ -167,6 +167,30 @@ ga yozilgan 272 so'zlik insho.
 
 ---
 
+## Task 1 (Academic) — alohida prompt
+
+`buildTask1Prompt` Task 2 promptidan ataylab ajratilgan. Task 2 prompti
+langar insholar bilan kalibrlangan — ikkalasini bitta umumiy promptga
+birlashtirish o'sha kalibratsiyani buzish xavfini tug'dirardi.
+
+- **Grafik matn sifatida beriladi.** Model rasmni ko'rmaydi. Klient
+  `chartToText` (lib/task1-chart.js) bilan jadval yuboradi — `taskData`.
+  Aynan shu ma'lumot ekrandagi grafikni ham chizadi, shuning uchun
+  "raqam noto'g'ri keltirilgan" degan izohni tekshirib bo'ladi.
+- **Taxminiy qiymat xato emas.** Bar va line grafiklarda qiymat o'q
+  bo'yicha taxminan o'qiladi — prompt buni ochiq aytadi. Pie va
+  jadvalda raqam yozilgan, u yerda aniqlik talab qilinadi.
+- **Overview — eng muhim belgi.** Busiz Task Achievement odatda 5 da
+  ushlab turiladi, tafsilotlar qanchalik aniq bo'lmasin.
+- **Langar javoblar yo'q.** Task 2 langarlari Task 1'ga yaramaydi,
+  Task 1 uchun haqiqiy baholangan namunalar esa hali to'planmagan.
+  To'qib chiqarilgan "ekspert bahosi" qo'yilmagan.
+- JSON kaliti `task_response` ikkala task uchun bir xil (baza ustuni
+  `band_task`). UI Task 1'da uni "Task Achievement" deb ko'rsatadi.
+- `taskType` yubormagan eski klient avtomatik Task 2 deb qabul qilinadi.
+
+---
+
 ## Ochiq ishlar
 
 - Langar yondashuvi hali sinalmagan. Kutilgan natija: writing-11
@@ -183,3 +207,6 @@ ga yozilgan 272 so'zlik insho.
   Hozirgacha to'g'ri hisoblab kelgan, lekin uni koddan hisoblash
   (to'rt mezon o'rtachasi + IELTS yaxlitlashi) bu manbani butunlay
   yo'q qilardi.
+- **Task 1 prompti hali haqiqiy javoblarda sinalmagan.** 2–3 ta javobni
+  har xil darajada (overview'siz, raqam xatosi bilan, kuchli) yuborib,
+  ballar mantiqiy chiqishini tekshirish, keyin langar qo'shish kerak.

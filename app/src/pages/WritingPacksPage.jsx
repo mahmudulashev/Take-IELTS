@@ -2,8 +2,31 @@ import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Sidebar from '../components/layout/Sidebar'
 import { useAuth } from '../context/AuthContext'
-import { WRITING_PACKS } from '../data/writing-prompts'
-import { PenLine, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react'
+import { WRITING_PACKS, WRITING_TASK1_PACKS, TASK_CONFIG } from '../data/writing-prompts'
+import { PenLine, ArrowRight, CheckCircle2, Sparkles, BarChart3 } from 'lucide-react'
+
+/**
+ * Imtihondagi tartib bilan: avval Task 1, keyin Task 2.
+ * Vaqt va so'z minimumi TASK_CONFIG'dan olinadi.
+ */
+const SECTIONS = [
+  {
+    task: 'task1',
+    packs: WRITING_TASK1_PACKS,
+    icon: BarChart3,
+    title: 'Task 1 — Grafik tasviri',
+    description: "Grafik yoki jadvaldagi asosiy ma'lumotni tanlab, solishtirib yozasiz.",
+    cta: 'Boshlash',
+  },
+  {
+    task: 'task2',
+    packs: WRITING_PACKS,
+    icon: PenLine,
+    title: 'Task 2 — Insho',
+    description: "Berilgan mavzu bo'yicha fikringizni dalillar bilan asoslaysiz.",
+    cta: 'Inshoni Boshlash',
+  },
+]
 
 export default function WritingPacksPage() {
   const { user, sessionChecked, signOut, results } = useAuth()
@@ -44,78 +67,97 @@ export default function WritingPacksPage() {
         <div className="bg-white rounded-[24px] p-6 md:p-8 border border-gray-100 shadow-sm mb-8">
           <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF3131] uppercase tracking-wider bg-[#FFF0F0] px-3 py-1 rounded-full mb-2">
             <PenLine className="w-3.5 h-3.5" />
-            <span>Writing Task 2 To'plami</span>
+            <span>Writing Task 1 va Task 2</span>
           </div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900">
             IELTS Writing Test To'plamlari
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            40 daqiqa, kamida 250 so'z. Insho tugagach AI to'rtta rasmiy mezon
-            bo'yicha baholaydi va xatolarni matn ichida ko'rsatadi.
+            Task 1: {TASK_CONFIG.task1.seconds / 60} daqiqa, kamida {TASK_CONFIG.task1.minWords} so'z.
+            Task 2: {TASK_CONFIG.task2.seconds / 60} daqiqa, kamida {TASK_CONFIG.task2.minWords} so'z.
+            Javob tugagach AI to'rtta rasmiy mezon bo'yicha baholaydi va xatolarni matn ichida ko'rsatadi.
           </p>
         </div>
 
-        {/* Grid of Writing Packs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {WRITING_PACKS.map(pack => {
-            const packResult = getPackResult(pack.id)
+        <div className="space-y-10">
+          {SECTIONS.map((section) => {
+            const cfg = TASK_CONFIG[section.task]
+            const Icon = section.icon
 
             return (
-              <div
-                key={pack.id}
-                className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group hover:-translate-y-1"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-[#FFF0F0] text-[#FF3131] flex items-center justify-center">
-                      <PenLine className="w-6 h-6" />
-                    </div>
-
-                    {packResult ? (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Band {packResult.band_score}</span>
-                      </span>
-                    ) : (
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
-                        Yozilmagan
-                      </span>
-                    )}
+              <section key={section.task}>
+                <div className="flex items-end justify-between gap-4 mb-4">
+                  <div className="min-w-0">
+                    <h2 className="text-lg font-extrabold text-gray-900">{section.title}</h2>
+                    <p className="text-xs text-gray-500 mt-0.5">{section.description}</p>
                   </div>
-
-                  <h3 className="text-base font-extrabold text-gray-900 mb-1.5 group-hover:text-[#FF3131] transition-colors">
-                    {pack.title}
-                  </h3>
-
-                  <div className="flex flex-wrap items-center gap-2 mb-3">
-                    <span className="text-[11px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
-                      {pack.type}
-                    </span>
-                    <span className="text-[11px] font-bold text-gray-400">{pack.topic}</span>
-                  </div>
-
-                  {/* Mavzuning o'zi — foydalanuvchi tanlashdan oldin ko'rsin */}
-                  <p className="text-xs text-gray-500 leading-relaxed mb-5 line-clamp-3">
-                    {pack.text}
-                  </p>
-
-                  <div className="flex items-center gap-3 text-xs font-semibold text-gray-500 mb-6">
-                    <span>250+ so'z</span>
-                    <span>•</span>
-                    <span>40 daqiqa</span>
-                    <span>•</span>
-                    <span>{pack.difficulty}</span>
-                  </div>
+                  <span className="text-xs font-bold text-gray-400 shrink-0">{section.packs.length} ta to'plam</span>
                 </div>
 
-                <Link
-                  to={`/test/writing/${pack.id}`}
-                  className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-[#FF3131] text-white font-bold text-xs hover:bg-[#E82C2C] transition-all shadow-md shadow-[#FF3131]/20"
-                >
-                  <span>{packResult ? 'Qayta Yozish' : 'Inshoni Boshlash'}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {section.packs.map(pack => {
+                    const packResult = getPackResult(pack.id)
+
+                    return (
+                      <div
+                        key={pack.id}
+                        className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group hover:-translate-y-1"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="w-12 h-12 rounded-2xl bg-[#FFF0F0] text-[#FF3131] flex items-center justify-center">
+                              <Icon className="w-6 h-6" />
+                            </div>
+
+                            {packResult ? (
+                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span>Band {packResult.band_score}</span>
+                              </span>
+                            ) : (
+                              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
+                                Yozilmagan
+                              </span>
+                            )}
+                          </div>
+
+                          <h3 className="text-base font-extrabold text-gray-900 mb-1.5 group-hover:text-[#FF3131] transition-colors">
+                            {pack.title}
+                          </h3>
+
+                          <div className="flex flex-wrap items-center gap-2 mb-3">
+                            <span className="text-[11px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                              {pack.type}
+                            </span>
+                            <span className="text-[11px] font-bold text-gray-400">{pack.topic}</span>
+                          </div>
+
+                          {/* Mavzuning o'zi — foydalanuvchi tanlashdan oldin ko'rsin */}
+                          <p className="text-xs text-gray-500 leading-relaxed mb-5 line-clamp-3">
+                            {pack.text}
+                          </p>
+
+                          <div className="flex items-center gap-3 text-xs font-semibold text-gray-500 mb-6">
+                            <span>{cfg.minWords}+ so'z</span>
+                            <span>•</span>
+                            <span>{cfg.seconds / 60} daqiqa</span>
+                            <span>•</span>
+                            <span>{pack.difficulty}</span>
+                          </div>
+                        </div>
+
+                        <Link
+                          to={`/test/writing/${pack.id}`}
+                          className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-[#FF3131] text-white font-bold text-xs hover:bg-[#E82C2C] transition-all shadow-md shadow-[#FF3131]/20"
+                        >
+                          <span>{packResult ? 'Qayta Yozish' : section.cta}</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
             )
           })}
         </div>
@@ -128,8 +170,10 @@ export default function WritingPacksPage() {
           <div>
             <h3 className="font-bold text-gray-900 text-sm mb-1">Baholash qanday ishlaydi</h3>
             <p className="text-xs text-gray-500 leading-relaxed">
-              Insho Task Response, Coherence &amp; Cohesion, Lexical Resource va
-              Grammatical Range bo'yicha alohida baholanadi. Xatolar matn ichida
+              Javob to'rt mezon bo'yicha alohida baholanadi: Task Achievement (Task 1)
+              yoki Task Response (Task 2), Coherence &amp; Cohesion, Lexical Resource va
+              Grammatical Range. Task 1'da AI grafikdagi aniq raqamlarni ham oladi, shuning
+              uchun noto'g'ri keltirilgan ma'lumotni ko'rsatib bera oladi. Xatolar matn ichida
               belgilanadi — bosilsa tuzatilgan variant va sababi chiqadi.
               Bu <strong>taxminiy baho</strong>, rasmiy IELTS ekspertining bahosi emas.
             </p>

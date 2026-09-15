@@ -33,7 +33,7 @@ o'tishi bilan qanday o'zgarayotganini grafiklarda ko'rsatadi.
 |---|---|
 | **Reading** | 5 ta to'liq test · 3 passage · 40 savol · 60 daqiqa · avtomatik ball |
 | **Listening** | 4 ta faol test · audio bilan · 40 savol · avtomatik ball |
-| **Writing** | Task 2 uchun 15 ta mavzu · AI baholash · to'rt mezon bo'yicha band |
+| **Writing** | Task 1: 4 ta grafik (bar, line, pie, jadval) · Task 2: 15 ta mavzu · AI baholash · to'rt mezon bo'yicha band |
 | **Hisobotlar** | Band score dinamikasi, mezonlar kesimi, chuqur tahlil bo'limi |
 | **Profil** | Supabase auth (email/parol va Google), natijalar tarixi |
 
@@ -42,7 +42,7 @@ o'tishi bilan qanday o'zgarayotganini grafiklarda ko'rsatadi.
 Insho Supabase Edge Function orqali Gemini modeliga yuboriladi va IELTS'ning
 to'rtta rasmiy mezoni bo'yicha baholanadi:
 
-- **Task Response** — savolga qanchalik to'liq javob berilgan
+- **Task Response / Task Achievement** — savolga qanchalik to'liq javob berilgan (Task 1'da: overview va raqamlar aniqligi)
 - **Coherence & Cohesion** — tuzilma va bog'lovchi vositalar
 - **Lexical Resource** — so'z boyligi
 - **Grammatical Range & Accuracy** — grammatika

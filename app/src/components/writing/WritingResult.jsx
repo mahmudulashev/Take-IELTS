@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AnnotatedEssay, { typeMeta, TYPE_META } from './AnnotatedEssay'
+import Task1Chart from './Task1Chart'
+import { getPromptById, TASK_CONFIG } from '../../data/writing-prompts'
 import {
   PenLine, RefreshCw, ArrowLeft, AlertTriangle, Target,
   ChevronRight, Sparkles, X,
@@ -38,6 +40,18 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
 
   const overall = result.band_overall
 
+  // Birinchi mezon Task 1'da boshqa nomlanadi, lekin baza ustuni
+  // (`band_task`) va JSON kaliti (`task_response`) ikkalasida bir xil.
+  const task = result?.task_type === 'task1' ? 'task1' : 'task2'
+  const criteria = CRITERIA.map((c) => (c.key === 'task_response'
+    ? { ...c, label: TASK_CONFIG[task].criterion, short: task === 'task1' ? 'Topshiriqni bajarish' : c.short }
+    : c))
+
+  // Task 1 izohlari grafikdagi raqamlarga ishora qiladi — grafik ko'rinib tursin
+  const chart = task === 'task1'
+    ? (prompt?.chart ?? getPromptById(result?.prompt_id)?.chart ?? null)
+    : null
+
   return (
     <div className="space-y-6">
 
@@ -46,7 +60,7 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
         <div className="min-w-0">
           <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF3131] uppercase tracking-wider bg-[#FFF0F0] px-3 py-1 rounded-full mb-2">
             <PenLine className="w-3.5 h-3.5" />
-            <span>Writing Task 2 · Tahlil</span>
+            <span>{TASK_CONFIG[task].label} · Tahlil</span>
           </div>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900">
             Inshoyingiz baholandi
@@ -76,7 +90,7 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
         <h3 className="font-bold text-gray-900 text-lg mb-6">Mezonlar bo'yicha</h3>
 
         <div className="space-y-5">
-          {CRITERIA.map((c) => {
+          {criteria.map((c) => {
             const band = result[c.field]
             const detail = fb.criteria_feedback?.[c.key]
             const pct = Math.max(0, Math.min(100, (parseFloat(band) || 0) / 9 * 100))
@@ -290,6 +304,11 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
       <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm">
         <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Mavzu</p>
         <p className="text-xs text-gray-600 leading-relaxed mb-5">{result.prompt_text || prompt?.text}</p>
+        {chart && (
+          <div className="mb-5 rounded-xl border border-gray-100 p-3 sm:p-4">
+            <Task1Chart chart={chart} />
+          </div>
+        )}
 
         <div className="flex items-start gap-2 text-[11px] text-gray-400 leading-relaxed border-t border-gray-100 pt-4">
           <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />

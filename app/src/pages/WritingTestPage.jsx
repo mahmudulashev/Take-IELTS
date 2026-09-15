@@ -2,17 +2,18 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import Sidebar from '../components/layout/Sidebar'
 import { useAuth } from '../context/AuthContext'
-import { getPromptById } from '../data/writing-prompts'
+import { getPromptById, taskOf, TASK_CONFIG } from '../data/writing-prompts'
 import {
   countWords, evaluateEssay, saveDraft, readDraft, clearDraft,
 } from '../lib/writing'
 import WritingResult from '../components/writing/WritingResult'
+import Task1Chart from '../components/writing/Task1Chart'
+import { chartToText } from '../lib/task1-chart'
 import {
   PenLine, Clock, AlertTriangle, Sparkles, RefreshCw, Info, Pause, Play,
 } from 'lucide-react'
 
-const TOTAL_SECONDS = 40 * 60   // Task 2 uchun rasmiy vaqt
-const MIN_WORDS = 250           // rasmiy minimum
+// Vaqt va so'z minimumi task turiga bog'liq: data/writing-prompts.js → TASK_CONFIG
 
 function formatTime(sec) {
   const m = Math.floor(Math.max(0, sec) / 60)
@@ -27,9 +28,11 @@ export default function WritingTestPage() {
   // Mavzu URL'dan keladi: /test/writing/writing-3
   const { packId } = useParams()
   const prompt = getPromptById(packId)
+  const task = taskOf(prompt)
+  const cfg = TASK_CONFIG[task]
   const [essay, setEssay] = useState('')
   const [started, setStarted] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS)
+  const [timeLeft, setTimeLeft] = useState(cfg.seconds)
   const [evaluating, setEvaluating] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
@@ -60,6 +63,13 @@ export default function WritingTestPage() {
     if (d?.essay && d.promptId === packId) setDraftOffer(d)
     else setDraftOffer(null)
   }, [packId])
+
+  // Bir to'plamdan boshqasiga o'tganda (masalan, brauzerning "orqaga"
+  // tugmasi bilan) komponent qayta yaratilmaydi. Task 1 va Task 2 vaqti
+  // har xil — boshlanmagan taymerni yangi to'plam me'yoriga qaytaramiz.
+  useEffect(() => {
+    if (!started) setTimeLeft(cfg.seconds)
+  }, [cfg.seconds, started])
 
   const restoreDraft = () => {
     if (!draftOffer) return
@@ -136,7 +146,10 @@ export default function WritingTestPage() {
       promptId: packId,
       promptText: prompt?.text ?? '',
       essay,
-      timeSpent: TOTAL_SECONDS - timeLeft,
+      timeSpent: cfg.seconds - timeLeft,
+      taskType: task,
+      // Task 1: AI grafikni ko'rmaydi — aynan shu raqamlarni matn qilib beramiz
+      taskData: prompt?.chart ? chartToText(prompt.chart) : undefined,
     })
 
     setEvaluating(false)
@@ -149,7 +162,7 @@ export default function WritingTestPage() {
     clearDraft()
     setResult(res.data)
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [essay, wordCount, prompt, packId, timeLeft, evaluating])
+  }, [essay, wordCount, prompt, packId, timeLeft, evaluating, task, cfg.seconds])
 
   // Vaqt tugasa avtomatik yuborish
   useEffect(() => {
@@ -163,7 +176,7 @@ export default function WritingTestPage() {
     setEssay('')
     setResult(null)
     setError(null)
-    setTimeLeft(TOTAL_SECONDS)
+    setTimeLeft(cfg.seconds)
     setStarted(false)
     setPaused(false)
   }
@@ -192,13 +205,13 @@ export default function WritingTestPage() {
           <div>
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF3131] uppercase tracking-wider bg-[#FFF0F0] px-3 py-1 rounded-full mb-2">
               <PenLine className="w-3.5 h-3.5" />
-              <span>Writing Task 2</span>
+              <span>{cfg.label}</span>
             </div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900">
-              Insho yozing, AI baholab beradi
+              {task === 'task1' ? 'Grafikni tasvirlab bering, AI baholaydi' : 'Insho yozing, AI baholab beradi'}
             </h1>
             <p className="text-xs text-gray-500 mt-1.5">
-              40 daqiqa · kamida {MIN_WORDS} so'z · to'rtta rasmiy mezon bo'yicha tahlil
+              {cfg.seconds / 60} daqiqa · kamida {cfg.minWords} so'z · to'rtta rasmiy mezon bo'yicha tahlil
             </p>
           </div>
 
@@ -271,16 +284,32 @@ export default function WritingTestPage() {
 
                 <p className="text-sm text-gray-800 leading-relaxed font-medium mb-5">{prompt.text}</p>
 
+                {prompt.chart && (
+                  <div className="mb-5 rounded-xl border border-gray-100 p-3 sm:p-4">
+                    <Task1Chart chart={prompt.chart} />
+                  </div>
+                )}
+
                 <div className="text-[11px] text-gray-500 leading-relaxed bg-gray-50 rounded-xl p-3.5 space-y-1">
-                  <p>· Kamida {MIN_WORDS} so'z yozing</p>
-                  <p>· Fikringizni aniq bildiring va misollar bilan asoslang</p>
-                  <p>· Kirish, 2–3 asosiy paragraf va xulosa tuzilmasiga amal qiling</p>
+                  <p>· Kamida {cfg.minWords} so'z yozing</p>
+                  {task === 'task1' ? (
+                    <>
+                      <p>· Umumiy tendensiyani (overview) alohida ayting — busiz Task Achievement odatda 5 bilan cheklanadi</p>
+                      <p>· Asosiy farq va o'zgarishlarni raqamlar bilan ko'rsating</p>
+                      <p>· Shaxsiy fikr va sabab yozmang — faqat grafikdagi ma'lumot</p>
+                    </>
+                  ) : (
+                    <>
+                      <p>· Fikringizni aniq bildiring va misollar bilan asoslang</p>
+                      <p>· Kirish, 2–3 asosiy paragraf va xulosa tuzilmasiga amal qiling</p>
+                    </>
+                  )}
                 </div>
 
                 {!started && (
                   <button onClick={() => setStarted(true)}
                     className="w-full mt-5 py-3.5 rounded-xl bg-[#FF3131] hover:bg-[#E82C2C] text-white font-bold text-xs transition-colors">
-                    Boshlash (40 daqiqa)
+                    Boshlash ({cfg.seconds / 60} daqiqa)
                   </button>
                 )}
                 {!started && (
@@ -295,9 +324,9 @@ export default function WritingTestPage() {
             <div className="lg:col-span-7">
               <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-bold text-gray-900 text-sm">Sizning inshoyingiz</h3>
-                  <span className={`text-xs font-bold ${wordCount >= MIN_WORDS ? 'text-green-600' : 'text-gray-400'}`}>
-                    {wordCount} / {MIN_WORDS} so'z
+                  <h3 className="font-bold text-gray-900 text-sm">{task === 'task1' ? 'Sizning javobingiz' : 'Sizning inshoyingiz'}</h3>
+                  <span className={`text-xs font-bold ${wordCount >= cfg.minWords ? 'text-green-600' : 'text-gray-400'}`}>
+                    {wordCount} / {cfg.minWords} so'z
                   </span>
                 </div>
 
@@ -311,7 +340,7 @@ export default function WritingTestPage() {
                     onChange={(e) => setEssay(e.target.value)}
                     onFocus={() => !started && setStarted(true)}
                     disabled={evaluating || paused}
-                    placeholder="Inshoyingizni shu yerga yozing…"
+                    placeholder={task === 'task1' ? 'Javobingizni shu yerga yozing…' : 'Inshoyingizni shu yerga yozing…'}
                     spellCheck={false}
                     className="w-full h-[420px] p-4 rounded-xl border border-gray-200 focus:border-[#FF3131] focus:ring-2 focus:ring-[#FF3131]/10 outline-none text-sm leading-relaxed resize-none font-sans disabled:bg-gray-50"
                   />
@@ -355,9 +384,9 @@ export default function WritingTestPage() {
                     : <><Sparkles className="w-4 h-4" /> Topshirish va baholash</>}
                 </button>
 
-                {wordCount > 0 && wordCount < MIN_WORDS && (
+                {wordCount > 0 && wordCount < cfg.minWords && (
                   <p className="text-[11px] text-gray-400 mt-2.5 text-center leading-relaxed">
-                    {MIN_WORDS} so'zdan kam insho Task Response mezoni bo'yicha jazolanadi.
+                    {cfg.minWords} so'zdan kam javob {cfg.criterion} mezoni bo'yicha jazolanadi.
                   </p>
                 )}
               </div>

@@ -216,6 +216,132 @@ Return ONLY valid JSON, no markdown fences, exactly this shape:
 "severity" must be one of: high, medium, low.`
 }
 
+/**
+ * Academic Writing Task 1 uchun baholash prompti.
+ *
+ * NIMA UCHUN buildPrompt'dan ALOHIDA (matn qisman takrorlansa ham):
+ * Task 2 prompti haqiqiy insholar bilan kalibrlangan (GRADER-NOTES.md).
+ * Uni ikki task uchun umumiylashtirib qayta tuzish o'sha kalibratsiyani
+ * buzish xavfini tug'diradi. Task 1'ning birinchi mezoni ham boshqa
+ * narsani o'lchaydi — overview va ma'lumot aniqligi — shuning uchun
+ * Task 2 anchor insholari bu yerga yaramaydi va ataylab kiritilmagan.
+ * Task 1 uchun haqiqiy baholangan namunalar to'plangach, ular shu yerga
+ * anchor sifatida qo'shiladi.
+ *
+ * JSON kaliti `task_response` saqlab qolingan: baza ustuni (`band_task`)
+ * va interfeys ikkala task uchun bitta. Mezon nomi UI'da almashtiriladi.
+ */
+function buildTask1Prompt(
+  promptText: string,
+  taskData: string,
+  report: string,
+  wordCount: number,
+  spellingList: string,
+  spellingRule: string,
+): string {
+  return `You are a senior IELTS examiner with 15 years of experience. Assess this Academic Writing Task 1 response against the official public band descriptors.
+
+TASK PROMPT:
+"""
+${promptText}
+"""
+
+THE VISUAL THE CANDIDATE WAS SHOWN, as exact data:
+"""
+${taskData}
+"""
+The candidate saw this as a chart or table, not as text. For bar charts and line graphs they had to read values off an axis, so reasonable approximations ("just under 20", "around 3 million") are CORRECT and must not be penalised. For pie charts and tables the figures were printed, so they should be reported accurately. Treat this data block as the ground truth when checking every figure the candidate cites.
+
+CANDIDATE'S RESPONSE (${wordCount} words):
+"""
+${report}
+"""
+
+=== WHAT TASK 1 MEASURES — THIS IS NOT AN ESSAY ===
+
+The first criterion for Task 1 is TASK ACHIEVEMENT, not Task Response. In the JSON below it is still reported under the key "task_response"; score it strictly as Task Achievement. It asks whether the candidate:
+- gives a clear OVERVIEW of the main trends, differences or stages. This is the single most important feature. Without a recognisable overview, Task Achievement is normally held at band 5 however accurate the details are. The overview may sit in the introduction or the conclusion; it must summarise the big picture, not repeat individual numbers.
+- SELECTS the key features instead of listing every figure mechanically. Reporting all the numbers one by one is a band 5 characteristic, not thoroughness.
+- SUPPORTS the key features with data. Key features described with no figures at all are inadequately illustrated.
+- makes COMPARISONS where the data invites them.
+- reports the data ACCURATELY. A misread or wrongly reported figure is an accuracy error; several of them, or one that distorts a key feature, cost band.
+- stays OBJECTIVE. Personal opinions, recommendations, and causes or explanations that are not in the visual are irrelevant content and are penalised.
+
+Task Achievement guide (use the half bands between these):
+- 8 and above: all requirements covered; key features clearly presented, highlighted and illustrated; clear overview.
+- 7: clear overview of the main trends or differences; key features clearly highlighted but could be more fully extended.
+- 6: an overview is present and information is appropriately selected; key features adequately covered, but some detail may be irrelevant, inappropriate or inaccurate.
+- 5: no clear overview, or details recounted mechanically; key features inadequately covered; a tendency to focus on detail.
+- 4: attempts the task but misses key features or confuses them with detail.
+
+Word count is ${wordCount}. Under 150 words is a Task Achievement penalty; state it explicitly if it applies. Length is not a merit in itself — do not reward a longer response for being longer.
+
+Coherence & Cohesion, Lexical Resource and Grammatical Range & Accuracy are assessed exactly as in Task 2. For Lexical Resource, Task 1 specifically rewards precise language for describing data: trends (rose steadily, levelled off, fluctuated), comparison (twice as much as, by far the largest share) and approximation (roughly, just over a quarter). Repeating "increased" and "decreased" throughout limits the ceiling.
+
+=== SCORING DISCIPLINE ===
+
+Assess the four criteria SEPARATELY, each against its own descriptor. Do not form an overall impression first and then spread it across four boxes. Do NOT manufacture a spread either: if the response is genuinely uniform, identical numbers are correct.
+
+Be honest, not kind. IELTS is reported in HALF bands and most real candidates land on them. Band 9 is extremely rare. Band 6 is the most common real score, and the realistic range for a motivated learner is 5.5-7.0. The absence of errors is not band 8 — band 8 requires range used naturally and a fully developed response. Over-correction is an equal error: do not deduct for something the descriptor does not penalise.
+
+For Lexical Resource: vocabulary that is WRONG (wrong word, broken collocation, wrong form, misspelling) costs band; vocabulary that is SIMPLE BUT CORRECT only caps the ceiling. If every word is used correctly and the meaning is never in doubt, the floor is band 6.
+
+"overall" is the mean of the four criteria rounded to the nearest half band.
+
+=== CONSISTENCY CHECK — BEFORE YOU FINALISE ===
+
+Your bands must agree with your own prose. If "to_improve" names a real present weakness — no overview, a misreported figure, formulaic linking — that weakness must be visible in the band. 8.5 and 9.0 mean you looked for a substantive weakness in that criterion and found none. Do not invent a criticism merely to justify a low number.
+${spellingList}
+
+=== WHAT TO PRODUCE ===
+
+For each criterion give: the band, a SHORT verbatim quote from the response that justifies it, and what specifically would raise it by half a band. For Task Achievement, say explicitly whether an overview is present, and name any figure that was reported inaccurately together with the correct value from the data.
+
+Then produce inline annotations: specific spans of the candidate's text that contain a problem. Each annotation's "quote" MUST be copied verbatim, character for character, from the response so it can be located in the text. Keep quotes short (3-15 words). Produce 5-8 annotations covering a mix of types. Use type "task" for inaccurate figures, missing comparisons, irrelevant opinion and other Task Achievement problems.
+
+NEVER present correct English as an error. Before writing each annotation ask: is this span actually WRONG, or merely PLAIN?
+  - genuinely wrong → state the error directly in "note".
+  - correct but improvable → "note" MUST begin with "Xato emas — yaxshilash:" and then explain the stronger option.
+A figure that is a reasonable reading of a chart is not an error.
+
+${spellingRule}
+
+Write all feedback in Uzbek (latin script). Keep quoted English from the response in English.
+
+Return ONLY valid JSON, no markdown fences, exactly this shape:
+{
+  "task_response": 6.0,
+  "coherence_cohesion": 6.5,
+  "lexical_resource": 5.5,
+  "grammatical_range": 6.0,
+  "overall": 6.0,
+  "summary": "2-3 jumla: eng muhim kuchli tomon va eng muhim zaiflik",
+  "criteria_feedback": {
+    "task_response":     { "why": "nega aynan shu ball (overview bormi, raqamlar to'g'rimi)", "evidence": "javobdan qisqa iqtibos", "to_improve": "yarim ball ko'tarish uchun aniq nima qilish kerak" },
+    "coherence_cohesion":{ "why": "...", "evidence": "...", "to_improve": "..." },
+    "lexical_resource":  { "why": "...", "evidence": "...", "to_improve": "..." },
+    "grammatical_range": { "why": "...", "evidence": "...", "to_improve": "..." }
+  },
+  "annotations": [
+    {
+      "quote": "verbatim span copied exactly from the response",
+      "type": "task",
+      "severity": "high",
+      "fix": "tuzatilgan variant",
+      "note": "nega xato — bir jumlada"
+    }
+  ],
+  "next_band": {
+    "target": 6.5,
+    "actions": ["aniq, bajariladigan qadam 1", "qadam 2", "qadam 3"]
+  },
+  "strengths": ["aniq kuchli tomon, umumiy maqtov emas"]
+}
+
+"type" must be one of: grammar, vocabulary, cohesion, task, spelling.
+"severity" must be one of: high, medium, low.`
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (req.method !== 'POST') return json({ error: 'Faqat POST' }, 405)
@@ -243,9 +369,19 @@ Deno.serve(async (req: Request) => {
     const body = await req.json().catch(() => null)
     if (!body) return json({ error: "So'rov formati noto'g'ri." }, 400)
 
-    const { promptId, promptText, essay, timeSpent } = body
+    const { promptId, promptText, essay, timeSpent, taskData } = body
+    // Eski klientlar taskType yubormaydi — ular faqat Task 2 bilan ishlagan.
+    const taskType = body.taskType === 'task1' ? 'task1' : 'task2'
     if (typeof promptText !== 'string' || typeof essay !== 'string') {
       return json({ error: 'promptText va essay matn bo\'lishi kerak.' }, 400)
+    }
+    // Task 1'ni grafik ma'lumotisiz baholab bo'lmaydi: model raqamlar to'g'ri
+    // keltirilganini tekshira olmaydi va Task Achievement taxminga aylanadi.
+    if (taskType === 'task1' && (typeof taskData !== 'string' || !taskData.trim())) {
+      return json({ error: 'Task 1 uchun grafik ma\'lumoti (taskData) kerak.' }, 400)
+    }
+    if (typeof taskData === 'string' && taskData.length > 4000) {
+      return json({ error: 'Grafik ma\'lumoti juda katta.' }, 400)
     }
 
     const wordCount = countWords(essay)
@@ -339,7 +475,9 @@ Deno.serve(async (req: Request) => {
     // tanlash uchun model'ga o'ylash vaqti kerak ekan. Shuning uchun
     // 'medium' — tezlik uchun quyidagi ikki optimizatsiyaga tayanamiz
     // (lug'atni oldindan yuklash + chiqish hajmini qisqartirish).
-    const promptText_ = buildPrompt(promptText, essay, wordCount, spellingList, spellingRule)
+    const promptText_ = taskType === 'task1'
+      ? buildTask1Prompt(promptText, taskData, essay, wordCount, spellingList, spellingRule)
+      : buildPrompt(promptText, essay, wordCount, spellingList, spellingRule)
     const buildGeminiBody = (withThinking: boolean) => JSON.stringify({
       contents: [{ parts: [{ text: promptText_ }] }],
       generationConfig: {
@@ -490,7 +628,7 @@ Deno.serve(async (req: Request) => {
 
     const record = {
       user_id: user.id,
-      task_type: 'task2',
+      task_type: taskType,
       prompt_id: typeof promptId === 'string' ? promptId : null,
       prompt_text: promptText,
       essay,
