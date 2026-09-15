@@ -1,19 +1,275 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useId } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AnnotatedEssay, { typeMeta, TYPE_META } from './AnnotatedEssay'
 import Task1Chart from './Task1Chart'
 import { getPromptById, TASK_CONFIG } from '../../data/writing-prompts'
+import { useAuth } from '../../context/AuthContext'
+import { formatSeconds } from '../../lib/scoring'
 import {
-  PenLine, RefreshCw, ArrowLeft, AlertTriangle, Target,
+  RefreshCw, ArrowLeft, AlertTriangle, Target,
   ChevronRight, Sparkles, X,
 } from 'lucide-react'
 
 const CRITERIA = [
-  { key: 'task_response',      field: 'band_task',      label: 'Task Response',     short: 'Mavzuga javob' },
-  { key: 'coherence_cohesion', field: 'band_coherence', label: 'Coherence & Cohesion', short: 'Bog\'lanish' },
-  { key: 'lexical_resource',   field: 'band_lexical',   label: 'Lexical Resource',  short: 'So\'z boyligi' },
-  { key: 'grammatical_range',  field: 'band_grammar',   label: 'Grammatical Range', short: 'Grammatika' },
+  { key: 'task_response',      field: 'band_task',      label: 'Task Response',     ring: 'Task Response',     short: 'Mavzuga javob' },
+  { key: 'coherence_cohesion', field: 'band_coherence', label: 'Coherence & Cohesion', ring: 'Coherence',      short: 'Bog\'lanish' },
+  { key: 'lexical_resource',   field: 'band_lexical',   label: 'Lexical Resource',  ring: 'Lexical Resource',  short: 'So\'z boyligi' },
+  { key: 'grammatical_range',  field: 'band_grammar',   label: 'Grammatical Range', ring: 'Grammatical Range', short: 'Grammatika' },
 ]
+
+const UZ_MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr']
+
+function formatUzDateTime(iso) {
+  const d = iso ? new Date(iso) : new Date()
+  if (isNaN(d.getTime())) return ''
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  return `${d.getDate()}-${UZ_MONTHS[d.getMonth()]}, ${hh}:${mm}`
+}
+
+function isToday(iso) {
+  const d = iso ? new Date(iso) : new Date()
+  return d.toDateString() === new Date().toDateString()
+}
+
+function bandLevel(band) {
+  const b = Math.floor(band)
+  if (b >= 9) return 'mukammal daraja'
+  if (b >= 8) return 'juda yaxshi daraja'
+  if (b >= 7) return 'yaxshi daraja'
+  if (b >= 6) return 'qoniqarli daraja'
+  if (b >= 5) return "o'rtacha daraja"
+  if (b >= 4) return 'cheklangan daraja'
+  return "boshlang'ich daraja"
+}
+
+const num = (v) => {
+  const n = parseFloat(v)
+  return Number.isFinite(n) ? n : null
+}
+
+// 8 → "8", 7.5 → "7.5" (halqa ichida)
+const shortBand = (b) => (Number.isInteger(b) ? String(b) : b.toFixed(1))
+
+function Delta({ value }) {
+  if (value == null) return null
+  if (value > 0) return <span className="text-[13px] font-semibold text-[#1F7A48]">↑ {value.toFixed(1)}</span>
+  if (value < 0) return <span className="text-[13px] font-semibold text-[#C2242A]">↓ {Math.abs(value).toFixed(1)}</span>
+  return <span className="text-[13px] font-semibold text-[#6B7280]">→ 0.0</span>
+}
+
+/**
+ * Natija sahifasining yuqori qismi: sarlavha qatori, qora ball kartasi,
+ * ballar dinamikasi, ustuvor yo'nalish va to'rtta mezon halqasi.
+ * Dinamika va o'zgarishlar shu task turidagi oldingi insholardan olinadi.
+ */
+function ResultHero({ result, task, criteria, annotationsCount, onNewEssay }) {
+  const { results: allResults = [] } = useAuth() || {}
+  const gradId = useId().replace(/:/g, '')
+
+  const overall = num(result.band_overall)
+  const createdAt = result.created_at
+
+  // Shu task turidagi insholar, xronologik tartibda, joriy natijagacha
+  const history = useMemo(() => {
+    const cur = createdAt ? new Date(createdAt).getTime() : Date.now()
+    const rows = allResults
+      .map((r) => r.writing || r)
+      .filter((r) => r && r.band_overall != null && r.id !== result.id)
+      .filter((r) => (r.task_type === 'task1' ? 'task1' : 'task2') === task)
+      .filter((r) => new Date(r.created_at).getTime() < cur)
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    return [...rows, result]
+  }, [allResults, result, task, createdAt])
+
+  const previous = history.length > 1 ? history[history.length - 2] : null
+  const overallDelta = previous && overall != null ? overall - num(previous.band_overall) : null
+
+  const bands = criteria.map((c) => ({ ...c, band: num(result[c.field]) }))
+  const scored = bands.filter((c) => c.band != null)
+  const weakest = scored.length
+    ? scored.reduce((min, c) => (c.band < min.band ? c : min), scored[0])
+    : null
+  const target = num(result.feedback?.next_band?.target) ?? (overall != null ? Math.min(9, overall + 0.5) : null)
+
+  // Sparkline: oxirgi 6 ta insho
+  const spark = history.slice(-6).map((r) => num(r.band_overall)).filter((b) => b != null)
+  const sMin = Math.min(...spark)
+  const sMax = Math.max(...spark)
+  const pts = spark.map((b, i) => {
+    const x = spark.length === 1 ? 292 : 8 + (i * 284) / (spark.length - 1)
+    const y = sMax === sMin ? 47 : 80 - ((b - sMin) / (sMax - sMin)) * 66
+    return [Math.round(x), Math.round(y)]
+  })
+  const avg = spark.length ? spark.reduce((a, b) => a + b, 0) / spark.length : null
+  const last = pts[pts.length - 1]
+
+  const gaugeLen = 282.7
+  const gaugeDash = overall != null ? (overall / 9) * gaugeLen : 0
+
+  const stat4 = result.unlimited
+    ? { value: 'Limitsiz', label: 'kunlik urinish' }
+    : typeof result.attemptsToday === 'number' && result.dailyLimit
+      ? { value: `${result.attemptsToday}/${result.dailyLimit}`, label: 'bugungi urinish' }
+      : { value: result.time_spent > 0 ? formatSeconds(result.time_spent) : '—', label: 'yozish vaqti' }
+
+  const stats = [
+    { value: result.word_count ?? '—', label: "so'z" },
+    { value: annotationsCount, label: 'belgilangan joy' },
+    {
+      value: overallDelta == null ? '—' : `${overallDelta > 0 ? '+' : ''}${overallDelta.toFixed(1)}`,
+      label: 'oldingi inshoga nisbatan',
+    },
+    stat4,
+  ]
+
+  return (
+    <div className="flex flex-col gap-4 text-[#14181F] antialiased" style={{ fontFamily: "'Outfit', system-ui, sans-serif" }}>
+
+      {/* ---------- Sarlavha qatori ---------- */}
+      <div className="flex items-center justify-between gap-4 flex-wrap px-1">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="inline-flex items-center gap-[7px] bg-[#FFE9E9] text-[#C2242A] text-xs font-semibold tracking-[.09em] uppercase px-3 py-[7px] rounded-full">
+            {TASK_CONFIG[task].label} · Tahlil
+          </span>
+          <span className="text-sm text-[#6B7280]">{formatUzDateTime(createdAt)} · AI baholash</span>
+        </div>
+        {onNewEssay && (
+          <button
+            onClick={onNewEssay}
+            className="text-sm font-semibold bg-[#14181F] hover:bg-[#2A2F38] text-white rounded-xl px-[18px] py-2.5 transition-colors"
+          >
+            Yangi insho yozish
+          </button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 items-stretch">
+
+        {/* ---------- Qora ball kartasi ---------- */}
+        <div className="xl:col-span-2 min-w-0 bg-[#14181F] rounded-[24px] px-5 py-6 sm:px-8 sm:py-[30px] flex flex-col gap-[26px] relative overflow-hidden">
+          <div
+            className="absolute -top-20 -right-[60px] w-[260px] h-[260px] rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle,rgba(245,51,58,.28),rgba(245,51,58,0) 70%)' }}
+          />
+          <div className="flex items-start justify-between gap-5 flex-wrap relative">
+            <div className="flex flex-col gap-1.5 min-w-0">
+              <span className="text-[13px] font-semibold tracking-[.1em] uppercase text-[#FF8E7A]">
+                {task === 'task1' ? 'Javobingiz baholandi' : 'Inshoyingiz baholandi'}
+              </span>
+              <span className="text-2xl sm:text-[30px] font-semibold tracking-[-.02em] text-white leading-[1.15]">
+                {overall != null ? `Band ${shortBand(overall)} — ${bandLevel(overall)}` : 'Baho mavjud emas'}
+              </span>
+              {overall != null && (
+                <span className="text-[15px] text-[#A7ADB6]">
+                  {overall >= 9
+                    ? 'Maksimal ball.'
+                    : `9 ballgacha ${(9 - overall).toFixed(1)} ball qoldi.`}
+                  {weakest && weakest.band < 9 && ` Eng past mezon — ${weakest.short.toLowerCase()}.`}
+                </span>
+              )}
+            </div>
+            <div className="flex-none flex flex-col items-center gap-0.5">
+              <svg viewBox="0 0 220 124" className="w-[220px] h-[124px] block">
+                <path d="M 20 112 A 90 90 0 0 1 200 112" fill="none" stroke="#2A2F38" strokeWidth="16" strokeLinecap="round" />
+                {overall != null && (
+                  <path d="M 20 112 A 90 90 0 0 1 200 112" fill="none" stroke="#F5333A" strokeWidth="16" strokeLinecap="round" strokeDasharray={`${gaugeDash.toFixed(1)} ${gaugeLen}`} />
+                )}
+                <text x="110" y="100" textAnchor="middle" fill="#ffffff" fontFamily="Outfit, system-ui, sans-serif" fontSize="54" fontWeight="600" letterSpacing="-2">
+                  {overall != null ? overall.toFixed(1) : '—'}
+                </text>
+              </svg>
+              <span className="text-[13px] text-[#A7ADB6] tracking-[.04em]">9 ballik shkala</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-px bg-[#2A2F38] rounded-2xl overflow-hidden relative">
+            {stats.map((s) => (
+              <div key={s.label} className="bg-[#14181F] px-[18px] py-4 flex flex-col gap-[3px]">
+                <span className="text-[22px] font-semibold text-white">{s.value}</span>
+                <span className="text-[13px] text-[#A7ADB6]">{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="min-w-0 flex flex-col gap-4">
+          {/* ---------- Ballar dinamikasi ---------- */}
+          <div className="flex-1 bg-white border border-[#E9E9EC] rounded-[24px] px-6 py-[22px] flex flex-col gap-3.5">
+            <div className="flex items-baseline justify-between gap-2.5">
+              <span className="text-base font-semibold">Ballar dinamikasi</span>
+              <span className="text-[13px] text-[#6B7280]">{spark.length} insho</span>
+            </div>
+            <svg viewBox="0 0 300 96" preserveAspectRatio="none" className="w-full h-24 block">
+              <defs>
+                <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#F5333A" stopOpacity=".18" />
+                  <stop offset="100%" stopColor="#F5333A" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              {pts.length > 1 && (
+                <>
+                  <path d={`M${pts.map((p) => p.join(',')).join(' L')} L${last[0]},96 L${pts[0][0]},96 Z`} fill={`url(#${gradId})`} />
+                  <polyline points={pts.map((p) => p.join(',')).join(' ')} fill="none" stroke="#F5333A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                </>
+              )}
+              {last && <circle cx={last[0]} cy={last[1]} r="5" fill="#F5333A" />}
+            </svg>
+            <div className="flex justify-between text-[13px] text-[#6B7280]">
+              <span>O'rtacha {avg != null ? avg.toFixed(1) : '—'}</span>
+              <span className="text-[#14181F] font-semibold">
+                {isToday(createdAt) ? 'Bugun' : 'Shu insho'} {overall != null ? overall.toFixed(1) : '—'}
+              </span>
+            </div>
+          </div>
+
+          {/* ---------- Ustuvor yo'nalish ---------- */}
+          {weakest && (
+            <div className="bg-[#FFF1EF] rounded-[24px] px-6 py-[22px] flex flex-col gap-2">
+              <span className="text-xs font-semibold tracking-[.09em] uppercase text-[#C2242A]">Ustuvor yo'nalish</span>
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-xl font-semibold">{weakest.short}</span>
+                <span className="text-[28px] font-semibold text-[#C2242A]">{weakest.band.toFixed(1)}</span>
+              </div>
+              <p className="text-sm leading-normal text-[#4A5058]">
+                {target != null && overall != null && target > overall
+                  ? `Shu mezonni kuchaytirsangiz, umumiy ball ${target.toFixed(1)} ga chiqadi.`
+                  : 'Shu mezonni kuchaytirish umumiy ballni barqaror ushlab turadi.'}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ---------- Mezon halqalari ---------- */}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
+        {bands.map((c) => {
+          const circ = 163.4
+          const dash = c.band != null ? (c.band / 9) * circ : 0
+          const prev = previous ? num(previous[c.field]) : null
+          return (
+            <div key={c.key} className="bg-white border border-[#E9E9EC] rounded-[20px] px-[22px] py-5 flex items-center gap-[18px]">
+              <svg viewBox="0 0 64 64" className="w-16 h-16 flex-none">
+                <circle cx="32" cy="32" r="26" fill="none" stroke="#F1F1F2" strokeWidth="7" />
+                {c.band != null && (
+                  <circle cx="32" cy="32" r="26" fill="none" stroke="#F5333A" strokeWidth="7" strokeLinecap="round" strokeDasharray={`${dash.toFixed(1)} ${circ}`} transform="rotate(-90 32 32)" />
+                )}
+                <text x="32" y="38" textAnchor="middle" fill="#14181F" fontFamily="Outfit, system-ui, sans-serif" fontSize={c.band != null && !Number.isInteger(c.band) ? 16 : 18} fontWeight="600">
+                  {c.band != null ? shortBand(c.band) : '—'}
+                </text>
+              </svg>
+              <div className="flex flex-col gap-[3px] min-w-0">
+                <span className="text-[15px] font-semibold">{c.ring}</span>
+                <span className="text-[13px] text-[#6B7280]">{c.short}</span>
+                <Delta value={prev != null && c.band != null ? c.band - prev : null} />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 /**
  * Task 1: AI javobdagi har bir raqam va solishtiruvchi da'voni grafik bilan
@@ -94,7 +350,7 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
   // (`band_task`) va JSON kaliti (`task_response`) ikkalasida bir xil.
   const task = result?.task_type === 'task1' ? 'task1' : 'task2'
   const criteria = CRITERIA.map((c) => (c.key === 'task_response'
-    ? { ...c, label: TASK_CONFIG[task].criterion, short: task === 'task1' ? 'Topshiriqni bajarish' : c.short }
+    ? { ...c, label: TASK_CONFIG[task].criterion, ring: TASK_CONFIG[task].criterion, short: task === 'task1' ? 'Topshiriqni bajarish' : c.short }
     : c))
 
   // Task 1 izohlari grafikdagi raqamlarga ishora qiladi — grafik ko'rinib tursin
@@ -105,35 +361,14 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
   return (
     <div className="space-y-6">
 
-      {/* ---------- Sarlavha: boshqa sahifalar bilan bir xil uslub ---------- */}
-      <div className="bg-white rounded-[24px] p-5 sm:p-6 md:p-8 border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="min-w-0">
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF3131] uppercase tracking-wider bg-[#FFF0F0] px-3 py-1 rounded-full mb-2">
-            <PenLine className="w-3.5 h-3.5" />
-            <span>{TASK_CONFIG[task].label} · Tahlil</span>
-          </div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900">
-            {task === 'task1' ? 'Javobingiz baholandi' : 'Inshoyingiz baholandi'}
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">
-            {result.word_count} so'z · {annotations.length} ta belgilangan joy
-            {typeof result.attemptsToday === 'number' && result.dailyLimit
-              ? ` · bugun ${result.attemptsToday}/${result.dailyLimit}`
-              : ''}
-            {result.unlimited && ' · limitsiz'}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-5 shrink-0">
-          <div className="text-right">
-            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Umumiy</p>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-5xl font-extrabold text-[#FF3131] leading-none">{overall ?? '—'}</span>
-              <span className="text-sm font-bold text-gray-300">/9</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ---------- Yuqori qism: sarlavha, ball, dinamika, mezon halqalari ---------- */}
+      <ResultHero
+        result={result}
+        task={task}
+        criteria={criteria}
+        annotationsCount={annotations.length}
+        onNewEssay={onNewEssay}
+      />
 
       {/* ---------- Mezonlar: gorizontal bar, Reports uslubida ---------- */}
       <div className="bg-white rounded-[24px] p-6 md:p-8 border border-gray-100 shadow-sm">
