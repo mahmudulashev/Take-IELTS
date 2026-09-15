@@ -4,7 +4,6 @@ import AnnotatedEssay, { typeMeta, TYPE_META } from './AnnotatedEssay'
 import Task1Chart from './Task1Chart'
 import { getPromptById, TASK_CONFIG } from '../../data/writing-prompts'
 import { useAuth } from '../../context/AuthContext'
-import { formatSeconds } from '../../lib/scoring'
 import {
   RefreshCw, ArrowLeft, AlertTriangle,
   ChevronRight, X,
@@ -16,16 +15,6 @@ const CRITERIA = [
   { key: 'lexical_resource',   field: 'band_lexical',   label: 'Lexical Resource',  ring: 'Lexical Resource',  short: 'So\'z boyligi' },
   { key: 'grammatical_range',  field: 'band_grammar',   label: 'Grammatical Range', ring: 'Grammatical Range', short: 'Grammatika' },
 ]
-
-const UZ_MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr']
-
-function formatUzDateTime(iso) {
-  const d = iso ? new Date(iso) : new Date()
-  if (isNaN(d.getTime())) return ''
-  const hh = String(d.getHours()).padStart(2, '0')
-  const mm = String(d.getMinutes()).padStart(2, '0')
-  return `${d.getDate()}-${UZ_MONTHS[d.getMonth()]}, ${hh}:${mm}`
-}
 
 function isToday(iso) {
   const d = iso ? new Date(iso) : new Date()
@@ -63,7 +52,7 @@ function Delta({ value }) {
  * ballar dinamikasi, ustuvor yo'nalish va to'rtta mezon halqasi.
  * Dinamika va o'zgarishlar shu task turidagi oldingi insholardan olinadi.
  */
-function ResultHero({ result, task, criteria, annotationsCount, onNewEssay }) {
+function ResultHero({ result, task, criteria }) {
   const { results: allResults = [] } = useAuth() || {}
   const gradId = useId().replace(/:/g, '')
 
@@ -83,7 +72,6 @@ function ResultHero({ result, task, criteria, annotationsCount, onNewEssay }) {
   }, [allResults, result, task, createdAt])
 
   const previous = history.length > 1 ? history[history.length - 2] : null
-  const overallDelta = previous && overall != null ? overall - num(previous.band_overall) : null
 
   const bands = criteria.map((c) => ({ ...c, band: num(result[c.field]) }))
   const scored = bands.filter((c) => c.band != null)
@@ -107,42 +95,8 @@ function ResultHero({ result, task, criteria, annotationsCount, onNewEssay }) {
   const gaugeLen = 282.7
   const gaugeDash = overall != null ? (overall / 9) * gaugeLen : 0
 
-  const stat4 = result.unlimited
-    ? { value: 'Limitsiz', label: 'kunlik urinish' }
-    : typeof result.attemptsToday === 'number' && result.dailyLimit
-      ? { value: `${result.attemptsToday}/${result.dailyLimit}`, label: 'bugungi urinish' }
-      : { value: result.time_spent > 0 ? formatSeconds(result.time_spent) : '—', label: 'yozish vaqti' }
-
-  const stats = [
-    { value: result.word_count ?? '—', label: "so'z" },
-    { value: annotationsCount, label: 'belgilangan joy' },
-    {
-      value: overallDelta == null ? '—' : `${overallDelta > 0 ? '+' : ''}${overallDelta.toFixed(1)}`,
-      label: 'oldingi inshoga nisbatan',
-    },
-    stat4,
-  ]
-
   return (
     <div className="flex flex-col gap-4 text-[#14181F] antialiased" style={{ fontFamily: "'Outfit', system-ui, sans-serif" }}>
-
-      {/* ---------- Sarlavha qatori ---------- */}
-      <div className="flex items-center justify-between gap-4 flex-wrap px-1">
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className="inline-flex items-center gap-[7px] bg-[#FFE9E9] text-[#C2242A] text-xs font-semibold tracking-[.09em] uppercase px-3 py-[7px] rounded-full">
-            {TASK_CONFIG[task].label} · Tahlil
-          </span>
-          <span className="text-sm text-[#6B7280]">{formatUzDateTime(createdAt)} · AI baholash</span>
-        </div>
-        {onNewEssay && (
-          <button
-            onClick={onNewEssay}
-            className="text-sm font-semibold bg-[#14181F] hover:bg-[#2A2F38] text-white rounded-xl px-[18px] py-2.5 transition-colors"
-          >
-            Yangi insho yozish
-          </button>
-        )}
-      </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 items-stretch">
 
@@ -183,13 +137,9 @@ function ResultHero({ result, task, criteria, annotationsCount, onNewEssay }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-px bg-[#2A2F38] rounded-2xl overflow-hidden relative">
-            {stats.map((s) => (
-              <div key={s.label} className="bg-[#14181F] px-[18px] py-4 flex flex-col gap-[3px]">
-                <span className="text-[22px] font-semibold text-white">{s.value}</span>
-                <span className="text-[13px] text-[#A7ADB6]">{s.label}</span>
-              </div>
-            ))}
+          <div className="relative flex flex-col gap-[3px] w-fit min-w-[130px] border border-[#2A2F38] rounded-2xl px-[18px] py-4">
+            <span className="text-[22px] font-semibold text-white">{result.word_count ?? '—'}</span>
+            <span className="text-[13px] text-[#A7ADB6]">so'z</span>
           </div>
         </div>
 
@@ -373,8 +323,6 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
         result={result}
         task={task}
         criteria={criteria}
-        annotationsCount={annotations.length}
-        onNewEssay={onNewEssay}
       />
 
       {/* ---------- Mezonlar bo'yicha izoh ---------- */}
