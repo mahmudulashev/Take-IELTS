@@ -92,6 +92,10 @@ function ResultHero({ result, task, criteria }) {
   const avg = spark.length ? spark.reduce((a, b) => a + b, 0) / spark.length : null
   const last = pts[pts.length - 1]
 
+  const words = result.word_count || 0
+  const minWords = TASK_CONFIG[task].minWords
+  const wordsOk = words >= minWords
+
   const gaugeLen = 282.7
   const gaugeDash = overall != null ? (overall / 9) * gaugeLen : 0
 
@@ -101,45 +105,64 @@ function ResultHero({ result, task, criteria }) {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 items-stretch">
 
         {/* ---------- Qora ball kartasi ---------- */}
-        <div className="xl:col-span-2 min-w-0 bg-[#14181F] rounded-[24px] px-5 py-6 sm:px-8 sm:py-[30px] flex flex-col gap-[26px] relative overflow-hidden">
+        <div className="xl:col-span-2 min-w-0 bg-[#14181F] rounded-[24px] p-6 sm:p-8 relative overflow-hidden flex flex-col sm:flex-row sm:items-stretch gap-8">
           <div
-            className="absolute -top-20 -right-[60px] w-[260px] h-[260px] rounded-full pointer-events-none"
-            style={{ background: 'radial-gradient(circle,rgba(245,51,58,.28),rgba(245,51,58,0) 70%)' }}
+            className="absolute -top-24 -right-16 w-[320px] h-[320px] rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle,rgba(245,51,58,.22),rgba(245,51,58,0) 70%)' }}
           />
-          <div className="flex items-start justify-between gap-5 flex-wrap relative">
-            <div className="flex flex-col gap-1.5 min-w-0">
+
+          {/* Chap: baho matni va so'z hajmi */}
+          <div className="relative flex-1 min-w-0 flex flex-col justify-between gap-7">
+            <div className="flex flex-col gap-2">
               <span className="text-[13px] font-semibold tracking-[.1em] uppercase text-[#FF8E7A]">
                 {task === 'task1' ? 'Javobingiz baholandi' : 'Inshoyingiz baholandi'}
               </span>
-              <span className="text-2xl sm:text-[30px] font-semibold tracking-[-.02em] text-white leading-[1.15]">
-                {overall != null ? `Band ${shortBand(overall)} — ${bandLevel(overall)}` : 'Baho mavjud emas'}
+              <span className="text-[26px] sm:text-[32px] font-semibold tracking-[-.02em] text-white leading-[1.1]">
+                {overall != null ? <>Band {shortBand(overall)} <span className="text-[#A7ADB6] font-normal">—</span> {bandLevel(overall)}</> : 'Baho mavjud emas'}
               </span>
               {overall != null && (
-                <span className="text-[15px] text-[#A7ADB6]">
+                <span className="text-[15px] leading-relaxed text-[#A7ADB6] max-w-[460px]">
                   {overall >= 9
                     ? 'Maksimal ball.'
                     : `9 ballgacha ${(9 - overall).toFixed(1)} ball qoldi.`}
-                  {weakest && weakest.band < 9 && ` Eng past mezon — ${weakest.short.toLowerCase()}.`}
+                  {weakest && weakest.band < 9 && <> Eng past mezon — <span className="text-white">{weakest.short.toLowerCase()}</span>.</>}
                 </span>
               )}
             </div>
-            <div className="flex-none flex flex-col items-center gap-0.5">
-              <svg viewBox="0 0 220 124" className="w-[220px] h-[124px] block">
-                <path d="M 20 112 A 90 90 0 0 1 200 112" fill="none" stroke="#2A2F38" strokeWidth="16" strokeLinecap="round" />
-                {overall != null && (
-                  <path d="M 20 112 A 90 90 0 0 1 200 112" fill="none" stroke="#F5333A" strokeWidth="16" strokeLinecap="round" strokeDasharray={`${gaugeDash.toFixed(1)} ${gaugeLen}`} />
-                )}
-                <text x="110" y="100" textAnchor="middle" fill="#ffffff" fontFamily="Outfit, system-ui, sans-serif" fontSize="54" fontWeight="600" letterSpacing="-2">
-                  {overall != null ? overall.toFixed(1) : '—'}
-                </text>
-              </svg>
-              <span className="text-[13px] text-[#A7ADB6] tracking-[.04em]">9 ballik shkala</span>
+
+            <div className="flex flex-col gap-2.5 max-w-[420px] pt-5 border-t border-[#2A2F38]">
+              <div className="flex items-baseline justify-between gap-4">
+                <span className="flex items-baseline gap-1.5">
+                  <span className="text-[28px] font-semibold text-white leading-none">{words || '—'}</span>
+                  <span className="text-sm text-[#A7ADB6]">so'z</span>
+                </span>
+                <span className={`text-[13px] font-medium ${wordsOk ? 'text-[#6FCF97]' : 'text-[#FF8E7A]'}`}>
+                  {wordsOk ? `✓ ${minWords} so'z talabi bajarildi` : `${minWords - words} so'z yetmadi`}
+                </span>
+              </div>
+              <div className="h-1.5 rounded-full bg-[#2A2F38] overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${wordsOk ? 'bg-[#6FCF97]' : 'bg-[#F5333A]'}`}
+                  style={{ width: `${Math.min(100, (words / minWords) * 100)}%` }}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="relative flex flex-col gap-[3px] w-fit min-w-[130px] border border-[#2A2F38] rounded-2xl px-[18px] py-4">
-            <span className="text-[22px] font-semibold text-white">{result.word_count ?? '—'}</span>
-            <span className="text-[13px] text-[#A7ADB6]">so'z</span>
+          {/* O'ng: ball ko'rsatkichi */}
+          <div className="relative flex-none self-center flex flex-col items-center gap-1">
+            <svg viewBox="0 0 220 124" className="w-[240px] h-[135px] block">
+              <path d="M 20 112 A 90 90 0 0 1 200 112" fill="none" stroke="#2A2F38" strokeWidth="16" strokeLinecap="round" />
+              {overall != null && (
+                <path d="M 20 112 A 90 90 0 0 1 200 112" fill="none" stroke="#F5333A" strokeWidth="16" strokeLinecap="round" strokeDasharray={`${gaugeDash.toFixed(1)} ${gaugeLen}`} />
+              )}
+              <text x="110" y="104" textAnchor="middle" fill="#ffffff" fontFamily="Outfit, system-ui, sans-serif" fontSize="56" fontWeight="600" letterSpacing="-2">
+                {overall != null ? overall.toFixed(1) : '—'}
+              </text>
+            </svg>
+            <div className="flex justify-between w-[208px] text-[12px] text-[#6B7280] -mt-1">
+              <span>0</span><span className="tracking-[.04em] text-[#A7ADB6]">9 ballik shkala</span><span>9</span>
+            </div>
           </div>
         </div>
 
