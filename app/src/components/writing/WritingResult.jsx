@@ -6,8 +6,8 @@ import { getPromptById, TASK_CONFIG } from '../../data/writing-prompts'
 import { useAuth } from '../../context/AuthContext'
 import { formatSeconds } from '../../lib/scoring'
 import {
-  RefreshCw, ArrowLeft, AlertTriangle, Target,
-  ChevronRight, Sparkles, X,
+  RefreshCw, ArrowLeft, AlertTriangle,
+  ChevronRight, X,
 } from 'lucide-react'
 
 const CRITERIA = [
@@ -271,6 +271,9 @@ function ResultHero({ result, task, criteria, annotationsCount, onNewEssay }) {
   )
 }
 
+const LABEL = 'text-xs font-semibold tracking-[.09em] uppercase'
+const CARD = 'bg-white border border-[#E9E9EC] rounded-[24px]'
+
 /**
  * Task 1: AI javobdagi har bir raqam va solishtiruvchi da'voni grafik bilan
  * tekshiradi. Nimalar tekshirilgani ko'rinib tursin — ball nimaga
@@ -281,51 +284,44 @@ function DataChecks({ checks }) {
   const approx = checks.filter((c) => c.verdict === 'approximation')
 
   return (
-    <div className="mt-6 rounded-2xl border border-gray-100 p-4">
-      <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
-        <h4 className="text-sm font-bold text-gray-900">Ma'lumot aniqligi</h4>
-        <span className="text-xs text-gray-400">
+    <div className={`${CARD} px-5 py-6 sm:px-[30px] sm:py-7 flex flex-col gap-5`}>
+      <div className="flex items-baseline justify-between gap-3 flex-wrap">
+        <span className="text-[22px] font-semibold tracking-[-.01em]">Ma'lumot aniqligi</span>
+        <span className="text-sm text-[#6B7280]">
           {checks.length} ta da'vo tekshirildi · {wrong.length} ta noto'g'ri · {approx.length} ta taxminiy
         </span>
       </div>
 
       {wrong.length === 0 ? (
-        <p className="text-xs text-green-700 bg-green-50 rounded-xl p-3">
+        <p className="text-[15px] leading-normal text-[#1F7A48] bg-[#EEF7F1] rounded-2xl px-[18px] py-4">
           Keltirilgan raqamlar va solishtirishlar grafikka mos.
         </p>
       ) : (
-        <ul className="space-y-2">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-3">
           {wrong.map((c, i) => (
-            <li key={i} className="text-xs bg-red-50 rounded-xl p-3 leading-relaxed">
-              <p className="text-gray-800 italic">"{c.quote}"</p>
+            <div key={i} className="bg-[#FFF1EF] rounded-2xl px-[18px] py-4 flex flex-col gap-1.5">
+              <span className={`${LABEL} text-[#C2242A]`}>
+                {c.severity === 'major' ? 'Asosiy xususiyatni buzadi' : "Noto'g'ri raqam"}
+              </span>
+              <p className="text-[15px] leading-normal text-[#3F4650] italic">"{c.quote}"</p>
               {c.correct_value && (
-                <p className="text-gray-700 mt-1">
-                  <span className="font-bold text-[#FF3131]">To'g'risi: </span>{c.correct_value}
+                <p className="text-[15px] leading-normal text-[#3F4650]">
+                  <span className="font-semibold text-[#C2242A]">To'g'risi: </span>{c.correct_value}
                 </p>
               )}
-              {c.note && <p className="text-gray-500 mt-1">{c.note}</p>}
-              {c.severity === 'major' && (
-                <p className="text-[11px] font-bold text-[#FF3131] mt-1">Asosiy xususiyatni buzadi</p>
-              )}
-            </li>
+              {c.note && <p className="text-sm leading-normal text-[#6B7280]">{c.note}</p>}
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
       {approx.length > 0 && (
-        <p className="text-[11px] text-gray-400 mt-3 leading-relaxed">
+        <p className="text-sm text-[#6B7280] leading-relaxed">
           Taxminiy deb qabul qilindi, ball tushirilmadi: {approx.map((c) => `"${c.quote}"`).join(', ')}
         </p>
       )}
     </div>
   )
-}
-
-function barColor(band) {
-  const b = parseFloat(band)
-  if (b >= 7) return 'bg-green-500'
-  if (b >= 5.5) return 'bg-[#FF3131]'
-  return 'bg-amber-500'
 }
 
 export default function WritingResult({ result, prompt, onNewEssay }) {
@@ -344,7 +340,7 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
     return c
   }, [annotations])
 
-  const overall = result.band_overall
+  const overall = num(result.band_overall)
 
   // Birinchi mezon Task 1'da boshqa nomlanadi, lekin baza ustuni
   // (`band_task`) va JSON kaliti (`task_response`) ikkalasida bir xil.
@@ -353,13 +349,24 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
     ? { ...c, label: TASK_CONFIG[task].criterion, ring: TASK_CONFIG[task].criterion, short: task === 'task1' ? 'Topshiriqni bajarish' : c.short }
     : c))
 
+  // Kuchli / zaif mezon — faqat ballar farq qilganda ajratib ko'rsatiladi
+  const scored = criteria.map((c) => ({ ...c, band: num(result[c.field]) })).filter((c) => c.band != null)
+  const minBand = scored.length ? Math.min(...scored.map((c) => c.band)) : null
+  const maxBand = scored.length ? Math.max(...scored.map((c) => c.band)) : null
+  const uneven = minBand != null && minBand !== maxBand
+  const strongest = uneven ? scored.find((c) => c.band === maxBand) : null
+  const weakest = uneven ? scored.find((c) => c.band === minBand) : null
+  const target = num(fb.next_band?.target) ?? (overall != null ? Math.min(9, overall + 0.5) : null)
+
   // Task 1 izohlari grafikdagi raqamlarga ishora qiladi — grafik ko'rinib tursin
   const chart = task === 'task1'
     ? (prompt?.chart ?? getPromptById(result?.prompt_id)?.chart ?? null)
     : null
 
+  const noun = task === 'task1' ? 'Javob' : 'Insho'
+
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4 text-[#14181F] antialiased" style={{ fontFamily: "'Outfit', system-ui, sans-serif" }}>
 
       {/* ---------- Yuqori qism: sarlavha, ball, dinamika, mezon halqalari ---------- */}
       <ResultHero
@@ -370,77 +377,106 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
         onNewEssay={onNewEssay}
       />
 
-      {/* ---------- Mezonlar: gorizontal bar, Reports uslubida ---------- */}
-      <div className="bg-white rounded-[24px] p-6 md:p-8 border border-gray-100 shadow-sm">
-        <h3 className="font-bold text-gray-900 text-lg mb-6">Mezonlar bo'yicha</h3>
-
-        <div className="space-y-5">
-          {criteria.map((c) => {
-            const band = result[c.field]
-            const detail = fb.criteria_feedback?.[c.key]
-            const pct = Math.max(0, Math.min(100, (parseFloat(band) || 0) / 9 * 100))
-
-            return (
-              <div key={c.key}>
-                <div className="flex items-baseline justify-between gap-3 mb-2">
-                  <div className="min-w-0">
-                    <span className="text-sm font-bold text-gray-900">{c.label}</span>
-                    <span className="text-xs text-gray-400 ml-2">{c.short}</span>
-                  </div>
-                  <span className="text-lg font-extrabold text-gray-900 shrink-0">{band ?? '—'}</span>
-                </div>
-
-                <div className="h-2 rounded-full bg-gray-100 overflow-hidden mb-3">
-                  <div className={`h-full rounded-full ${barColor(band)}`} style={{ width: `${pct}%` }} />
-                </div>
-
-                {detail && typeof detail === 'object' && (
-                  <div className="pl-3 border-l-2 border-gray-100 space-y-1.5">
-                    <p className="text-xs text-gray-600 leading-relaxed">{detail.why}</p>
-                    {detail.evidence && (
-                      <p className="text-xs text-gray-400 italic leading-relaxed">"{detail.evidence}"</p>
-                    )}
-                    {detail.to_improve && (
-                      <p className="text-xs text-gray-800 leading-relaxed">
-                        <span className="font-bold text-[#FF3131]">+0.5 uchun: </span>
-                        {detail.to_improve}
-                      </p>
-                    )}
-                  </div>
-                )}
-                {typeof detail === 'string' && (
-                  <p className="text-xs text-gray-600 leading-relaxed pl-3 border-l-2 border-gray-100">{detail}</p>
-                )}
-              </div>
-            )
-          })}
+      {/* ---------- Mezonlar bo'yicha izoh ---------- */}
+      <div className={`${CARD} px-5 py-6 sm:px-[30px] sm:py-7 flex flex-col gap-6`}>
+        <div className="flex items-baseline justify-between gap-3 flex-wrap">
+          <span className="text-[22px] font-semibold tracking-[-.01em]">Mezonlar bo'yicha izoh</span>
+          <span className="text-sm text-[#6B7280]">Har bir mezon uchun sitata va +0.5 ga yo'l</span>
         </div>
 
-        {fb.summary && (
-          <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-2xl p-4 mt-6">
-            {fb.summary}
-          </p>
-        )}
+        {criteria.map((c) => {
+          const band = num(result[c.field])
+          const detail = fb.criteria_feedback?.[c.key]
+          const low = uneven && band === minBand
 
-        {task === 'task1' && Array.isArray(fb.data_checks) && fb.data_checks.length > 0 && (
-          <DataChecks checks={fb.data_checks} />
-        )}
+          return (
+            <div key={c.key} className="flex flex-col gap-3.5 pt-[22px] border-t border-[#EDEDF0]">
+              <div className="flex items-center gap-3.5 flex-wrap">
+                <span className="text-lg font-semibold">{c.label}</span>
+                <span className="text-sm text-[#6B7280]">{c.short}</span>
+                <span className={`ml-auto text-[15px] font-semibold rounded-[10px] px-3 py-1.5 ${
+                  low ? 'bg-[#FFE9E9] text-[#C2242A]' : 'bg-[#F4F4F5]'
+                }`}>
+                  {band != null ? band.toFixed(1) : '—'}
+                </span>
+              </div>
+
+              {detail && typeof detail === 'object' && (
+                <>
+                  {detail.why && <p className="text-[15px] leading-relaxed text-[#3F4650]">{detail.why}</p>}
+                  {(detail.evidence || detail.to_improve) && (
+                    <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-3">
+                      {detail.evidence && (
+                        <div className="bg-[#F7F7F8] rounded-2xl px-[18px] py-4 flex flex-col gap-1.5">
+                          <span className={`${LABEL} text-[#6B7280]`}>{noun}dan</span>
+                          <p className="text-[15px] leading-normal text-[#3F4650] italic">"{detail.evidence}"</p>
+                        </div>
+                      )}
+                      {detail.to_improve && (
+                        <div className="bg-[#FFF1EF] rounded-2xl px-[18px] py-4 flex flex-col gap-1.5">
+                          <span className={`${LABEL} text-[#C2242A]`}>+0.5 uchun</span>
+                          <p className="text-[15px] leading-normal text-[#3F4650]">{detail.to_improve}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+              {typeof detail === 'string' && (
+                <p className="text-[15px] leading-relaxed text-[#3F4650]">{detail}</p>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* ---------- Ma'lumot aniqligi: faqat Task 1 ---------- */}
+      {task === 'task1' && Array.isArray(fb.data_checks) && fb.data_checks.length > 0 && (
+        <DataChecks checks={fb.data_checks} />
+      )}
+
+      {/* ---------- Umumiy xulosa ---------- */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div className={`${CARD} ${fb.summary ? 'xl:col-span-2' : 'hidden'} min-w-0 px-5 py-6 sm:px-[30px] sm:py-7 flex flex-col gap-2.5`}>
+          <span className={`${LABEL} text-[#C2242A]`}>Umumiy xulosa</span>
+          <p className="text-[17px] sm:text-[19px] leading-[1.55] text-[#22262E]">{fb.summary}</p>
+        </div>
+        <div className={`${CARD} ${fb.summary ? '' : 'xl:col-span-3'} min-w-0 px-[26px] py-6 flex flex-col gap-3.5`}>
+          <div className="flex justify-between gap-2.5 text-[15px] text-[#6B7280] pb-3 border-b border-[#EDEDF0]">
+            <span>Kuchli tomon</span>
+            <span className="text-[#14181F] font-semibold text-right">{strongest ? strongest.short : '—'}</span>
+          </div>
+          <div className="flex justify-between gap-2.5 text-[15px] text-[#6B7280] pb-3 border-b border-[#EDEDF0]">
+            <span>Zaif tomon</span>
+            <span className="text-[#14181F] font-semibold text-right">{weakest ? weakest.short : '—'}</span>
+          </div>
+          <div className="flex justify-between gap-2.5 text-[15px] text-[#6B7280]">
+            <span>Keyingi maqsad</span>
+            <span className="text-[#C2242A] font-semibold">
+              {target != null && overall != null && target > overall ? target.toFixed(1) : '—'}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* ---------- ASOSIY QISM: belgilangan insho ---------- */}
-      <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden">
-        <div className="p-6 md:p-8 border-b border-gray-100">
-          <h3 className="font-bold text-gray-900 text-lg mb-1">{task === 'task1' ? 'Javobingiz' : 'Inshoyingiz'}, xatolar belgilangan holda</h3>
-          <p className="text-xs text-gray-500">
-            Rangli joyni bosing — tuzatilgan variant va sababi chiqadi.
-          </p>
+      <div className={`${CARD} overflow-hidden`}>
+        <div className="px-5 py-6 sm:px-[30px] sm:py-7 flex flex-col gap-5">
+          <div className="flex flex-col gap-1">
+            <span className="text-[22px] font-semibold tracking-[-.01em]">
+              {task === 'task1' ? 'Javobingiz' : 'Inshoyingiz'}, xatolar belgilangan holda
+            </span>
+            <span className="text-[15px] text-[#6B7280]">Rangli joyni bosing — tuzatilgan variant va sababi chiqadi.</span>
+          </div>
 
           {annotations.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 mt-4">
+            <div className="flex gap-2.5 flex-wrap">
               <button
                 onClick={() => { setFilter(null); setActiveIdx(null) }}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${
-                  filter === null ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                className={`text-sm rounded-xl px-4 py-2.5 transition-colors ${
+                  filter === null
+                    ? 'font-semibold bg-[#14181F] text-white border border-[#14181F]'
+                    : 'font-medium bg-white text-[#3F4650] border border-[#E6E6E9] hover:bg-[#FAFAFA] hover:border-[#D6D6DA]'
                 }`}
               >
                 Hammasi ({annotations.length})
@@ -453,11 +489,13 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
                   <button
                     key={type}
                     onClick={() => { setFilter(on ? null : type); setActiveIdx(null) }}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${
-                      on ? 'bg-gray-900 text-white border-gray-900' : `${meta.chip} hover:brightness-95`
+                    className={`inline-flex items-center gap-2 text-sm rounded-xl px-4 py-2.5 transition-colors ${
+                      on
+                        ? 'font-semibold bg-[#14181F] text-white border border-[#14181F]'
+                        : 'font-medium bg-white text-[#3F4650] border border-[#E6E6E9] hover:bg-[#FAFAFA] hover:border-[#D6D6DA]'
                     }`}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full ${on ? 'bg-white' : meta.dot}`} />
+                    <span className={`w-2 h-2 rounded-full ${on ? 'bg-white' : meta.dot}`} />
                     {meta.label} ({n})
                   </button>
                 )
@@ -466,8 +504,8 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12">
-          <div className="lg:col-span-7 p-6 md:p-8 lg:border-r border-gray-100">
+        <div className="grid grid-cols-1 lg:grid-cols-12 border-t border-[#EDEDF0]">
+          <div className="lg:col-span-7 px-5 py-6 sm:px-[30px] sm:py-7 lg:border-r border-[#EDEDF0]">
             <AnnotatedEssay
               essay={result.essay}
               annotations={annotations}
@@ -478,44 +516,44 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
           </div>
 
           {/* Tanlangan xato paneli */}
-          <div className="lg:col-span-5 p-6 md:p-8 bg-gray-50/60">
+          <div className="lg:col-span-5 px-5 py-6 sm:px-[30px] sm:py-7 bg-[#F7F7F8]">
             {active ? (
               <div className="lg:sticky lg:top-6">
                 <div className="flex items-start justify-between gap-3 mb-4">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${typeMeta(active.type).chip}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${typeMeta(active.type).dot}`} />
+                  <span className="inline-flex items-center gap-2 text-sm font-medium bg-white text-[#3F4650] border border-[#E6E6E9] rounded-xl px-3 py-1.5">
+                    <span className={`w-2 h-2 rounded-full ${typeMeta(active.type).dot}`} />
                     {typeMeta(active.type).label}
                   </span>
-                  <button onClick={() => setActiveIdx(null)} className="text-gray-400 hover:text-gray-900 shrink-0">
+                  <button onClick={() => setActiveIdx(null)} className="text-[#6B7280] hover:text-[#14181F] shrink-0">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
 
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Sizda</p>
-                <p className="text-sm text-red-600 line-through leading-relaxed mb-4">{active.quote}</p>
+                <p className={`${LABEL} text-[#6B7280] mb-1.5`}>Sizda</p>
+                <p className="text-[15px] text-[#C2242A] line-through leading-relaxed mb-4">{active.quote}</p>
 
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Tuzatilgan</p>
-                <p className="text-sm text-green-700 font-semibold leading-relaxed mb-4">{active.fix}</p>
+                <p className={`${LABEL} text-[#6B7280] mb-1.5`}>Tuzatilgan</p>
+                <p className="text-[15px] text-[#1F7A48] font-semibold leading-relaxed mb-4">{active.fix}</p>
 
                 {active.note && (
                   <>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Nega</p>
-                    <p className="text-xs text-gray-600 leading-relaxed">{active.note}</p>
+                    <p className={`${LABEL} text-[#6B7280] mb-1.5`}>Nega</p>
+                    <p className="text-sm text-[#3F4650] leading-relaxed">{active.note}</p>
                   </>
                 )}
 
-                <div className="flex items-center gap-2 mt-6">
+                <div className="flex items-center gap-2.5 mt-6">
                   <button
                     onClick={() => setActiveIdx(Math.max(0, activeIdx - 1))}
                     disabled={activeIdx === 0}
-                    className="flex-1 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-600 font-bold text-xs hover:bg-gray-50 disabled:opacity-40 transition-colors"
+                    className="flex-1 py-2.5 rounded-xl border border-[#E6E6E9] bg-white text-[#3F4650] font-medium text-sm hover:bg-[#FAFAFA] disabled:opacity-40 transition-colors"
                   >
                     Oldingi
                   </button>
                   <button
                     onClick={() => setActiveIdx(Math.min(annotations.length - 1, activeIdx + 1))}
                     disabled={activeIdx >= annotations.length - 1}
-                    className="flex-1 py-2.5 rounded-xl bg-gray-900 text-white font-bold text-xs hover:bg-gray-800 disabled:opacity-40 transition-colors"
+                    className="flex-1 py-2.5 rounded-xl bg-[#14181F] text-white font-semibold text-sm hover:bg-[#2A2F38] disabled:opacity-40 transition-colors"
                   >
                     Keyingi
                   </button>
@@ -523,10 +561,10 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
               </div>
             ) : (
               <div className="lg:sticky lg:top-6 text-center py-8">
-                <div className="w-11 h-11 rounded-full bg-white border border-gray-200 flex items-center justify-center mx-auto mb-3">
-                  <ChevronRight className="w-5 h-5 text-gray-300" />
+                <div className="w-11 h-11 rounded-full bg-white border border-[#E6E6E9] flex items-center justify-center mx-auto mb-3">
+                  <ChevronRight className="w-5 h-5 text-[#A7ADB6]" />
                 </div>
-                <p className="text-xs text-gray-400 leading-relaxed max-w-[220px] mx-auto">
+                <p className="text-sm text-[#6B7280] leading-relaxed max-w-[240px] mx-auto">
                   {annotations.length > 0
                     ? 'Matndagi rangli joylardan birini bosing — tuzatish shu yerda chiqadi.'
                     : 'Bu inshoda belgilangan xato topilmadi.'}
@@ -534,7 +572,7 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
                 {annotations.length > 0 && (
                   <button
                     onClick={() => setActiveIdx(0)}
-                    className="mt-4 px-5 py-2.5 rounded-xl bg-gray-900 text-white font-bold text-xs hover:bg-gray-800 transition-colors"
+                    className="mt-4 px-[18px] py-2.5 rounded-xl bg-[#14181F] text-white font-semibold text-sm hover:bg-[#2A2F38] transition-colors"
                   >
                     Birinchisidan boshlash
                   </button>
@@ -545,62 +583,61 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
         </div>
       </div>
 
-      {/* ---------- Keyingi bandga chiqish rejasi ---------- */}
-      {fb.next_band?.actions?.length > 0 && (
-        <div className="bg-white rounded-[24px] p-6 md:p-8 border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-9 h-9 rounded-xl bg-[#FFF0F0] text-[#FF3131] flex items-center justify-center shrink-0">
-              <Target className="w-4.5 h-4.5" />
-            </div>
-            <div>
-              <h3 className="font-bold text-gray-900 text-lg leading-tight">
-                Band {fb.next_band.target} ga chiqish uchun
-              </h3>
-              <p className="text-xs text-gray-500">Keyingi insho yozishdan oldin shularga e'tibor bering</p>
-            </div>
-          </div>
-
-          <ol className="space-y-3">
-            {fb.next_band.actions.map((a, i) => (
-              <li key={i} className="flex gap-3 text-sm text-gray-700 leading-relaxed">
-                <span className="w-6 h-6 rounded-lg bg-gray-100 text-gray-700 text-xs font-extrabold flex items-center justify-center shrink-0 mt-0.5">
-                  {i + 1}
+      {/* ---------- Keyingi bandga chiqish rejasi + kuchli tomonlar ---------- */}
+      {(fb.next_band?.actions?.length > 0 || fb.strengths?.length > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {fb.next_band?.actions?.length > 0 && (
+            <div className={`${CARD} ${fb.strengths?.length ? '' : 'lg:col-span-2'} px-5 py-6 sm:px-[30px] sm:py-7 flex flex-col gap-5`}>
+              <div className="flex flex-col gap-1">
+                <span className={`${LABEL} text-[#C2242A]`}>Keyingi qadam</span>
+                <span className="text-[22px] font-semibold tracking-[-.01em]">
+                  Band {fb.next_band.target} ga chiqish uchun
                 </span>
-                <span>{a}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
+              </div>
+              <ol className="flex flex-col gap-3">
+                {fb.next_band.actions.map((a, i) => (
+                  <li key={i} className="flex gap-3 text-[15px] text-[#3F4650] leading-normal">
+                    <span className="w-7 h-7 rounded-[10px] bg-[#F4F4F5] text-[#14181F] text-sm font-semibold flex items-center justify-center shrink-0">
+                      {i + 1}
+                    </span>
+                    <span className="pt-0.5">{a}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
 
-      {/* ---------- Kuchli tomonlar ---------- */}
-      {fb.strengths?.length > 0 && (
-        <div className="bg-white rounded-[24px] p-6 md:p-8 border border-gray-100 shadow-sm">
-          <h3 className="font-bold text-gray-900 text-sm mb-4 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-green-500" /> Nimani saqlab qolish kerak
-          </h3>
-          <ul className="space-y-2.5">
-            {fb.strengths.map((s, i) => (
-              <li key={i} className="text-xs text-gray-600 leading-relaxed flex gap-2">
-                <span className="text-green-500 shrink-0">•</span><span>{s}</span>
-              </li>
-            ))}
-          </ul>
+          {fb.strengths?.length > 0 && (
+            <div className={`${CARD} ${fb.next_band?.actions?.length ? '' : 'lg:col-span-2'} px-5 py-6 sm:px-[30px] sm:py-7 flex flex-col gap-5`}>
+              <div className="flex flex-col gap-1">
+                <span className={`${LABEL} text-[#1F7A48]`}>Kuchli tomonlar</span>
+                <span className="text-[22px] font-semibold tracking-[-.01em]">Nimani saqlab qolish kerak</span>
+              </div>
+              <ul className="flex flex-col gap-3">
+                {fb.strengths.map((s, i) => (
+                  <li key={i} className="flex gap-3 text-[15px] text-[#3F4650] leading-normal">
+                    <span className="w-2 h-2 rounded-full bg-[#1F7A48] shrink-0 mt-2" />
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 
       {/* ---------- Mavzu + ogohlantirish ---------- */}
-      <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm">
-        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Mavzu</p>
-        <p className="text-xs text-gray-600 leading-relaxed mb-5">{result.prompt_text || prompt?.text}</p>
+      <div className={`${CARD} px-5 py-6 sm:px-[30px] sm:py-7 flex flex-col gap-4`}>
+        <span className={`${LABEL} text-[#6B7280]`}>Mavzu</span>
+        <p className="text-[15px] text-[#3F4650] leading-relaxed">{result.prompt_text || prompt?.text}</p>
         {chart && (
-          <div className="mb-5 rounded-xl border border-gray-100 p-3 sm:p-4">
+          <div className="rounded-2xl border border-[#EDEDF0] p-3 sm:p-4">
             <Task1Chart chart={chart} />
           </div>
         )}
 
-        <div className="flex items-start gap-2 text-[11px] text-gray-400 leading-relaxed border-t border-gray-100 pt-4">
-          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-2 text-[13px] text-[#6B7280] leading-relaxed border-t border-[#EDEDF0] pt-4">
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <p>
             Bu <strong>taxminiy baho</strong> — sun'iy intellekt rasmiy band descriptor'lar
             asosida hisoblaydi, rasmiy IELTS ekspertining bahosi emas. Haqiqiy imtihon
@@ -610,13 +647,13 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
       </div>
 
       {/* ---------- Amallar ---------- */}
-      <div className="flex flex-col sm:flex-row items-center gap-3">
+      <div className="flex flex-col sm:flex-row items-center gap-2.5">
         <button onClick={onNewEssay}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#FF3131] hover:bg-[#E82C2C] text-white font-bold text-xs transition-colors">
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-[18px] py-2.5 rounded-xl bg-[#14181F] hover:bg-[#2A2F38] text-white font-semibold text-sm transition-colors">
           <RefreshCw className="w-4 h-4" /> Shu mavzuni qayta yozish
         </button>
         <button onClick={() => navigate('/writing-packs')}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl border border-gray-200 text-gray-700 font-bold text-xs hover:bg-gray-50 transition-colors">
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-[18px] py-2.5 rounded-xl border border-[#E6E6E9] bg-white text-[#3F4650] font-medium text-sm hover:bg-[#FAFAFA] transition-colors">
           <ArrowLeft className="w-4 h-4" /> Boshqa to'plam
         </button>
       </div>
