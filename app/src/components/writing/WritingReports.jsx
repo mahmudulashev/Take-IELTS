@@ -28,7 +28,7 @@ const CRITERIA = [
   ['band_grammar', 'GRA'],
 ]
 
-export default function WritingReports({ results = [], syncError = null }) {
+export default function WritingReports({ results = [], syncError = null, task = 'task1' }) {
   const { refreshResults } = useAuth()
   const [selected, setSelected] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(null)   // o'chiriladigan yozuv
@@ -121,13 +121,13 @@ export default function WritingReports({ results = [], syncError = null }) {
         <div className="w-12 h-12 rounded-full bg-[#FFF0F0] text-[#FF3131] flex items-center justify-center mx-auto mb-4">
           <PenLine className="w-5 h-5" />
         </div>
-        <p className="text-base font-bold text-gray-700 mb-1.5">Hali insho yozilmagan</p>
+        <p className="text-base font-bold text-gray-700 mb-1.5">{task === 'task1' ? 'Hali Task 1 javobi yozilmagan' : 'Hali Task 2 inshosi yozilmagan'}</p>
         <p className="text-xs text-gray-500 mb-6 max-w-sm mx-auto leading-relaxed">
-          Writing Task 1 yoki Task 2 javobini yozing — AI to'rtta rasmiy mezon bo'yicha
+          {task === 'task1' ? 'Writing Task 1' : 'Writing Task 2'} javobini yozing — AI to'rtta rasmiy mezon bo'yicha
           baholaydi va xatolarni matn ichida ko'rsatadi.
         </p>
         <Link
-          to="/writing-packs"
+          to={`/writing-${task}`}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#FF3131] hover:bg-[#E82C2C] text-white font-bold text-xs transition-colors"
         >
           <PenLine className="w-4 h-4" /> Birinchi inshoni yozish

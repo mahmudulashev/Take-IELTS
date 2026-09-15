@@ -159,7 +159,7 @@ export async function deleteWritingResult(id) {
  * hiylasi ishlatilmaydi — yozuvlar bazadan haqiqatan o'chiriladi va
  * qaytarib bo'lmaydi. Chaqirishdan oldin tasdiqlash so'ralishi shart.
  */
-export async function clearWritingHistory() {
+export async function clearWritingHistory(taskType = null) {
   if (!isSupabaseConfigured || !supabase) {
     return { ok: false, error: 'Supabase sozlanmagan.' }
   }
@@ -170,16 +170,19 @@ export async function clearWritingHistory() {
 
   // Avval nechta yozuv borligini bilib olamiz — o'chirish haqiqatan
   // ishlaganini tekshirish uchun.
-  const { count: before } = await supabase
+  let countQuery = supabase
     .from('writing_results')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
+  if (taskType) countQuery = countQuery.eq('task_type', taskType)
+  const { count: before } = await countQuery
 
-  const { data, error } = await supabase
+  let deleteQuery = supabase
     .from('writing_results')
     .delete()
     .eq('user_id', userId)
-    .select('id')
+  if (taskType) deleteQuery = deleteQuery.eq('task_type', taskType)
+  const { data, error } = await deleteQuery.select('id')
 
   if (error) {
     console.warn('clearWritingHistory:', error)

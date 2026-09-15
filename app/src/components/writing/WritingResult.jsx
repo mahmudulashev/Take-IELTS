@@ -623,7 +623,7 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-[18px] py-2.5 rounded-xl bg-[#14181F] hover:bg-[#2A2F38] text-white font-semibold text-sm transition-colors">
           <RefreshCw className="w-4 h-4" /> Shu mavzuni qayta yozish
         </button>
-        <button onClick={() => navigate('/writing-packs')}
+        <button onClick={() => navigate(`/writing-${task}`)}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-[18px] py-2.5 rounded-xl border border-[#E6E6E9] bg-white text-[#3F4650] font-medium text-sm hover:bg-[#FAFAFA] transition-colors">
           <ArrowLeft className="w-4 h-4" /> Boshqa to'plam
         </button>

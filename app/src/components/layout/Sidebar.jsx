@@ -8,7 +8,8 @@ import {
   BarChart3,
   User,
   LogOut,
-  PenLine
+  PenLine,
+  BarChart2
 } from 'lucide-react'
 
 export default function Sidebar({ user, onSignOut }) {
@@ -18,7 +19,8 @@ export default function Sidebar({ user, onSignOut }) {
     { label: 'Bosh sahifa', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Reading Testlar', path: '/reading-packs', icon: BookOpen },
     { label: 'Listening Testlar', path: '/listening-packs', icon: Headphones },
-    { label: 'Writing (AI)', path: '/writing-packs', icon: PenLine },
+    { label: 'Writing Task 1', path: '/writing-task1', icon: BarChart2 },
+    { label: 'Writing Task 2', path: '/writing-task2', icon: PenLine },
     { label: 'Natijalarim', path: '/reports', icon: BarChart3 },
     { label: 'Profilim', path: '/profile', icon: User },
   ]
@@ -29,7 +31,8 @@ export default function Sidebar({ user, onSignOut }) {
     { label: 'Asosiy', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Reading', path: '/reading-packs', icon: BookOpen },
     { label: 'Listening', path: '/listening-packs', icon: Headphones },
-    { label: 'Writing', path: '/writing-packs', icon: PenLine },
+    { label: 'Task 1', path: '/writing-task1', icon: BarChart2 },
+    { label: 'Task 2', path: '/writing-task2', icon: PenLine },
     { label: 'Natijalar', path: '/reports', icon: BarChart3 },
     { label: 'Profilim', path: '/profile', icon: User },
   ]
@@ -69,7 +72,7 @@ export default function Sidebar({ user, onSignOut }) {
 
       {/* Mobile Floating Bottom Navigation Bar with Framer Motion liquid tab indicator
           Diqqat: elementlar soni o'zgarsa ham buzilmasligi kerak.
-          - flex-1 + basis-0 → oltitasi ham teng joy oladi
+          - flex-1 + basis-0 → hammasi teng joy oladi
           - whitespace-nowrap → yorliq ikki qatorga tushmaydi (aks holda
             faol element aylanaga aylanib, paneldan chiqib ketadi)
           - rounded-2xl → baland element aylana emas, to'rtburchak bo'lib qoladi */}

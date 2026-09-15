@@ -10,7 +10,7 @@ import { formatDate, formatSeconds } from '../lib/scoring'
 import WritingReports from '../components/writing/WritingReports'
 import { clearWritingHistory } from '../lib/writing'
 import { deleteTestResult } from '../lib/supabase'
-import { BookOpen, Headphones, PenLine, Calendar, CheckCircle2, XCircle, ChevronRight, X, BarChart3, Trash2, WifiOff, RefreshCw } from 'lucide-react'
+import { BookOpen, Headphones, PenLine, BarChart2, Calendar, CheckCircle2, XCircle, ChevronRight, X, BarChart3, Trash2, WifiOff, RefreshCw } from 'lucide-react'
 
 export default function ReportsPage() {
   const { user, sessionChecked, signOut, results, clearHistory, refreshResults, syncError } = useAuth()
@@ -83,8 +83,8 @@ export default function ReportsPage() {
 
   const handleConfirmClear = async () => {
     setDeleteError(null)
-    if (activeTab === 'writing') {
-      const res = await clearWritingHistory()
+    if (writingTask) {
+      const res = await clearWritingHistory(writingTask)
       if (!res.ok) {
         // Jim muvaffaqiyatsizlikni yashirmaymiz — foydalanuvchi
         // "tozalandi" deb o'ylab, keyin natijalarni qayta ko'rmasin.
@@ -107,12 +107,17 @@ export default function ReportsPage() {
 
   const readingResults = results.filter(r => r.test_type === 'reading')
   const listeningResults = results.filter(r => r.test_type === 'listening')
-  const writingResults = results.filter(r => r.test_type === 'writing')
+  // Task 1 va Task 2 alohida tablarda — aralashib ketmasin
+  const taskOfRow = (r) => ((r.writing?.task_type || r.task_type) === 'task1' ? 'task1' : 'task2')
+  const writingTask = activeTab === 'writing1' ? 'task1' : activeTab === 'writing2' ? 'task2' : null
+  const writing1Results = results.filter(r => r.test_type === 'writing' && taskOfRow(r) === 'task1')
+  const writing2Results = results.filter(r => r.test_type === 'writing' && taskOfRow(r) === 'task2')
+  const writingResults = writingTask === 'task1' ? writing1Results : writing2Results
   const currentTabResults = activeTab === 'reading' ? readingResults : listeningResults
 
   // Tozalash tugmasi faol tabda yozuv bo'lgandagina ko'rinadi.
   // Writing alohida hisoblanadi — u boshqa jadvaldan o'chiriladi.
-  const currentClearCount = activeTab === 'writing'
+  const currentClearCount = writingTask
     ? writingResults.length
     : results.filter(r => r.test_type !== 'writing').length
 
@@ -230,15 +235,27 @@ export default function ReportsPage() {
               </button>
 
               <button
-                onClick={() => setActiveTab('writing')}
+                onClick={() => setActiveTab('writing1')}
                 className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                  activeTab === 'writing'
+                  activeTab === 'writing1'
+                    ? 'bg-[#FF3131] text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <BarChart2 className="w-4 h-4" />
+                <span>Writing Task 1 ({writing1Results.length})</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('writing2')}
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  activeTab === 'writing2'
                     ? 'bg-[#FF3131] text-white shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 <PenLine className="w-4 h-4" />
-                <span>Writing ({writingResults.length})</span>
+                <span>Writing Task 2 ({writing2Results.length})</span>
               </button>
             </div>
 
@@ -259,8 +276,8 @@ export default function ReportsPage() {
 
         {/* Writing tabi butunlay boshqacha: 40 ta savol jadvali yo'q,
             insho matni va uning tahlili bor. */}
-        {activeTab === 'writing' ? (
-          <WritingReports results={writingResults} syncError={syncError} />
+        {writingTask ? (
+          <WritingReports key={writingTask} task={writingTask} results={writingResults} syncError={syncError} />
         ) : (
         <>
         {/* Stats Summary Cards for selected tab */}
@@ -432,11 +449,11 @@ export default function ReportsPage() {
               <Trash2 className="w-6 h-6" />
             </div>
             <h3 className="text-lg font-extrabold text-gray-900 mb-2">
-              {activeTab === 'writing' ? 'Insholarni o\'chirish' : 'Natijalar tarixini tozalash'}
+              {writingTask ? 'Insholarni o\'chirish' : 'Natijalar tarixini tozalash'}
             </h3>
             <p className="text-xs text-gray-500 mb-6">
-              {activeTab === 'writing'
-                ? `Yozilgan ${writingResults.length} ta insho, ularning matni va AI tahlili bazadan butunlay o'chiriladi. Bu amalni ortga qaytarib bo'lmaydi!`
+              {writingTask
+                ? `${writingTask === 'task1' ? 'Task 1' : 'Task 2'} bo'yicha yozilgan ${writingResults.length} ta javob, ularning matni va AI tahlili bazadan butunlay o'chiriladi. Bu amalni ortga qaytarib bo'lmaydi!`
                 : "Barcha topshirilgan testlar tarixi va grafik statistikalari o'chirib tashlanadi. Bu amalni ortga qaytarib bo'lmaydi!"}
             </p>
             <div className="flex items-center gap-3">

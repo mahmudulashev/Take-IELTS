@@ -35,10 +35,12 @@ export default function App() {
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/test/reading" element={<ReadingTestPage />} />
-            <Route path="/writing-packs" element={<WritingPacksPage />} />
+            <Route path="/writing-task1" element={<WritingPacksPage task="task1" />} />
+            <Route path="/writing-task2" element={<WritingPacksPage task="task2" />} />
+            <Route path="/writing-packs" element={<Navigate to="/writing-task1" replace />} />
             <Route path="/test/writing/:packId" element={<WritingTestPage />} />
             {/* Eski havolalar to'plamlar sahifasiga yo'naltiriladi */}
-            <Route path="/test/writing" element={<Navigate to="/writing-packs" replace />} />
+            <Route path="/test/writing" element={<Navigate to="/writing-task1" replace />} />
           </Routes>
         </Suspense>
       </ErrorBoundary>

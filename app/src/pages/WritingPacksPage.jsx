@@ -28,7 +28,7 @@ const SECTIONS = [
   },
 ]
 
-export default function WritingPacksPage() {
+export default function WritingPacksPage({ task = 'task1' }) {
   const { user, sessionChecked, signOut, results } = useAuth()
   const navigate = useNavigate()
 
@@ -46,6 +46,9 @@ export default function WritingPacksPage() {
     await signOut()
     navigate('/')
   }
+
+  const sections = SECTIONS.filter((s) => s.task === task)
+  const cfg = TASK_CONFIG[task]
 
   /** Shu to'plam bo'yicha eng yaxshi natija (Reading sahifasidagi kabi) */
   const getPackResult = (packId) => {
@@ -67,21 +70,19 @@ export default function WritingPacksPage() {
         <div className="bg-white rounded-[24px] p-6 md:p-8 border border-gray-100 shadow-sm mb-8">
           <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF3131] uppercase tracking-wider bg-[#FFF0F0] px-3 py-1 rounded-full mb-2">
             <PenLine className="w-3.5 h-3.5" />
-            <span>Writing Task 1 va Task 2</span>
+            <span>{cfg.label}</span>
           </div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900">
-            IELTS Writing Test To'plamlari
+            {task === 'task1' ? 'Writing Task 1 To\'plamlari' : 'Writing Task 2 To\'plamlari'}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Task 1: {TASK_CONFIG.task1.seconds / 60} daqiqa, kamida {TASK_CONFIG.task1.minWords} so'z.
-            Task 2: {TASK_CONFIG.task2.seconds / 60} daqiqa, kamida {TASK_CONFIG.task2.minWords} so'z.
+            {cfg.seconds / 60} daqiqa, kamida {cfg.minWords} so'z.
             Javob tugagach AI to'rtta rasmiy mezon bo'yicha baholaydi va xatolarni matn ichida ko'rsatadi.
           </p>
         </div>
 
         <div className="space-y-10">
-          {SECTIONS.map((section) => {
-            const cfg = TASK_CONFIG[section.task]
+          {sections.map((section) => {
             const Icon = section.icon
 
             return (
@@ -170,10 +171,10 @@ export default function WritingPacksPage() {
           <div>
             <h3 className="font-bold text-gray-900 text-sm mb-1">Baholash qanday ishlaydi</h3>
             <p className="text-xs text-gray-500 leading-relaxed">
-              Javob to'rt mezon bo'yicha alohida baholanadi: Task Achievement (Task 1)
-              yoki Task Response (Task 2), Coherence &amp; Cohesion, Lexical Resource va
-              Grammatical Range. Task 1'da AI grafikdagi aniq raqamlarni ham oladi, shuning
-              uchun noto'g'ri keltirilgan ma'lumotni ko'rsatib bera oladi. Xatolar matn ichida
+              Javob to'rt mezon bo'yicha alohida baholanadi: {cfg.criterion}, Coherence &amp; Cohesion,
+              Lexical Resource va Grammatical Range.
+              {task === 'task1' && " AI grafikdagi aniq raqamlarni ham oladi, shuning uchun noto'g'ri keltirilgan ma'lumotni ko'rsatib bera oladi."}
+              {' '}Xatolar matn ichida
               belgilanadi — bosilsa tuzatilgan variant va sababi chiqadi.
               Bu <strong>taxminiy baho</strong>, rasmiy IELTS ekspertining bahosi emas.
             </p>

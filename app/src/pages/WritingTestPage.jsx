@@ -189,7 +189,7 @@ export default function WritingTestPage() {
     )
   }
   if (!user) return null
-  if (!prompt) return <Navigate to="/writing-packs" replace />
+  if (!prompt) return <Navigate to="/writing-task1" replace />
 
   const timeDanger = timeLeft <= 300 && timeLeft > 0
 
@@ -313,7 +313,7 @@ export default function WritingTestPage() {
                   </button>
                 )}
                 {!started && (
-                  <button onClick={() => navigate('/writing-packs')}
+                  <button onClick={() => navigate(`/writing-${task}`)}
                     className="w-full mt-2.5 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold text-xs hover:bg-gray-50 transition-colors">
                     Boshqa to'plam tanlash
                   </button>
