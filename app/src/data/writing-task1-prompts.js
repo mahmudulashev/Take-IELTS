@@ -1,5 +1,5 @@
 /**
- * IELTS Academic Writing Task 1 — 4 ta belgilangan to'plam.
+ * IELTS Academic Writing Task 1 — 5 ta belgilangan to'plam.
  *
  * Task 2 to'plamlaridan farqi: har birida `chart` bor. Grafik rasm emas,
  * shu ma'lumotdan chiziladi (components/writing/Task1Chart.jsx), AI
@@ -124,6 +124,27 @@ export const WRITING_TASK1_PACKS = [
         { name: 'Food', values: [310, 450, 620] },
         { name: 'Transport', values: [90, 240, 510] },
         { name: 'Leisure', values: [40, 160, 480] },
+      ],
+    },
+  },
+  {
+    id: 'writing-t1-5',
+    number: 5,
+    task: 'task1',
+    title: 'Task 1 Practice 5',
+    type: 'Bar chart',
+    topic: 'Economy & Spending',
+    difficulty: "O'rta",
+    text: `The chart below shows the expenditure of two countries on consumer goods in 2010. ${INSTRUCTION}`,
+    chart: {
+      kind: 'bar',
+      title: 'Expenditure of two countries on consumer goods (2010)',
+      unit: 'pounds sterling',
+      axisLabel: 'Country',
+      categories: ['Cars', 'Computers', 'Books', 'Perfume', 'Cameras'],
+      series: [
+        { name: 'France', values: [400000, 380000, 300000, 200000, 150000] },
+        { name: 'UK', values: [450000, 350000, 400000, 140000, 360000] },
       ],
     },
   },

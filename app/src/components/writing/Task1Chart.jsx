@@ -32,7 +32,8 @@ export default function Task1Chart({ chart }) {
 // ---------------------------------------------------------------
 const W = 640
 const H = 300
-const PAD = { l: 48, r: 12, t: 12, b: 44 }
+// l: 60 — "500,000" kabi olti xonali o'q yozuvlari sig'ishi uchun
+const PAD = { l: 60, r: 12, t: 12, b: 44 }
 const PLOT_W = W - PAD.l - PAD.r
 const PLOT_H = H - PAD.t - PAD.b
 
