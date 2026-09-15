@@ -42,9 +42,9 @@ const shortBand = (b) => (Number.isInteger(b) ? String(b) : b.toFixed(1))
 
 function Delta({ value }) {
   if (value == null) return null
-  if (value > 0) return <span className="text-[13px] font-semibold text-[#1F7A48]">↑ {value.toFixed(1)}</span>
-  if (value < 0) return <span className="text-[13px] font-semibold text-[#C2242A]">↓ {Math.abs(value).toFixed(1)}</span>
-  return <span className="text-[13px] font-semibold text-[#6B7280]">→ 0.0</span>
+  if (value > 0) return <span className="text-sm font-semibold text-[#1F7A48]">↑ {value.toFixed(1)}</span>
+  if (value < 0) return <span className="text-sm font-semibold text-[#C2242A]">↓ {Math.abs(value).toFixed(1)}</span>
+  return <span className="text-sm font-semibold text-[#6B7280]">→ 0.0</span>
 }
 
 /**
@@ -221,8 +221,8 @@ function ResultHero({ result, task, criteria }) {
           const dash = c.band != null ? (c.band / 9) * circ : 0
           const prev = previous ? num(previous[c.field]) : null
           return (
-            <div key={c.key} className="bg-white border border-[#E9E9EC] rounded-[20px] px-[22px] py-5 flex items-center gap-[18px]">
-              <svg viewBox="0 0 64 64" className="w-16 h-16 flex-none">
+            <div key={c.key} className="bg-white border border-[#E9E9EC] rounded-[22px] px-6 py-6 flex items-center gap-5">
+              <svg viewBox="0 0 64 64" className="w-20 h-20 flex-none">
                 <circle cx="32" cy="32" r="26" fill="none" stroke="#F1F1F2" strokeWidth="7" />
                 {c.band != null && (
                   <circle cx="32" cy="32" r="26" fill="none" stroke="#F5333A" strokeWidth="7" strokeLinecap="round" strokeDasharray={`${dash.toFixed(1)} ${circ}`} transform="rotate(-90 32 32)" />
@@ -231,9 +231,9 @@ function ResultHero({ result, task, criteria }) {
                   {c.band != null ? shortBand(c.band) : '—'}
                 </text>
               </svg>
-              <div className="flex flex-col gap-[3px] min-w-0">
-                <span className="text-[15px] font-semibold">{c.ring}</span>
-                <span className="text-[13px] text-[#6B7280]">{c.short}</span>
+              <div className="flex flex-col gap-1 min-w-0">
+                <span className="text-[17px] font-semibold leading-tight">{c.ring}</span>
+                <span className="text-sm text-[#6B7280]">{c.short}</span>
                 <Delta value={prev != null && c.band != null ? c.band - prev : null} />
               </div>
             </div>
