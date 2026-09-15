@@ -222,6 +222,49 @@ tekshirgan. Tuzatish — ikki qatlam, ikkalasi ham **adolat** uchun:
 Kutilgan natija: shu javob qayta yuborilsa "highest figure" da'vosi
 `inaccurate` bo'lib belgilanadi, TA taxminan 7–7.5 ga tushadi.
 
+
+### Ikkinchi tekshiruv — writing-t1-5 (2026-09-15)
+
+Bar chart (France/UK, 5 ta mahsulot), 166 so'zlik javob **7.0** oldi:
+TA 7.5 / CC 7.0 / LR 6.5 / GRA 7.0. Umumiy ball adolatli, lekin profil
+noto'g'ri taqsimlangan — ikki mezon qarama-qarshi tomonga 0.5 dan adashgan:
+
+- **TA 7.5 → ~7.0 bo'lishi kerak edi.** Overview'dagi *"Perfume was the
+  product which people spent the least money on"* UK uchun to'g'ri
+  (140k), lekin France uchun noto'g'ri — France eng kam Cameras'ga (150k)
+  sarflagan. Model uni `correct` deb belgiladi va buni o'zi hisoblagan
+  jami (340k) bilan oqladi, holbuki javobda "jami" deyilmagan. Natijada
+  "barcha raqamlar to'liq mos" degan xulosa chiqdi.
+- **LR 6.5 → ~7.0 bo'lishi kerak edi.** Birorta ham leksik xato topilmadi
+  (yagona vocabulary izohi "Xato emas — yaxshilash"), javobda esa
+  *expenditure, figure, the largest gap, more than twice as high,
+  slightly lower* bor. Band 6–6.5 deskriptori "ba'zi noaniqlik" talab
+  qiladi; model LR ni faqat takrorlanish uchun tushirgan.
+
+Qo'shimcha topilgan xato: bu grafikda X o'qi mahsulotlar, ketma-ketlik
+emas, lekin `tabularFacts` *"net change −250,000"*, *"France becomes
+higher than UK between Cars and Computers"*, *"From Cars to Computers
+every series fell"* degan ma'nosiz trend faktlarini yuborardi.
+
+Tuzatish:
+
+- `chart.ordered: false` — trend/kesishish faktlari o'rniga har seriya
+  ichidagi tartib, kategoriya bo'yicha jami va tafovut beriladi; modelga
+  "kategoriyalar ketma-ketlik emas" deb aytiladi.
+- STEP 1 qoidasi: seriya nomini aytmagan umumiy "eng kam/eng ko'p"
+  da'vo HAR BIR seriya uchun to'g'ri bo'lishi shart, aks holda
+  `inaccurate` / `minor`. Jami bilan oqlash mumkin emas, agar nomzod
+  o'zi "in total" demagan bo'lsa.
+- LR qoidasi (faqat Task 1 prompti): leksik xato topilmasa va kamdan-kam
+  so'zlar to'g'ri ishlatilgan bo'lsa LR ≥ 7.0; takrorlanish 7 va 8
+  orasini hal qiladi. Task 2 dagi "LR poli 6.0" bilan bir mantiq — pol,
+  shift emas. **Kuzatish kerak:** agar endi hamma Task 1 LR aynan 7.0
+  da to'plansa, bu qoida nishonga aylangan bo'ladi (yuqoridagi "8.0 da
+  to'planish" tarixini qarang).
+
+Kutilgan natija: shu javob qayta yuborilsa perfume da'vosi `inaccurate`
+(minor) bo'ladi, TA ≈ 7.0, LR ≈ 7.0, umumiy 7.0 o'zgarmaydi.
+
 ---
 
 ## Ochiq ishlar

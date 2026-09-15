@@ -15,6 +15,8 @@
  *   series     — bar/line: chiziq/ustun guruhlari; table: qatorlar
  *                [{ name, values: [...], color? }], values tartibi categories bilan bir xil;
  *                color berilmasa SERIES_COLORS'dan olinadi
+ *   ordered    — bar/line/table: categories ketma-ketlikmi (yillar, yosh guruhlari).
+ *                Mahsulotlar kabi alohida narsalar uchun `false` — trend faktlari chiqmaydi
  *   pies       — faqat pie: [{ label, slices: [{ name, value }] }]
  */
 
@@ -93,6 +95,24 @@ function tabularFacts(chart) {
   cats.forEach((cat, i) => {
     facts.push(`Ranking in ${cat}: ${rankingText(series.map((s) => ({ name: s.name, value: s.values[i] })), suffix)}`)
   })
+
+  // Kategoriyalar ketma-ketlik bo'lmasa (Cars, Books, ...) "o'sish",
+  // "kesishish" degan faktlar ma'nosiz va modelni chalg'itadi. O'rniga
+  // "eng kam sarflangan mahsulot" kabi da'volarni tekshirish uchun har
+  // seriya ichidagi tartib, jami va tafovut beriladi.
+  if (chart.ordered === false) {
+    for (const s of series) {
+      facts.push(`${s.name} ranking across ${where === 'table' ? 'columns' : 'categories'}: ${rankingText(cats.map((c, i) => ({ name: c, value: s.values[i] })), suffix)}`)
+    }
+    if (series.length > 1 && suffix !== '%') {
+      facts.push(`Combined total of all series, by category: ${rankingText(cats.map((c, i) => ({ name: c, value: round(series.reduce((sum, s) => sum + s.values[i], 0)) })), '')}`)
+    }
+    if (series.length === 2) {
+      const [a, b] = series
+      facts.push(`Gap between ${a.name} and ${b.name}, by category (largest first): ${rankingText(cats.map((c, i) => ({ name: c, value: round(Math.abs(a.values[i] - b.values[i])) })), suffix)}`)
+    }
+    return facts
+  }
 
   for (const s of series) {
     const first = s.values[0]
@@ -212,6 +232,9 @@ export function chartToText(chart) {
   lines.push(tolerance > 0
     ? `- Reading tolerance: this ${KIND_NAMES[chart.kind].toLowerCase()} has no value labels, so a stated figure within ±${formatNumber(tolerance)} of the true value is an accurate reading.`
     : '- Reading tolerance: the figures were printed on the visual, so stated figures should match; sensible rounding with hedging words is still acceptable.')
+  if (chart.kind !== 'pie' && chart.ordered === false) {
+    lines.push('- The categories are separate items, not a sequence (not years or stages): there is no trend across them, so "rose", "fell" or "overtook" across categories is not a valid reading.')
+  }
   for (const fact of chart.kind === 'pie' ? pieFacts(chart) : tabularFacts(chart)) {
     lines.push(`- ${fact}`)
   }

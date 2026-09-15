@@ -141,6 +141,8 @@ export const WRITING_TASK1_PACKS = [
       title: 'Expenditure of two countries on consumer goods (2010)',
       unit: 'pounds sterling',
       axisLabel: 'Country',
+      // Mahsulotlar ketma-ketlik emas — trend faktlari hisoblanmaydi
+      ordered: false,
       categories: ['Cars', 'Computers', 'Books', 'Perfume', 'Cameras'],
       series: [
         { name: 'France', values: [400000, 380000, 300000, 200000, 150000], color: '#4A9BD9' },

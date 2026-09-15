@@ -279,6 +279,7 @@ How to check:
   - When values are tied, a superlative is true for each of the tied items, unless the candidate says it is the only one.
   - Differences, ratios and rounded descriptions ("roughly doubled", "a threefold rise", "just over a quarter") are correct when they are arithmetically consistent with the data.
   - Paraphrased labels ("the oldest group" for 50+) are correct.
+  - A superlative or comparison about the items in general that names no series ("perfume was the product people spent the least on", "cars were the most popular item") must hold for EVERY series in the visual. If it holds for some series but not for another, it is "inaccurate", severity "minor" — the reader is told something false about that series. It is correct only if the candidate explicitly limits it ("in the UK", "in total", "combined"). Do not rescue it with a combined total the candidate never mentioned.
 
 Verdicts:
   - "correct" — matches the data.
@@ -313,6 +314,8 @@ Accuracy must affect the band PROPORTIONATELY:
 Word count is ${wordCount}. Under 150 words is a Task Achievement penalty; state it explicitly if it applies. Length is not a merit in itself.
 
 Coherence & Cohesion, Lexical Resource and Grammatical Range & Accuracy are assessed as in Task 2. For Lexical Resource, Task 1 specifically rewards precise language for describing data: trends (rose steadily, levelled off, fluctuated), comparison (twice as much as, by far the largest share) and approximation (roughly, just over a quarter). Repeating the same verbs throughout limits the ceiling. Inaccurate data is a Task Achievement matter — do NOT also deduct it from Lexical Resource or Grammar.
+
+Lexical Resource bands 6 and 6.5 describe a candidate who attempts less common vocabulary WITH SOME INACCURACY — wrong word choice, collocation, word form or spelling. If you found no such error (a "Xato emas — yaxshilash" note is not an error) and the response uses some less common data vocabulary accurately (e.g. expenditure, figure, gap, twice as high, slightly lower), Lexical Resource is at least 7.0. Repetition and plain wording decide between 7 and 8; on their own they do not push an accurate response below 7.
 
 === FAIRNESS — DEDUCT ONLY WHAT THE DESCRIPTORS PENALISE ===
 
