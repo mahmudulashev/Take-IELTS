@@ -602,7 +602,7 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
         <span className={`${LABEL} text-[#6B7280]`}>Mavzu</span>
         <p className="text-[15px] text-[#3F4650] leading-relaxed">{result.prompt_text || prompt?.text}</p>
         {chart && (
-          <div className="rounded-2xl border border-[#EDEDF0] p-3 sm:p-4">
+          <div className="w-full max-w-[600px] rounded-2xl border border-[#EDEDF0] p-3 sm:p-4">
             <Task1Chart chart={chart} />
           </div>
         )}
