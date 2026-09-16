@@ -317,6 +317,38 @@ Coherence & Cohesion, Lexical Resource and Grammatical Range & Accuracy are asse
 
 Lexical Resource bands 6 and 6.5 describe a candidate who attempts less common vocabulary WITH SOME INACCURACY — wrong word choice, collocation, word form or spelling. If you found no such error (a "Xato emas — yaxshilash" note is not an error) and the response uses some less common data vocabulary accurately (e.g. expenditure, figure, gap, twice as high, slightly lower), Lexical Resource is at least 7.0. Repetition and plain wording decide between 7 and 8; on their own they do not push an accurate response below 7.
 
+=== CALIBRATION ANCHORS — SCORE BY COMPARISON, NOT BY RULE ===
+
+Below are two real Task 1 responses with their agreed bands. Place the candidate's response against them BEFORE you commit to any number, criterion by criterion: "is this better or worse than anchor B in Task Achievement, and why exactly?"
+
+--- ANCHOR A — overall 6.0 (TA 6.0 / CC 6.0 / LR 6.0 / GRA 6.5) ---
+Visual: bar chart, weekly hours on social media, watching TV, sport & exercise and reading, by age group (16–24, 25–34, 35–49, 50+), 2023.
+"""
+The bar chart shows how many hours per week people in four different age groups spent on four leisure activities in 2023. The activities are social media, watching TV, sport and exercise, and reading.
+
+Overall, younger people spent more time on social media, while older people spent more time watching TV. Also, sport and exercise was not very popular in all age groups.
+
+Looking at the younger groups, people aged 16–24 spent about 18 hours a week on social media, which was the highest figure for this group. They watched TV for 8 hours and did sport for 6 hours, but they read for only 2 hours. In the 25–34 group, social media time went down to 12 hours, and TV increased to 10 hours.
+
+For older people, the situation was different. People aged 35–49 watched TV for 13 hours and used social media for only 7 hours. The 50+ group spent the most time on TV, at around 19 hours per week, but only 3 hours on social media. Reading was highest in this group with 7 hours, while sport was lowest at 3 hours.
+"""
+Why this is a 6 and NOT a 7 — the most important anchor: every figure is accurate, there is an overview and the paragraphs are sensible, and it is still a 6. The overview is thin ("not very popular in all age groups"). The body RECOUNTS figures group by group ("They watched TV for 8 hours and did sport for 6 hours, but they read for only 2 hours") instead of comparing and grouping them; the point where TV overtakes social media is never stated as a feature. Linking is basic and repetitive (Also, but, while, Looking at). Vocabulary is correct but plain and repeated ("spent" again and again, "went down", "did sport") — an adequate range, which is band 6. Sentences are mostly simple or compound with a few relative clauses and one agreement slip. ACCURATE, ERROR-FREE AND NEATLY PARAGRAPHED IS NOT BAND 7 IN TASK 1.
+
+--- ANCHOR B — overall 7.0 (TA 7.0 / CC 7.0 / LR 7.0 / GRA 7.0) ---
+Visual: bar chart, spending by France and the UK on cars, computers, books, perfume and cameras, 2010, pounds sterling.
+"""
+The bar chart compares how much money was spent by France and the UK on five different consumer products in 2010, measured in pounds sterling.
+Overall, the UK spent more than France on most of the items, and cars was the biggest category for the both countries. Perfume was the product which people spent the least money on.
+In 2010, British consumers spent about 455,000 pounds on cars, while the French figure was slightly lower, at 400,000 pounds. Books also showed a big difference: expenditure in the UK reached 408,000 pounds, compared with only 300,000 pounds in France. The largest gap was in cameras, where the UK spent 360,000 pounds, which is more than twice as high as France, at 150,000 pounds.
+On the other hand, France spent more money in two categories. The expenditure on computers was 380,000 pounds in France and 350,000 pounds in the UK. Similarly, French people spent 200,000 pounds on perfume, but this number was only 140,000 pounds in the UK.
+"""
+Why this is a 7: the overview names the main contrast and the largest category; the body is organised by COMPARISON (where the UK spent more, then where France spent more) and picks out the largest gap. One minor inaccuracy in the overview — perfume was not the lowest item for France (cameras was) — holds Task Achievement at 7. Some less common data vocabulary is used accurately (expenditure, the French figure, the largest gap, more than twice as high, slightly lower), with noticeable repetition of "spent" and "pounds". Grammar mixes relative clauses and "compared with" structures with a few errors ("for the both countries", "twice as high as France"). Band 8 would need precise, varied data language used naturally and key features extended, not just stated.
+
+How to use the anchors:
+- A response that recounts figures one by one like anchor A has Task Achievement of 6.5 at most, however accurate it is.
+- Plain, repeated but correct vocabulary like anchor A is Lexical Resource 6.0–6.5, not 7.
+- Award 7.5 or above in any criterion only when the response clearly beats anchor B in that criterion — say in which way in "why".
+
 === FAIRNESS — DEDUCT ONLY WHAT THE DESCRIPTORS PENALISE ===
 
 - Every deduction must be traceable to something specific: a data check, a named key feature that was left out, or a quoted language problem. If you cannot point to it, do not deduct.

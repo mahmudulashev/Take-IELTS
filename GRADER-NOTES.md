@@ -182,9 +182,9 @@ birlashtirish o'sha kalibratsiyani buzish xavfini tug'dirardi.
   jadvalda raqam yozilgan, u yerda aniqlik talab qilinadi.
 - **Overview — eng muhim belgi.** Busiz Task Achievement odatda 5 da
   ushlab turiladi, tafsilotlar qanchalik aniq bo'lmasin.
-- **Langar javoblar yo'q.** Task 2 langarlari Task 1'ga yaramaydi,
-  Task 1 uchun haqiqiy baholangan namunalar esa hali to'planmagan.
-  To'qib chiqarilgan "ekspert bahosi" qo'yilmagan.
+- **Langar javoblar — 2026-09-16 dan bor** (pastdagi "Uchinchi tekshiruv"
+  bo'limiga qarang). Task 2 langarlari Task 1'ga yaramaydi, shuning uchun
+  Task 1'ga o'z grafiklarimizga yozilgan haqiqiy javoblar qo'yilgan.
 - JSON kaliti `task_response` ikkala task uchun bir xil (baza ustuni
   `band_task`). UI Task 1'da uni "Task Achievement" deb ko'rsatadi.
 - `taskType` yubormagan eski klient avtomatik Task 2 deb qabul qilinadi.
@@ -265,6 +265,48 @@ Tuzatish:
 Kutilgan natija: shu javob qayta yuborilsa perfume da'vosi `inaccurate`
 (minor) bo'ladi, TA ≈ 7.0, LR ≈ 7.0, umumiy 7.0 o'zgarmaydi.
 
+
+### Uchinchi tekshiruv — inflatsiya va langarlar (2026-09-16)
+
+Foydalanuvchi writing-t1-1 grafigiga **ataylab 5.5–6 darajada** yozilgan
+186 so'zlik javob yubordi. Natija: **7.0** (TA 7 / CC 7 / LR 6.5 / GRA 7).
+Ya'ni taxminan bir bandga oshirilgan.
+
+Tahlil: barcha raqamlar to'g'ri, overview bor, paragraflar mantiqiy — va
+model shuning o'zini 7 deb o'qidi. Aslida:
+
+- overview yuzaki ("not very popular in all age groups");
+- tana qismi raqamlarni guruhma-guruh sanab chiqadi, solishtirmaydi;
+  TV social media'dan o'zib ketgan joy xususiyat sifatida aytilmagan;
+- bog'lovchilar oddiy (Also, but, while), leksika to'g'ri lekin sodda va
+  takroriy ("spent", "went down", "did sport");
+- gaplar asosan sodda/qo'shma, bitta moslashuv xatosi.
+
+Bu Task 2'dagi "xatosizlik = band 8" inflatsiyasining Task 1 versiyasi:
+**"aniq va xatosiz = band 7"**. Task 2'da bu qoidalar bilan emas, langar
+insholar bilan tuzatilgan edi — Task 1'ga ham shu qo'llandi.
+
+Qo'shilgan langarlar (`buildTask1Prompt`):
+
+| Langar | Grafik | Umumiy | TA | CC | LR | GRA | Nimani o'rgatadi |
+|---|---|---|---|---|---|---|---|
+| A | writing-t1-1 (yosh guruhlari) | 6.0 | 6.0 | 6.0 | 6.0 | 6.5 | aniq + xatosiz + paragraflangan ≠ 7; sanab chiqish TA ≤ 6.5; sodda-to'g'ri leksika LR 6–6.5 |
+| B | writing-t1-5 (France/UK) | 7.0 | 7.0 | 7.0 | 7.0 | 7.0 | solishtirishga qurilgan tana; bitta kichik overview xatosi TA ni 7 da ushlaydi |
+
+Langar ballari qayerdan: A — foydalanuvchi 5.5–6 maqsad bilan yozdirgan
+javob, 6.0 deb qabul qilindi; B — 2026-09-15 dagi tahlilda kelishilgan
+taqsimot (TA 7.5 → 7, LR 6.5 → 7). Rasmiy ekspert bahosi emas.
+
+Ma'lum cheklov: band 8 langari yo'q — haqiqiy namuna yo'q, to'qib
+chiqarilmadi. Shu sababli 7.5+ uchun qoida "B dan aniq ustun bo'lsa va
+qaysi jihatdan ekanini aytsa" ko'rinishida. Kuchli (8+) javob to'plangach
+C langari qo'shilishi kerak.
+
+Kutilgan natija: A javobi qayta yuborilsa ≈ 6.0; B javobi ≈ 7.0.
+**Kuzatish kerak:** langar javobning o'zi yuborilganda model uni tanib
+aynan langar balini ko'chirishi mumkin — bu test emas. Haqiqiy tekshiruv
+boshqa, yangi yozilgan javoblarda.
+
 ---
 
 ## Ochiq ishlar
@@ -283,6 +325,6 @@ Kutilgan natija: shu javob qayta yuborilsa perfume da'vosi `inaccurate`
   Hozirgacha to'g'ri hisoblab kelgan, lekin uni koddan hisoblash
   (to'rt mezon o'rtachasi + IELTS yaxlitlashi) bu manbani butunlay
   yo'q qilardi.
-- **Task 1 prompti hali haqiqiy javoblarda sinalmagan.** 2–3 ta javobni
-  har xil darajada (overview'siz, raqam xatosi bilan, kuchli) yuborib,
-  ballar mantiqiy chiqishini tekshirish, keyin langar qo'shish kerak.
+- **Task 1: langar A va B qo'shildi (2026-09-16).** Endi langar bo'lmagan
+  yangi javoblarda sinash kerak: overview'siz javob (~5), raqam xatosi
+  bilan javob, va kuchli (8+) javob — oxirgisi C langari uchun ham kerak.
