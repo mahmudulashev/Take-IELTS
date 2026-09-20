@@ -7,11 +7,10 @@ import { clearWritingHistory } from '../lib/writing'
 import { PenLine, BarChart2, XCircle, X, BarChart3, Trash2, WifiOff, RefreshCw } from 'lucide-react'
 
 /**
- * "Natijalarim" — faqat Writing.
+ * "Natijalarim" — Task 1 va Task 2 alohida tablarda.
  *
- * Reading va Listening bo'limlari saytdan olib tashlangan, shuning uchun
- * bu yerda 40 ta savol jadvali, band grafigi va chuqur tahlil bo'limlari
- * ham yo'q: ularning hammasi o'sha testlarga bog'liq edi.
+ * Ro'yxatni va tahlilni WritingReports chizadi; bu sahifa tab tanlash,
+ * tarixni tozalash va aloqa xatosi bannerini boshqaradi.
  */
 export default function ReportsPage() {
   const { user, sessionChecked, signOut, results, refreshResults, syncError } = useAuth()

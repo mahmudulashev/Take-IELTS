@@ -1,7 +1,7 @@
 /**
  * IELTS Writing Task 2 — 15 ta belgilangan to'plam.
  *
- * Reading/Listening kabi har bir to'plam o'zgarmas: foydalanuvchi
+ * Har bir to'plam o'zgarmas: foydalanuvchi
  * "Writing Practice 3" ni tanlasa, har safar aynan o'sha mavzu
  * chiqadi. Bu tasodifiy mavzudan afzal, chunki:
  *   - natijalarni to'plam bo'yicha solishtirish mumkin

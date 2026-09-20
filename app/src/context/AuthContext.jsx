@@ -8,14 +8,9 @@ import {
 import { getWritingResultsWithStatus as fetchWriting, clearWritingHistory } from '../lib/writing'
 
 /**
- * Natijalar faqat `writing_results` jadvalidan keladi.
- *
- * Reading/Listening bo'limlari olib tashlanganidan keyin `test_results`
- * jadvaliga hech narsa yozilmaydi, shuning uchun uni o'qish ham,
- * localStorage'dagi eski nusxasini birlashtirish ham kerak emas.
- *
- * Dashboard va ro'yxatlar uchun qatorlarni umumiy shaklga keltiramiz:
- * `band_score` va `completed_at` bo'lsa, mavjud kod o'zgarishsiz ishlaydi.
+ * Bazadagi `writing_results` qatorini interfeys kutadigan shaklga keltiradi:
+ * `band_score` va `completed_at` bo'lsa, ro'yxatlar va statistika
+ * hech qanday maxsus shartsiz ishlaydi.
  */
 function normalizeWriting(row) {
   return {
@@ -66,11 +61,12 @@ function computeStats(results) {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => readLocalUser())
-  const [sessionChecked, setSessionChecked] = useState(true)
+  // Lokal nusxa bo'lsa darhol chizamiz; bo'lmasa Supabase javobini kutamiz —
+  // aks holda tizimga kirgan foydalanuvchi bir zumda /auth ga otilib ketadi.
+  const [sessionChecked, setSessionChecked] = useState(() => Boolean(readLocalUser()))
 
   const [results, setResults] = useState([])
   const [stats, setStats] = useState(EMPTY_STATS)
-  const [dataReady, setDataReady] = useState(true)
 
   // Bulut bilan aloqa uzilganda ro'yxat bo'sh qoladi. Interfeys buni
   // "hali javob yozilmagan" deb ko'rsatmasligi uchun xatoni alohida
@@ -79,8 +75,12 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     async function init() {
-      const session = await getSession()
-      if (session?.user) setUser(session.user)
+      try {
+        const session = await getSession()
+        if (session?.user) setUser(session.user)
+      } finally {
+        setSessionChecked(true)
+      }
     }
     init()
 
@@ -172,7 +172,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, sessionChecked, signOut, results, stats, dataReady, syncError, refreshResults, clearHistory }}>
+    <AuthContext.Provider value={{ user, sessionChecked, signOut, results, stats, syncError, refreshResults, clearHistory }}>
       {children}
     </AuthContext.Provider>
   )

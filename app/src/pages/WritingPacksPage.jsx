@@ -50,7 +50,7 @@ export default function WritingPacksPage({ task = 'task1' }) {
   const sections = SECTIONS.filter((s) => s.task === task)
   const cfg = TASK_CONFIG[task]
 
-  /** Shu to'plam bo'yicha eng yaxshi natija (Reading sahifasidagi kabi) */
+  /** Shu to'plam bo'yicha eng yaxshi natija */
   const getPackResult = (packId) => {
     const matching = results.filter(r => r.test_type === 'writing' && r.test_id === packId)
     if (!matching.length) return null

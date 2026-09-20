@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Sidebar from '../components/layout/Sidebar'
 import { useAuth } from '../context/AuthContext'
-import { formatDate } from '../lib/scoring'
+import { formatDate } from '../lib/format'
 import { Flame, Award, BarChart2, PenLine, ArrowRight, History, CheckCircle2 } from 'lucide-react'
 
 export default function DashboardPage() {

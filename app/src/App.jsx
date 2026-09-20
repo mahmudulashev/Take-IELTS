@@ -35,8 +35,8 @@ export default function App() {
             <Route path="/test/writing/:packId" element={<WritingTestPage />} />
             {/* Eski havolalar to'plamlar sahifasiga yo'naltiriladi */}
             <Route path="/test/writing" element={<Navigate to="/writing-task1" replace />} />
-            {/* Reading/Listening olib tashlandi — eski havolalar bosh sahifaga.
-                Tizimga kirgan foydalanuvchini LandingPage dashboardga o'tkazadi. */}
+            {/* Noma'lum yo'l — bosh sahifaga. Tizimga kirgan foydalanuvchini
+                LandingPage o'zi dashboardga o'tkazadi. */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

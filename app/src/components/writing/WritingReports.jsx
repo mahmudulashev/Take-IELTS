@@ -1,17 +1,16 @@
 import React, { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import WritingResult from './WritingResult'
-import { formatDate } from '../../lib/scoring'
+import { formatDate } from '../../lib/format'
 import { deleteWritingResult } from '../../lib/writing'
 import { useAuth } from '../../context/AuthContext'
 import { PenLine, ChevronRight, ArrowLeft, TrendingUp, Trash2, WifiOff } from 'lucide-react'
 
 /**
- * "Natijalarim" sahifasining Writing tabi.
+ * "Natijalarim" sahifasidagi javoblar ro'yxati va umumiy ko'rsatkichlar.
  *
- * Reading/Listening dan farqi: bu yerda 40 ta savol jadvali yo'q.
- * Writing natijasi — matn va uning tahlili, shuning uchun ro'yxatdan
- * bittasini tanlaganda to'liq tahlil (WritingResult) ochiladi.
+ * Natija — matn va uning tahlili, shuning uchun ro'yxatdan bittasini
+ * tanlaganda to'liq tahlil (WritingResult) ochiladi.
  */
 
 function bandBadge(band) {
