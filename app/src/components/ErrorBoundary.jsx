@@ -73,7 +73,7 @@ export default class ErrorBoundary extends React.Component {
           </p>
 
           <p className="text-xs text-gray-500 leading-relaxed mb-6">
-            Topshirgan testlaringiz va natijalaringiz saqlanib qoldi,
+            Yozgan javoblaringiz va natijalaringiz saqlanib qoldi,
             ular yo'qolmaydi.
           </p>
 

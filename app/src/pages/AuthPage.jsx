@@ -140,7 +140,7 @@ export default function AuthPage() {
   const subtitle =
     mode === MODE.SIGNUP ? 'Bepul hisob yarating va natijalaringizni saqlang'
     : mode === MODE.RESET ? 'Email manzilingizni kiriting — tiklash havolasini yuboramiz'
-    : 'IELTS mock testlarini yechish va natijalarni saqlash uchun'
+    : 'Writing javoblaringizni yozish va AI bahosini olish uchun'
 
   return (
     <div className="min-h-screen bg-[#F7F8FC] flex flex-col justify-center items-center px-4 py-12">
