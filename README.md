@@ -2,7 +2,7 @@
 
 # Take IELTS
 
-**IELTS'ga haqiqiy imtihon formatida tayyorlanish platformasi**
+**IELTS Writing javoblarini AI bilan baholaydigan mashq platformasi**
 
 Writing Task 1 va Task 2 · AI baholash · natijalar tahlili
 
@@ -27,6 +27,17 @@ platformasi. Task 1 va Task 2 javoblari imtihon vaqti bilan yoziladi, AI esa
 to'rtta rasmiy mezon bo'yicha band qo'yib, xatolarni matn ichida ko'rsatadi.
 Har bir urinish saqlanadi — bir mavzuni qayta yozib, o'sishni ko'rish mumkin.
 
+## Qanday ishlaydi
+
+```mermaid
+flowchart LR
+    A["Brauzer<br/>React + Vite"] -->|"javob + grafik ma'lumoti"| B["Edge Function<br/>evaluate-writing"]
+    B --> C["Lug'at bo'yicha<br/>imlo tekshiruvi"]
+    C --> D["Gemini<br/>4 mezon + data_checks"]
+    D --> E["writing_results<br/>Postgres + RLS"]
+    E --> A
+```
+
 ## Imkoniyatlar
 
 | Bo'lim | Nima bor |
@@ -47,13 +58,23 @@ to'rtta rasmiy mezoni bo'yicha baholanadi:
 - **Lexical Resource** — so'z boyligi
 - **Grammatical Range & Accuracy** — grammatika
 
-Baholashdan oldin insho deterministik lug'at asosida imlo tekshiruvidan o'tadi —
-model taxmin qilmasin, xatolar aniq ro'yxat bo'lib bersin uchun. Javobda insho
-ustiga qo'yilgan izohlar (annotated essay) va har bir mezon uchun izohli fikr
-qaytadi.
+Javobda insho ustiga qo'yilgan izohlar (annotated essay), har bir mezon uchun
+izohli fikr va yarim ball ko'tarish uchun aniq maslahat qaytadi.
 
 > API kalit hech qachon brauzerga tushmaydi — u faqat Edge Function muhitida
 > turadi. Sababi va tafsilotlari: [`supabase/WRITING-SETUP.md`](supabase/WRITING-SETUP.md).
+
+## Nega bunday qilingan
+
+Loyihadagi asosiy qarorlar va ularning sababi:
+
+| Qaror | Sabab |
+|---|---|
+| **Task 1 grafigi rasm emas, ma'lumot** | Grafik `chart` obyektidan SVG bo'lib chiziladi va aynan o'sha raqamlar AI'ga matn ko'rinishida boradi. Bitta manba bo'lgani uchun "raqam noto'g'ri keltirilgan" degan izohni tekshirib bo'ladi — rasm bilan buni kafolatlab bo'lmasdi. |
+| **Tayanch faktlar kodda hisoblanadi** | Eng katta/kichik qiymat, guruhlardagi tartib va qatorlar kesishgan joy kod bilan topilib, promptga qo'shiladi. Model bir marta "18 — eng yuqori qiymat" degan xatoni o'tkazib yuborgandi (aslida 19); endi u hisob-kitobga tayanmaydi. |
+| **Imloni model emas, lug'at tekshiradi** | Til modeli matnni harflar emas, tokenlar sifatida ko'radi va "goverment" ni sezmay o'tib ketadi. Shuning uchun ~275k so'zlik lug'at va tahrir masofasi ishlatiladi. |
+| **Baholash faqat serverda** | Gemini kaliti brauzerga umuman tushmaydi. `writing_results` ga yozishni faqat Edge Function bajaradi — RLS'da INSERT policy'si ataylab yo'q, shuning uchun foydalanuvchi o'ziga band score yozib qo'ya olmaydi. |
+| **Aloqa uzilsa, "natija yo'q" deyilmaydi** | Bulut javob bermasa interfeys buni ochiq aytadi va qayta urinish tugmasini beradi. Aks holda bo'sh ro'yxat "ma'lumotlarim o'chibdi" degan taassurot qoldiradi. |
 
 ## Texnologiyalar
 
