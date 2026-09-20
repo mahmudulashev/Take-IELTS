@@ -14,6 +14,7 @@ Writing Task 1 va Task 2 · AI baholash · natijalar tahlili
   <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind-3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white">
   <img alt="Supabase" src="https://img.shields.io/badge/Supabase-Auth%20%2B%20DB-3ECF8E?style=flat-square&logo=supabase&logoColor=white">
   <img alt="Vercel" src="https://img.shields.io/badge/Vercel-deploy-000000?style=flat-square&logo=vercel&logoColor=white">
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-blue?style=flat-square">
 </p>
 
 </div>
@@ -160,6 +161,10 @@ Writing bo'limini to'liq yoqish uchun (Gemini kaliti, funksiyani deploy qilish)
 Vercel'da Root Directory sozlamasiga qarab ikkita `vercel.json` dan biri o'qiladi
 (ildizdagi yoki `app/` ichidagi). **Ikkalasini bir xil holatda saqlang** — birini
 o'zgartirsangiz, ikkinchisini ham yangilang. Batafsil: [`DEPLOY-NOTES.md`](DEPLOY-NOTES.md).
+
+## Litsenziya
+
+[MIT](LICENSE) — kodni erkin ishlatish, o'zgartirish va tarqatish mumkin.
 
 ---
 
