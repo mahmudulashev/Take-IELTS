@@ -47,13 +47,41 @@ function toResults(rows) {
     .sort((a, b) => new Date(b.completed_at || 0) - new Date(a.completed_at || 0))
 }
 
+/**
+ * Umumiy Writing band.
+ *
+ * IELTS'da Writing bandini ikkala task teng belgilamaydi — Task 2 ning
+ * og'irligi ikki barobar:  (Task 1 + 2 × Task 2) / 3.  Oddiy o'rtacha
+ * olish Task 1 ni haddan tashqari ko'tarib yuboradi va nomzodga
+ * imtihonda chiqadigan balldan boshqa raqam ko'rsatadi.
+ *
+ * Bitta task bo'yicha hali javob bo'lmasa, bor bo'lganining o'rtachasi
+ * olinadi. Natija eng yaqin yarim bandga yaxlitlanadi.
+ */
+function writingBand(results) {
+  const mean = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length
+  const halfBand = (n) => (Math.round(n * 2) / 2).toFixed(1)
+
+  const bandsOf = (task) => results
+    .filter((r) => (r.task_type === 'task1' ? 'task1' : 'task2') === task)
+    .map((r) => parseFloat(r.band_score))
+    .filter((n) => !Number.isNaN(n))
+
+  const t1 = bandsOf('task1')
+  const t2 = bandsOf('task2')
+
+  if (!t1.length && !t2.length) return '0.0'
+  if (!t1.length) return halfBand(mean(t2))
+  if (!t2.length) return halfBand(mean(t1))
+  return halfBand((mean(t1) + 2 * mean(t2)) / 3)
+}
+
 function computeStats(results) {
   if (!results.length) return EMPTY_STATS
   const bands = results.map(r => parseFloat(r.band_score) || 0)
-  const sum = bands.reduce((a, b) => a + b, 0)
   return {
     totalTests: results.length,
-    avgBand: (sum / bands.length).toFixed(1),
+    avgBand: writingBand(results),
     bestBand: Math.max(...bands).toFixed(1),
     lastTest: results[0],
   }

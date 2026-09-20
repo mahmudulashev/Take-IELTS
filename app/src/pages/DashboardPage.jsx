@@ -86,8 +86,9 @@ export default function DashboardPage() {
               <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center mb-2">
                 <Award className="w-5 h-5 text-green-600" />
               </div>
-              <p className="text-[11px] font-medium text-gray-500">O'rtacha Band</p>
+              <p className="text-[11px] font-medium text-gray-500">Writing band</p>
               <p className="text-2xl font-extrabold text-gray-900 mt-0.5">{stats.avgBand}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">Task 2 × 2</p>
             </div>
 
             <div style={{ minWidth: 'calc(100vw - 32px)' }} className="snap-center bg-white rounded-[20px] p-5 border border-gray-100 shadow-sm shrink-0">
@@ -137,8 +138,9 @@ export default function DashboardPage() {
               <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-3">
                 <Award className="w-6 h-6 text-green-600" />
               </div>
-              <p className="text-xs font-medium text-gray-500">O'rtacha Band</p>
+              <p className="text-xs font-medium text-gray-500">Writing band</p>
               <p className="text-3xl font-extrabold text-gray-900 mt-1">{stats.avgBand}</p>
+              <p className="text-[11px] text-gray-400 mt-1">Task 2 × 2 og'irlik bilan</p>
             </div>
 
             <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm">
