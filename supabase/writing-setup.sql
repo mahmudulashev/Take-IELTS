@@ -73,7 +73,14 @@ create policy "insho: o'zinikini o'chirish"
 -- security definer — funksiya jadvalni RLS'dan qat'i nazar o'qiy
 -- oladi, lekin faqat sanoq qaytaradi, ma'lumot chiqarmaydi.
 
-create or replace function public.writing_attempts_today(p_user_id uuid)
+-- Eski bir argumentli versiya (limit ikkala task uchun umumiy bo'lgan davrdan)
+-- olib tashlanadi: u yangi versiya bilan noaniqlik keltirib chiqaradi.
+drop function if exists public.writing_attempts_today(uuid);
+
+-- Limit HAR BIR TASK uchun alohida sanaladi: Task 1 va Task 2 boshqa-boshqa
+-- mashq, biri ikkinchisining kunlik hisobini yeb qo'ymasligi kerak.
+-- p_task_type null bo'lsa — ikkalasi birga (umumiy hisob uchun).
+create or replace function public.writing_attempts_today(p_user_id uuid, p_task_type text default null)
 returns integer
 language sql
 security definer
@@ -82,11 +89,12 @@ as $$
   select count(*)::integer
   from public.writing_results
   where user_id = p_user_id
+    and (p_task_type is null or task_type = p_task_type)
     and created_at >= date_trunc('day', now());
 $$;
 
-revoke all on function public.writing_attempts_today(uuid) from public, anon;
-grant execute on function public.writing_attempts_today(uuid) to service_role;
+revoke all on function public.writing_attempts_today(uuid, text) from public, anon;
+grant execute on function public.writing_attempts_today(uuid, text) to service_role;
 
 
 -- ------------------------------------------------------------

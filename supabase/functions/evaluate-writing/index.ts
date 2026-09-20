@@ -498,11 +498,16 @@ Deno.serve(async (req: Request) => {
       envList('UNLIMITED_EMAILS').includes(email) ||
       envList('UNLIMITED_USER_IDS').includes(user.id.toLowerCase())
 
-    const { data: attempts } = await admin.rpc('writing_attempts_today', { p_user_id: user.id })
+    // Limit har bir task uchun alohida — Task 1 yozgan odam Task 2 uchun
+    // kunlik hisobini yo'qotmasin.
+    const { data: attempts } = await admin.rpc('writing_attempts_today', {
+      p_user_id: user.id,
+      p_task_type: taskType,
+    })
 
     if (!isUnlimited && typeof attempts === 'number' && attempts >= DAILY_LIMIT) {
       return json({
-        error: `Kunlik limit tugadi (${DAILY_LIMIT} ta insho). Ertaga qayta urinib ko'ring.`,
+        error: `Kunlik limit tugadi: ${taskType === 'task1' ? 'Task 1' : 'Task 2'} uchun kuniga ${DAILY_LIMIT} ta javob. Ertaga qayta urinib ko'ring.`,
         limitReached: true,
         // Nega limitsiz ro'yxatga tushmagani darrov ko'rinsin.
         // Bu foydalanuvchining O'Z ma'lumoti — sir emas.
