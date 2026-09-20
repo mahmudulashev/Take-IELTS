@@ -4,7 +4,7 @@
 
 **IELTS'ga haqiqiy imtihon formatida tayyorlanish platformasi**
 
-Reading, Listening va Writing bo'limlari · AI baholash · natijalar tahlili
+Writing Task 1 va Task 2 · AI baholash · natijalar tahlili
 
 [**Saytni ochish →**](https://take-ielts.vercel.app)
 
@@ -22,20 +22,20 @@ Reading, Listening va Writing bo'limlari · AI baholash · natijalar tahlili
 
 ## Loyiha haqida
 
-Take IELTS — o'zbek tilidagi interfeys bilan ishlaydigan IELTS mashq platformasi.
-Testlar haqiqiy imtihon formatida: bir xil vaqt chegarasi, bir xil savol turlari,
-bir xil ball hisoblash jadvali. Har bir urinish saqlanadi, natijalar esa vaqt
-o'tishi bilan qanday o'zgarayotganini grafiklarda ko'rsatadi.
+Take IELTS — o'zbek tilidagi interfeys bilan ishlaydigan IELTS Writing mashq
+platformasi. Task 1 va Task 2 javoblari imtihon vaqti bilan yoziladi, AI esa
+to'rtta rasmiy mezon bo'yicha band qo'yib, xatolarni matn ichida ko'rsatadi.
+Har bir urinish saqlanadi — bir mavzuni qayta yozib, o'sishni ko'rish mumkin.
 
 ## Imkoniyatlar
 
 | Bo'lim | Nima bor |
 |---|---|
-| **Reading** | 5 ta to'liq test · 3 passage · 40 savol · 60 daqiqa · avtomatik ball |
-| **Listening** | 4 ta faol test · audio bilan · 40 savol · avtomatik ball |
-| **Writing** | Task 1: 4 ta grafik (bar, line, pie, jadval) · Task 2: 15 ta mavzu · AI baholash · to'rt mezon bo'yicha band |
-| **Hisobotlar** | Band score dinamikasi, mezonlar kesimi, chuqur tahlil bo'limi |
-| **Profil** | Supabase auth (email/parol va Google), natijalar tarixi |
+| **Task 1** | 5 ta to'plam (bar, line, pie, jadval) · 20 daqiqa · kamida 150 so'z · grafik ma'lumotdan chiziladi |
+| **Task 2** | 15 ta mavzu · 40 daqiqa · kamida 250 so'z |
+| **AI baholash** | To'rtta rasmiy mezon, har biri uchun izoh va iqtibos · xatolar matn ichida belgilanadi |
+| **Hisobotlar** | Task 1 va Task 2 alohida tablarda, band dinamikasi va o'rtacha ko'rsatkichlar |
+| **Profil** | Supabase auth (email/parol va Google), javoblar tarixi |
 
 ### Writing AI baholash qanday ishlaydi
 
@@ -115,17 +115,15 @@ Writing bo'limini to'liq yoqish uchun (Gemini kaliti, funksiyani deploy qilish)
 .
 ├── app/                      # React ilova (Vite)
 │   ├── src/
-│   │   ├── pages/            # Landing, Dashboard, Reports, test sahifalari
-│   │   ├── components/       # Grafiklar, layout, writing natija komponentlari
-│   │   ├── data/             # Test katalogi, reading/listening/writing kontenti
-│   │   ├── lib/              # Supabase klient, ball hisoblash, writing mantiqi
+│   │   ├── pages/            # Landing, Auth, Dashboard, Writing, Reports, Profile
+│   │   ├── components/       # Layout, Task 1 grafigi, writing natija komponentlari
+│   │   ├── data/             # Task 1 grafiklari va Task 2 mavzulari
+│   │   ├── lib/              # Supabase klient, writing mantiqi, grafik yordamchilari
 │   │   └── context/          # Auth konteksti
-│   ├── *.html                # Legacy formatdagi reading/listening testlari
-│   └── public/               # Audio va statik fayllar
-├── supabase/
-│   ├── functions/            # evaluate-writing Edge Function
-│   └── *.sql                 # Jadvallar va RLS sozlamalari
-└── scratch/                  # Kontent generatsiya skriptlari (ishlab chiqish uchun)
+│   └── public/               # Favicon, manifest, sitemap
+└── supabase/
+    ├── functions/            # evaluate-writing Edge Function
+    └── *.sql                 # Jadvallar va RLS sozlamalari
 ```
 
 ## Hujjatlar

@@ -6,8 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { 
   getProfile, 
   updateProfile, 
-  isSupabaseConfigured,
-  clearTestHistory
+  isSupabaseConfigured
 } from '../lib/supabase'
 import { 
   User, 
@@ -146,7 +145,7 @@ export default function ProfilePage() {
   const handleClearHistory = async () => {
     await clearHistory()
     setShowDeleteModal(false)
-    setMessage({ type: 'success', text: 'Barcha testlar tarixi tozalandi. ✨' })
+    setMessage({ type: 'success', text: 'Barcha javoblar tarixi tozalandi. ✨' })
   }
 
   // Calendar Helpers
@@ -539,7 +538,7 @@ export default function ProfilePage() {
 
                 <div className="text-xs text-gray-500 leading-relaxed">
                   {isSupabaseConfigured
-                    ? 'Test natijalaringiz avtomatik tarzda bulutga saqlanadi — hech narsa bosishingiz shart emas.'
+                    ? 'Javoblaringiz va AI tahlili avtomatik tarzda bulutga saqlanadi — hech narsa bosishingiz shart emas.'
                     : 'Hozircha `.env` faylida Supabase kalitlari belgilanmagan. Sozlaganingizdan so\'ng Google OAuth va bulut saqlash ishga tushadi.'}
                 </div>
 
@@ -548,7 +547,7 @@ export default function ProfilePage() {
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
-                  <span>Natijalar Tarixini Tozalash</span>
+                  <span>Javoblar Tarixini Tozalash</span>
                 </button>
               </div>
             </div>
@@ -563,9 +562,9 @@ export default function ProfilePage() {
             <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-extrabold text-gray-900 mb-2">Natijalar tarixini tozalash</h3>
+            <h3 className="text-lg font-extrabold text-gray-900 mb-2">Javoblar tarixini tozalash</h3>
             <p className="text-xs text-gray-500 mb-6">
-              Barcha topshirilgan testlar tarixi va statistikangiz o'chirib tashlanadi. Bu amalni ortga qaytarib bo'lmaydi!
+              Task 1 va Task 2 bo'yicha yozilgan barcha javoblar, ularning matni va AI tahlili o'chirib tashlanadi. Bu amalni ortga qaytarib bo'lmaydi!
             </p>
             <div className="flex items-center gap-3">
               <button

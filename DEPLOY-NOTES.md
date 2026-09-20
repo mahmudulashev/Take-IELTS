@@ -40,7 +40,8 @@ Endi topilmagan fayl halol **404** qaytaradi — xato aniq ko'rinadi.
 
 SPA marshrutlarida (`/dashboard`, `/test/writing/writing-3`) nuqta
 bo'lmaydi, shuning uchun ular avvalgidek `index.html` ga boradi.
-`/reading-test-2.html` kabi statik sahifalar fayl tizimidan beriladi.
+Kengaytmasi bor yo'llar (`/assets/main-*.js`, `/sitemap.xml`) esa fayl
+tizimidan beriladi.
 
 ---
 
