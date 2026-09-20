@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import Sidebar from '../components/layout/Sidebar'
 import { useAuth } from '../context/AuthContext'
 import { formatDate } from '../lib/scoring'
-import { Flame, Award, BookOpen, Headphones, PenLine, ArrowRight, History, CheckCircle2 } from 'lucide-react'
+import { Flame, Award, BarChart2, PenLine, ArrowRight, History, CheckCircle2 } from 'lucide-react'
 
 export default function DashboardPage() {
   const { user, sessionChecked, signOut, results, stats } = useAuth()
@@ -78,7 +78,7 @@ export default function DashboardPage() {
               <div className="w-9 h-9 rounded-lg bg-white/20 flex items-center justify-center mb-2">
                 <Flame className="w-5 h-5 text-white" />
               </div>
-              <p className="text-[11px] font-medium opacity-90">Testlar soni</p>
+              <p className="text-[11px] font-medium opacity-90">Javoblar soni</p>
               <p className="text-2xl font-extrabold mt-0.5">{stats.totalTests}</p>
             </div>
 
@@ -102,7 +102,7 @@ export default function DashboardPage() {
               <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center mb-2">
                 <History className="w-5 h-5 text-blue-600" />
               </div>
-              <p className="text-[11px] font-medium text-gray-500">So'nggi test</p>
+              <p className="text-[11px] font-medium text-gray-500">So'nggi javob</p>
               <p className="text-2xl font-extrabold text-gray-900 mt-0.5">
                 {stats.lastTest ? stats.lastTest.band_score : '—'}
               </p>
@@ -128,7 +128,7 @@ export default function DashboardPage() {
                 <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-3">
                   <Flame className="w-6 h-6 text-white" />
                 </div>
-                <p className="text-xs font-medium opacity-90">Testlar soni</p>
+                <p className="text-xs font-medium opacity-90">Javoblar soni</p>
                 <p className="text-3xl font-extrabold mt-1">{stats.totalTests}</p>
               </div>
             </div>
@@ -153,7 +153,7 @@ export default function DashboardPage() {
               <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
                 <History className="w-6 h-6 text-blue-600" />
               </div>
-              <p className="text-xs font-medium text-gray-500">So'nggi test</p>
+              <p className="text-xs font-medium text-gray-500">So'nggi javob</p>
               <p className="text-3xl font-extrabold text-gray-900 mt-1">
                 {stats.lastTest ? stats.lastTest.band_score : '—'}
               </p>
@@ -161,46 +161,42 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Practice Test Section Launchers */}
-        <h2 className="text-xl font-extrabold text-gray-900 mb-4">Testlar</h2>
+        {/* Writing mashqlari */}
+        <h2 className="text-xl font-extrabold text-gray-900 mb-4">Writing mashqlari</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-          {/* Reading Launcher */}
-          <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-            <div>
-              <div className="w-12 h-12 rounded-2xl bg-[#FFF0F0] text-[#FF3131] flex items-center justify-center mb-4">
-                <BookOpen className="w-6 h-6" />
+          {[
+            {
+              to: '/writing-task1',
+              icon: BarChart2,
+              title: 'Writing Task 1',
+              desc: "Grafik tasviri · 20 daqiqa · kamida 150 so'z",
+            },
+            {
+              to: '/writing-task2',
+              icon: PenLine,
+              title: 'Writing Task 2',
+              desc: "Insho · 40 daqiqa · kamida 250 so'z",
+            },
+          ].map((item) => {
+            const Icon = item.icon
+            return (
+              <div key={item.to} className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-[#FFF0F0] text-[#FF3131] flex items-center justify-center mb-4">
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
+                  <p className="text-sm text-gray-500 mb-6 leading-relaxed">{item.desc}</p>
+                </div>
+                <Link
+                  to={item.to}
+                  className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-[#FF3131] text-white font-bold text-sm hover:bg-[#E82C2C] transition-all shadow-md shadow-[#FF3131]/20 hover:shadow-lg"
+                >
+                  <span>Boshlash →</span>
+                </Link>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Reading Testlari</h3>
-              <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-                3 passage · 40 savol · 60 daqiqa
-              </p>
-            </div>
-            <Link
-              to="/reading-packs"
-              className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-[#FF3131] text-white font-bold text-sm hover:bg-[#E82C2C] transition-all shadow-md shadow-[#FF3131]/20 hover:shadow-lg"
-            >
-              <span>Boshlash →</span>
-            </Link>
-          </div>
-
-          {/* Listening Launcher */}
-          <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-            <div>
-              <div className="w-12 h-12 rounded-2xl bg-[#FFF0F0] text-[#FF3131] flex items-center justify-center mb-4">
-                <Headphones className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Listening Testlari</h3>
-              <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-                4 part · 40 savol · Audio
-              </p>
-            </div>
-            <Link
-              to="/listening-packs"
-              className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-[#FF3131] text-white font-bold text-sm hover:bg-[#E82C2C] transition-all shadow-md shadow-[#FF3131]/20 hover:shadow-lg"
-            >
-              <span>Boshlash →</span>
-            </Link>
-          </div>
+            )
+          })}
         </div>
 
         {/* Recent Results Summary — full charts, analytics & history now live on /reports */}
@@ -220,29 +216,17 @@ export default function DashboardPage() {
           {results.length === 0 ? (
             <div className="p-12 text-center">
               <CheckCircle2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-base font-bold text-gray-700">Hali test yechilmagan. Birinchi testingizni boshlang!</p>
+              <p className="text-base font-bold text-gray-700">Hali javob yozilmagan. Birinchi Task 1 javobini yozib ko'ring!</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
               {results.slice(0, 3).map((res, index) => (
                 <div key={res.id || index} className="p-4 sm:p-5 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
-                        res.test_type === 'reading'
-                          ? 'bg-[#FFF0F0] text-[#FF3131]'
-                          : res.test_type === 'writing'
-                          ? 'bg-purple-50 text-purple-600'
-                          : 'bg-blue-50 text-blue-600'
-                      }`}
-                    >
-                      {res.test_type === 'reading' ? (
-                        <><BookOpen className="w-[13px] h-[13px]" />Reading</>
-                      ) : res.test_type === 'writing' ? (
-                        <><PenLine className="w-[13px] h-[13px]" />Writing</>
-                      ) : (
-                        <><Headphones className="w-[13px] h-[13px]" />Listening</>
-                      )}
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shrink-0 bg-purple-50 text-purple-600">
+                      {(res.writing?.task_type || res.task_type) === 'task1'
+                        ? <><BarChart2 className="w-[13px] h-[13px]" />Task 1</>
+                        : <><PenLine className="w-[13px] h-[13px]" />Task 2</>}
                     </span>
                     <span className="text-xs text-gray-500 font-medium truncate">
                       {formatDate(res.completed_at || res.created_at || res.date)}
@@ -251,9 +235,7 @@ export default function DashboardPage() {
 
                   <div className="flex items-center gap-3 shrink-0">
                     <span className="hidden sm:inline text-sm font-semibold text-gray-700">
-                      {res.test_type === 'writing'
-                        ? `${res.score} so'z`
-                        : `${res.score} / ${res.total_questions || 40}`}
+                      {res.score} so'z
                     </span>
                     <span
                       className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold ${

@@ -18,7 +18,7 @@ export function countWords(text) {
 
 /**
  * Insho qoralamasini saqlash — sahifa yopilib qolsa yo'qolmasin.
- * Statik testlardagi test-guard.js bilan bir mantiq.
+ * Brauzer yopilib qolsa ham matn qolsin.
  */
 export function saveDraft({ promptId, essay }) {
   try {

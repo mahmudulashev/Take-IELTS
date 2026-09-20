@@ -5,10 +5,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 const LandingPage = lazy(() => import('./pages/LandingPage'))
 const AuthPage = lazy(() => import('./pages/AuthPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
-const ReadingPacksPage = lazy(() => import('./pages/ReadingPacksPage'))
-const ListeningPacksPage = lazy(() => import('./pages/ListeningPacksPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
-const ReadingTestPage = lazy(() => import('./pages/ReadingTestPage'))
 const WritingPacksPage = lazy(() => import('./pages/WritingPacksPage'))
 const WritingTestPage = lazy(() => import('./pages/WritingTestPage'))
 const ReportsPage = lazy(() => import('./pages/ReportsPage'))
@@ -30,17 +27,17 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/reading-packs" element={<ReadingPacksPage />} />
-            <Route path="/listening-packs" element={<ListeningPacksPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/test/reading" element={<ReadingTestPage />} />
             <Route path="/writing-task1" element={<WritingPacksPage task="task1" />} />
             <Route path="/writing-task2" element={<WritingPacksPage task="task2" />} />
             <Route path="/writing-packs" element={<Navigate to="/writing-task1" replace />} />
             <Route path="/test/writing/:packId" element={<WritingTestPage />} />
             {/* Eski havolalar to'plamlar sahifasiga yo'naltiriladi */}
             <Route path="/test/writing" element={<Navigate to="/writing-task1" replace />} />
+            {/* Reading/Listening olib tashlandi — eski havolalar bosh sahifaga.
+                Tizimga kirgan foydalanuvchini LandingPage dashboardga o'tkazadi. */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
       </ErrorBoundary>

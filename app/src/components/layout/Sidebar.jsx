@@ -3,8 +3,6 @@ import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   LayoutDashboard,
-  BookOpen,
-  Headphones,
   BarChart3,
   User,
   LogOut,
@@ -17,8 +15,6 @@ export default function Sidebar({ user, onSignOut }) {
 
   const menuItems = [
     { label: 'Bosh sahifa', path: '/dashboard', icon: LayoutDashboard },
-    { label: 'Reading Testlar', path: '/reading-packs', icon: BookOpen },
-    { label: 'Listening Testlar', path: '/listening-packs', icon: Headphones },
     { label: 'Writing Task 1', path: '/writing-task1', icon: BarChart2 },
     { label: 'Writing Task 2', path: '/writing-task2', icon: PenLine },
     { label: 'Natijalarim', path: '/reports', icon: BarChart3 },
@@ -29,8 +25,6 @@ export default function Sidebar({ user, onSignOut }) {
   // aks holda ikki qatorga tushib panelni buzadi.
   const bottomNavItems = [
     { label: 'Asosiy', path: '/dashboard', icon: LayoutDashboard },
-    { label: 'Reading', path: '/reading-packs', icon: BookOpen },
-    { label: 'Listening', path: '/listening-packs', icon: Headphones },
     { label: 'Task 1', path: '/writing-task1', icon: BarChart2 },
     { label: 'Task 2', path: '/writing-task2', icon: PenLine },
     { label: 'Natijalar', path: '/reports', icon: BarChart3 },
