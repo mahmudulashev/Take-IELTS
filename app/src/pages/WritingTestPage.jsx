@@ -46,14 +46,6 @@ export default function WritingTestPage() {
   const wordCount = countWords(essay)
 
   // ----------------------------------------------------------------
-  // Kirish nazorati
-  // ----------------------------------------------------------------
-  useEffect(() => {
-    if (!sessionChecked) return
-    if (!user) navigate('/auth')
-  }, [user, sessionChecked, navigate])
-
-  // ----------------------------------------------------------------
   // Tugallanmagan qoralama
   // ----------------------------------------------------------------
   useEffect(() => {
@@ -188,7 +180,7 @@ export default function WritingTestPage() {
       </div>
     )
   }
-  if (!user) return null
+  if (!user) return <Navigate to="/auth" replace />
   if (!prompt) return <Navigate to="/writing-task1" replace />
 
   const timeDanger = timeLeft <= 300 && timeLeft > 0

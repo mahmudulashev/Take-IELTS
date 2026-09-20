@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Sidebar from '../components/layout/Sidebar'
 import { useAuth } from '../context/AuthContext'
@@ -209,7 +209,7 @@ export default function ProfilePage() {
     )
   }
 
-  if (!user) { navigate('/auth'); return null }
+  if (!user) return <Navigate to="/auth" replace />
 
   const userAvatar = profile?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture
   const userName = profile?.full_name || 'IELTS Student'

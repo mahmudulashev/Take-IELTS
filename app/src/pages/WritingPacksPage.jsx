@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import Sidebar from '../components/layout/Sidebar'
 import { useAuth } from '../context/AuthContext'
 import { WRITING_PACKS, WRITING_TASK1_PACKS, TASK_CONFIG } from '../data/writing-prompts'
@@ -40,7 +40,7 @@ export default function WritingPacksPage({ task = 'task1' }) {
     )
   }
 
-  if (!user) { navigate('/auth'); return null }
+  if (!user) return <Navigate to="/auth" replace />
 
   const handleSignOut = async () => {
     await signOut()

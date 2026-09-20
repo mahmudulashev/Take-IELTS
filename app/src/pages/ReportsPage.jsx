@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import Sidebar from '../components/layout/Sidebar'
 import { useAuth } from '../context/AuthContext'
 import WritingReports from '../components/writing/WritingReports'
@@ -28,7 +28,7 @@ export default function ReportsPage() {
     )
   }
 
-  if (!user) { navigate('/auth'); return null }
+  if (!user) return <Navigate to="/auth" replace />
 
   const handleSignOut = async () => {
     await signOut()

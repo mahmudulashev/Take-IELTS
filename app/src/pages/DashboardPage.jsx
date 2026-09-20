@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Sidebar from '../components/layout/Sidebar'
 import { useAuth } from '../context/AuthContext'
@@ -19,7 +19,7 @@ export default function DashboardPage() {
     )
   }
 
-  if (!user) { navigate('/auth'); return null }
+  if (!user) return <Navigate to="/auth" replace />
 
   const handleSignOut = async () => {
     await signOut()
