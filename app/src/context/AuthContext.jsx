@@ -119,17 +119,28 @@ export function AuthProvider({ children }) {
     return () => subscription?.unsubscribe()
   }, [])
 
+  // Bitta joyda: kelgan javobni holatga yozish. `noSession` — sessiya
+  // o'qilmagan lahza (token yangilanmoqda). Bunda BOR RO'YXAT SAQLANADI:
+  // uni bo'shatsak, ekranda "hali javob yozilmagan" chiqadi va
+  // foydalanuvchi ma'lumotlari o'chgan deb o'ylaydi.
+  const applyResults = useCallback(({ results: rows, error, noSession }) => {
+    if (noSession) {
+      setSyncError('Sessiya vaqtincha o\'qilmadi.')
+      return
+    }
+    const normalized = toResults(rows)
+    setResults(normalized)
+    setStats(computeStats(normalized))
+    setSyncError(error || null)
+  }, [])
+
   const refreshResults = useCallback(async () => {
     try {
-      const { results: rows, error } = await fetchWriting(50)
-      const normalized = toResults(rows)
-      setResults(normalized)
-      setStats(computeStats(normalized))
-      setSyncError(error || null)
+      applyResults(await fetchWriting(50))
     } catch (e) {
       setSyncError(describeFetchError(e))
     }
-  }, [])
+  }, [applyResults])
 
   // Foydalanuvchi aniqlangach yuklaymiz
   useEffect(() => {
@@ -138,19 +149,15 @@ export function AuthProvider({ children }) {
 
     ;(async () => {
       try {
-        const { results: rows, error } = await fetchWriting(50)
-        if (cancelled) return
-        const normalized = toResults(rows)
-        setResults(normalized)
-        setStats(computeStats(normalized))
-        setSyncError(error || null)
+        const res = await fetchWriting(50)
+        if (!cancelled) applyResults(res)
       } catch (e) {
         if (!cancelled) setSyncError(describeFetchError(e))
       }
     })()
 
     return () => { cancelled = true }
-  }, [user])
+  }, [user, applyResults])
 
   // Boshqa tabda yoki test sahifasida yozilgan javob darhol ko'rinsin:
   // tabga qaytganda va bfcache'dan tiklanganda qayta o'qiymiz.

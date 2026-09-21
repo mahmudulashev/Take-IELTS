@@ -209,7 +209,27 @@ export async function clearWritingHistory(taskType = null) {
  * RLS tufayli faqat o'ziniki qaytadi, lekin filtrni baribir
  * ochiq yozamiz — himoya ikki qatlamli bo'lsin.
  */
+// Bir vaqtning o'zida bir nechta joydan (sahifa effekti, tabga qaytish,
+// bfcache) bir xil so'rov ketadi. Har biri alohida `getSession()` chaqiradi
+// va token yangilanayotgan lahzada ulardan biri sessiyasiz qaytishi mumkin.
+// Shuning uchun uchayotgan so'rov bo'lsa, yangisini boshlamay o'shanga
+// ulanamiz.
+let inFlight = null
+let inFlightLimit = null
+
 export async function getWritingResultsWithStatus(limit = 50) {
+  if (inFlight && inFlightLimit === limit) return inFlight
+  inFlightLimit = limit
+  inFlight = fetchWritingResults(limit)
+  try {
+    return await inFlight
+  } finally {
+    inFlight = null
+    inFlightLimit = null
+  }
+}
+
+async function fetchWritingResults(limit) {
   // Sozlanmagan yoki tizimga kirilmagan holat — bu aloqa xatosi EMAS,
   // shuning uchun ogohlantirish ko'rsatilmaydi.
   if (!isSupabaseConfigured || !supabase) return { results: [], error: null }
@@ -217,7 +237,11 @@ export async function getWritingResultsWithStatus(limit = 50) {
   try {
     const { data: sessionData } = await supabase.auth.getSession()
     const userId = sessionData?.session?.user?.id
-    if (!userId) return { results: [], error: null }
+    // Sessiya o'qilmadi — bu "javob yo'q" degani EMAS. Token yangilanayotgan
+    // lahzada ham shu yerga tushish mumkin. `noSession` bo'lsa chaqiruvchi
+    // bor ro'yxatni saqlab qoladi; aks holda ekran bir zumda nolga tushadi
+    // va foydalanuvchi ma'lumotlarim o'chibdi deb o'ylaydi.
+    if (!userId) return { results: [], error: null, noSession: true }
 
     const { data, error } = await supabase
       .from('writing_results')

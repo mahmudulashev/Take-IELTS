@@ -4,10 +4,10 @@ import { motion } from 'framer-motion'
 import Sidebar from '../components/layout/Sidebar'
 import { useAuth } from '../context/AuthContext'
 import { formatDate } from '../lib/format'
-import { Flame, Award, BarChart2, PenLine, ArrowRight, History, CheckCircle2 } from 'lucide-react'
+import { Flame, Award, BarChart2, PenLine, ArrowRight, History, CheckCircle2, WifiOff } from 'lucide-react'
 
 export default function DashboardPage() {
-  const { user, sessionChecked, signOut, results, stats } = useAuth()
+  const { user, sessionChecked, signOut, results, stats, syncError } = useAuth()
   const [currentSlide, setCurrentSlide] = useState(0)
   const navigate = useNavigate()
 
@@ -215,7 +215,23 @@ export default function DashboardPage() {
           )}
         </div>
         <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden">
-          {results.length === 0 ? (
+          {results.length === 0 && syncError ? (
+            /* Aloqa uzilganda ro'yxat bo'sh qaytadi. Buni "hali javob
+               yozilmagan" deb ko'rsatsak, foydalanuvchi ma'lumotlarim
+               o'chibdi deb o'ylaydi — aslida ular bazada turadi. */
+            <div className="p-8 flex items-start gap-3">
+              <div className="w-9 h-9 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                <WifiOff className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-gray-900 mb-1">Natijalar o'qilmadi</p>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  {syncError} <strong>Ma'lumotlaringiz o'chmagan</strong> — ular bazada turibdi,
+                  aloqa tiklangach qaytadi.
+                </p>
+              </div>
+            </div>
+          ) : results.length === 0 ? (
             <div className="p-12 text-center">
               <CheckCircle2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-base font-bold text-gray-700">Hali javob yozilmagan. Birinchi Task 1 javobini yozib ko'ring!</p>
