@@ -279,6 +279,7 @@ How to check:
   - When values are tied, a superlative is true for each of the tied items, unless the candidate says it is the only one.
   - Differences, ratios and rounded descriptions ("roughly doubled", "a threefold rise", "just over a quarter") are correct when they are arithmetically consistent with the data.
   - Paraphrased labels ("the oldest group" for 50+) are correct.
+  - An adverb of speed or size is PART of the claim and must be checked against the actual size of the change: "slowly", "gradually", "slightly", "steadily", "sharply", "dramatically", "rapidly". Calling a rise of more than about half the starting value "slow", "slight" or "gradual", or calling a change of less than about a tenth "sharp" or "dramatic", is "inaccurate", severity "minor". "Steadily" additionally claims the direction never reverses, so one dip or peak in between makes it inaccurate.
   - A superlative or comparison about the items in general that names no series ("perfume was the product people spent the least on", "cars were the most popular item") must hold for EVERY series in the visual. If it holds for some series but not for another, it is "inaccurate", severity "minor" — the reader is told something false about that series. It is correct only if the candidate explicitly limits it ("in the UK", "in total", "combined"). Do not rescue it with a combined total the candidate never mentioned.
 
 Verdicts:
@@ -319,7 +320,7 @@ Lexical Resource bands 6 and 6.5 describe a candidate who attempts less common v
 
 === CALIBRATION ANCHORS — SCORE BY COMPARISON, NOT BY RULE ===
 
-Below are two real Task 1 responses with their agreed bands. Place the candidate's response against them BEFORE you commit to any number, criterion by criterion: "is this better or worse than anchor B in Task Achievement, and why exactly?"
+Below are three real Task 1 responses with their agreed bands. Place the candidate's response against them BEFORE you commit to any number, criterion by criterion: "is this better or worse than anchor B in Task Achievement, and why exactly?"
 
 --- ANCHOR A — overall 6.0 (TA 6.0 / CC 6.0 / LR 6.0 / GRA 6.5) ---
 Visual: bar chart, weekly hours on social media, watching TV, sport & exercise and reading, by age group (16–24, 25–34, 35–49, 50+), 2023.
@@ -344,8 +345,22 @@ On the other hand, France spent more money in two categories. The expenditure on
 """
 Why this is a 7: the overview names the main contrast and the largest category; the body is organised by COMPARISON (where the UK spent more, then where France spent more) and picks out the largest gap. One minor inaccuracy in the overview — perfume was not the lowest item for France (cameras was) — holds Task Achievement at 7. Some less common data vocabulary is used accurately (expenditure, the French figure, the largest gap, more than twice as high, slightly lower), with noticeable repetition of "spent" and "pounds". Grammar mixes relative clauses and "compared with" structures with a few errors ("for the both countries", "twice as high as France"). Band 8 would need precise, varied data language used naturally and key features extended, not just stated.
 
+--- ANCHOR C — overall 6.0 (TA 6.0 / CC 6.0 / LR 5.5 / GRA 6.0) ---
+Visual: line graph, international tourist arrivals in Northport, Riverton and Lakeside, 2000–2020, millions.
+"""
+The line graph gives information about how many international tourists visited three different cities, which are Northport, Riverton and Lakeside, between 2000 and 2020.
+
+Overall, it can be seen that the number of tourists in Northport and Lakeside went up during this period, but Riverton stayed almost the same and then dropped at the end. Also, Northport had the biggest number in 2015.
+
+In 2000, Riverton was the most popular city with 3.5 million tourists, while Northport had 2.1 million and Lakeside had only 0.8 million. After that, Northport increased a lot and reached to 3.9 million in 2010 and 5.2 million in 2015, which was the highest point of all the cities.
+
+For Lakeside, the number of tourists also raised slowly, from 0.8 million to 3.3 million in 2015. However, in 2020 all three cities went down. Northport fell to 3.1 million, Riverton to 2.4 million, and Lakeside to 2.9 million.
+"""
+Why this is a 6 and NOT a 6.5 or a 7 — the second most important anchor: there is a real overview, the paragraphs are tidy and almost every figure is read correctly, and it is STILL a 6. The body narrates the graph city by city and year by year ("In 2000... After that... For Lakeside... However, in 2020..."); it follows the lines instead of selecting features. Neither crossover is mentioned (Northport passes Riverton between 2005 and 2010; Lakeside passes Riverton between 2015 and 2020), and no gap between the cities is ever quantified, so key features are only adequately covered — band 6, not 7. "also raised slowly" describes a rise from 0.8 to 3.3 million, more than a fourfold increase, as slow: an inaccurate trend claim, minor. Linking is basic and repeated (Also, After that, However, For Lakeside) and the overview is glued on with "Also". Vocabulary keeps returning to "went up", "went down", "the number of tourists", "million", with "a lot" and the errors "reached to" and "raised" for "rose" — an attempt at data language with noticeable inaccuracy, which is Lexical Resource 5.5. Sentences are mostly simple and compound with one or two relative clauses. AN ACCURATE, TIDY, CHRONOLOGICAL NARRATION OF EACH SERIES IN TURN IS BAND 6.
+
 How to use the anchors:
-- A response that recounts figures one by one like anchor A has Task Achievement of 6.5 at most, however accurate it is.
+- A response that recounts figures one by one like anchor A, or narrates each series in turn like anchor C, has Task Achievement of 6.0–6.5, however accurate it is.
+- The test that separates 6 from 7 in Task Achievement: find a sentence in the BODY that puts two series side by side to make a point — a quantified gap, a crossover, a ratio, or two series grouped because they behave alike. A comparison that only appears in the overview does not count. If you cannot quote such a sentence, Task Achievement is 6.0–6.5 and you must say in "why" that the response reports the data rather than comparing it.
 - Plain, repeated but correct vocabulary like anchor A is Lexical Resource 6.0–6.5, not 7.
 - Award 7.5 or above in any criterion only when the response clearly beats anchor B in that criterion — say in which way in "why".
 
@@ -369,6 +384,8 @@ IELTS is reported in HALF bands and most real candidates land on them. Band 9 is
 === CONSISTENCY CHECK — BEFORE YOU FINALISE ===
 
 - If any data check is "inaccurate", the Task Achievement "why" must name it with the correct value, and neither "why" nor "summary" may describe the figures as fully accurate.
+- If the Task Achievement "to_improve" asks for a key feature that is missing from the response — a crossover, the largest gap, the main contrast — then key features were NOT fully covered, and Task Achievement cannot be above 6.5. Do not praise the response for accuracy in "why" and then ask for a missing feature in "to_improve" without that showing in the band.
+- A trend claim whose adverb you judged wrong belongs in "data_checks" as "inaccurate", not only in "annotations".
 - If "to_improve" names a real present weakness — no overview, a misreported figure, an uncovered key feature, formulaic linking — that weakness must be visible in the band.
 - 8.5 and 9.0 mean you looked for a substantive weakness in that criterion and found none.
 - Do not invent a criticism merely to justify a low number.
