@@ -1,5 +1,5 @@
 /**
- * IELTS Academic Writing Task 1 — 5 ta belgilangan to'plam.
+ * IELTS Academic Writing Task 1 — 8 ta belgilangan to'plam.
  *
  * Task 2 to'plamlaridan farqi: har birida `chart` bor. Grafik rasm emas,
  * shu ma'lumotdan chiziladi (components/writing/Task1Chart.jsx), AI
@@ -147,6 +147,74 @@ export const WRITING_TASK1_PACKS = [
       series: [
         { name: 'France', values: [400000, 380000, 300000, 200000, 150000], color: '#4A9BD9' },
         { name: 'UK', values: [450000, 350000, 400000, 140000, 360000], color: '#F47B20' },
+      ],
+    },
+  },
+  {
+    id: 'writing-t1-6',
+    number: 6,
+    task: 'task1',
+    title: 'Task 1 Practice 6',
+    type: 'Line graph',
+    topic: 'Education',
+    difficulty: "O'rta",
+    text: `The line graph below shows the number of students enrolled in three types of university course in one country between 2005 and 2025. ${INSTRUCTION}`,
+    chart: {
+      kind: 'line',
+      title: 'University enrolments by subject area, 2005–2025',
+      unit: 'thousands of students',
+      axisLabel: 'Subject area',
+      categories: ['2005', '2010', '2015', '2020', '2025'],
+      series: [
+        { name: 'Business', values: [42, 48, 55, 51, 46] },
+        { name: 'Engineering', values: [30, 33, 38, 47, 58] },
+        { name: 'Arts & humanities', values: [38, 35, 31, 26, 20] },
+      ],
+    },
+  },
+  {
+    id: 'writing-t1-7',
+    number: 7,
+    task: 'task1',
+    title: 'Task 1 Practice 7',
+    type: 'Bar chart',
+    topic: 'Transport',
+    difficulty: 'Qiyin',
+    text: `The bar chart below shows the percentage of daily journeys made by four means of transport in one city in 1995, 2005, 2015 and 2025. ${INSTRUCTION}`,
+    chart: {
+      kind: 'bar',
+      title: 'Share of daily journeys by means of transport, 1995–2025',
+      unit: '%',
+      axisLabel: 'Means of transport',
+      categories: ['1995', '2005', '2015', '2025'],
+      series: [
+        { name: 'Car', values: [52, 58, 49, 38] },
+        { name: 'Bus', values: [26, 20, 18, 17] },
+        { name: 'Cycling', values: [8, 6, 13, 24] },
+        { name: 'Walking', values: [14, 16, 20, 21] },
+      ],
+    },
+  },
+  {
+    id: 'writing-t1-8',
+    number: 8,
+    task: 'task1',
+    title: 'Task 1 Practice 8',
+    type: 'Table',
+    topic: 'Housing',
+    difficulty: 'Qiyin',
+    text: `The table below gives information about the average monthly rent for a two-bedroom flat in four cities in 2015, 2020 and 2025. ${INSTRUCTION}`,
+    chart: {
+      kind: 'table',
+      title: 'Average monthly rent for a two-bedroom flat, 2015–2025',
+      unit: 'US dollars',
+      axisLabel: 'City',
+      categories: ['2015', '2020', '2025'],
+      series: [
+        { name: 'Northport', values: [620, 810, 1180] },
+        { name: 'Riverton', values: [540, 700, 905] },
+        { name: 'Lakeside', values: [480, 520, 610] },
+        { name: 'Eastvale', values: [700, 690, 640] },
       ],
     },
   },
