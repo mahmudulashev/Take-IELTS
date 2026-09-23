@@ -1,5 +1,5 @@
 /**
- * IELTS Writing Task 2 — 15 ta belgilangan to'plam.
+ * IELTS Writing Task 2 — 16 ta belgilangan to'plam.
  *
  * Har bir to'plam o'zgarmas: foydalanuvchi
  * "Writing Practice 3" ni tanlasa, har safar aynan o'sha mavzu
@@ -154,6 +154,15 @@ export const WRITING_PACKS = [
     topic: 'Work & Well-being',
     difficulty: 'Qiyin',
     text: 'As most people spend a major part of adult life at the place of work, job satisfaction is an important part of individual well-being. What are the factors that contribute to job satisfaction? Are all the expectations for job satisfaction realistic?',
+  },
+  {
+    id: 'writing-16',
+    number: 16,
+    title: 'Writing Practice 16',
+    type: 'Opinion',
+    topic: 'Society & Work',
+    difficulty: "O'rta",
+    text: 'In many countries children are engaged in some kind of paid work. Some people regard this as completely wrong, while others consider it as valuable work experience, important for learning and taking responsibility. What is your opinion on this?',
   },
 ]
 
