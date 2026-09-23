@@ -605,11 +605,19 @@ Deno.serve(async (req: Request) => {
     // Bittasi 404 bersa keyingisiga o'tamiz — sayt to'xtab qolmasin.
     // `gemini-2.5-flash` 2026-yil avgustda yangi foydalanuvchilar uchun
     // yopildi (404 NOT_FOUND) — Google o'rniga 3.6-flash'ni tavsiya qildi.
-    // Zaxira zanjiri sifat bo'yicha tartiblangan: birinchisi 404 bersa,
-    // eng yaqin kuchli modelga tushamiz, eng oxirida esa sayt to'xtab
-    // qolmasligi uchun har qanday ishlaydigan model.
+    // ZAXIRA ZANJIRIDA `gemini-3.5-flash-lite` ATAYLAB YO'Q.
+    //
+    // 2026-09-23 da shunday bo'ldi: 3.6-flash ham, flash-latest ham 503
+    // ("high demand") qaytardi va baholash flash-lite'ga tushdi. U esa
+    // xatosiz, lekin oddiy javobga 7.5 qo'ydi — to'g'ri ball 6.5 edi.
+    // Foydalanuvchi buni ko'rmaydi: natija tarixga xuddi boshqalari kabi
+    // yozilib qoladi.
+    //
+    // Baholash mahsulotida noto'g'ri ball — xatodan yomonroq. Model
+    // topilmasa, "keyinroq urinib ko'ring" deymiz: zanjirda faqat shu
+    // vazifani uddalay oladigan modellar turadi.
     const primaryModel = isTask1 ? TASK1_MODEL : TASK2_MODEL
-    const MODELS = [primaryModel, TASK2_MODEL, 'gemini-flash-latest', 'gemini-3.5-flash-lite']
+    const MODELS = [primaryModel, TASK2_MODEL, TASK1_MODEL, 'gemini-flash-latest']
       .filter((m, i, all) => all.indexOf(m) === i)
 
     let geminiJson: any = null
