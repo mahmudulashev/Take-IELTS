@@ -1,8 +1,9 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { RefreshCw, ArrowLeft } from 'lucide-react'
+import { RefreshCw, ArrowLeft, AlertTriangle } from 'lucide-react'
 import { getPromptById, TASK_CONFIG } from '../../data/writing-prompts'
 import { num } from './result/shared'
+import { isDegradedModel } from '../../lib/model-quality'
 import ResultHero from './result/ResultHero'
 import CriteriaFeedback from './result/CriteriaFeedback'
 import DataChecks from './result/DataChecks'
@@ -53,6 +54,24 @@ export default function WritingResult({ result, prompt, onNewEssay }) {
 
   return (
     <div className="flex flex-col gap-4 text-[#14181F] antialiased" style={{ fontFamily: "'Outfit', system-ui, sans-serif" }}>
+      {/* Zaxira model bahosi — jim o'tkazib yuborilmaydi */}
+      {isDegradedModel(result?.model) && (
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+          <div className="w-9 h-9 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-[#14181F] mb-1">Bu ball zaxira model tomonidan qo'yilgan</p>
+            <p className="text-xs text-[#5B626D] leading-relaxed">
+              Asosiy baholash modeli band edi, shuning uchun javobingiz kuchsizroq zaxira
+              modelda baholandi. U ballni <strong>oshirib yuborishi</strong> mumkin — quyidagi
+              raqamlarga to'liq ishonmang. Keyinroq shu inshoni qayta yuborsangiz, aniqroq
+              baho olasiz.
+            </p>
+          </div>
+        </div>
+      )}
+
       <ResultHero result={result} task={task} criteria={criteria} />
 
       <CriteriaFeedback

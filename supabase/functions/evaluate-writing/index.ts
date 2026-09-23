@@ -605,19 +605,19 @@ Deno.serve(async (req: Request) => {
     // Bittasi 404 bersa keyingisiga o'tamiz — sayt to'xtab qolmasin.
     // `gemini-2.5-flash` 2026-yil avgustda yangi foydalanuvchilar uchun
     // yopildi (404 NOT_FOUND) — Google o'rniga 3.6-flash'ni tavsiya qildi.
-    // ZAXIRA ZANJIRIDA `gemini-3.5-flash-lite` ATAYLAB YO'Q.
+    // `gemini-3.5-flash-lite` — eng oxirgi chora, va u ATAYLAB belgilanadi.
     //
-    // 2026-09-23 da shunday bo'ldi: 3.6-flash ham, flash-latest ham 503
-    // ("high demand") qaytardi va baholash flash-lite'ga tushdi. U esa
-    // xatosiz, lekin oddiy javobga 7.5 qo'ydi — to'g'ri ball 6.5 edi.
-    // Foydalanuvchi buni ko'rmaydi: natija tarixga xuddi boshqalari kabi
-    // yozilib qoladi.
+    // 2026-09-23 da ikkala holat ham ko'rindi. Avval: 3.6 va flash-latest
+    // 503 berdi, baholash jimgina flash-lite'ga tushdi va oddiy javobga
+    // 7.5 qo'ydi (to'g'ri ball 6.5). Uni zanjirdan olib tashlaganimizdan
+    // keyin esa hamma model 503 berib, baholash umuman ishlamay qoldi.
     //
-    // Baholash mahsulotida noto'g'ri ball — xatodan yomonroq. Model
-    // topilmasa, "keyinroq urinib ko'ring" deymiz: zanjirda faqat shu
-    // vazifani uddalay oladigan modellar turadi.
+    // Ikkalasi ham yomon. Yechim: flash-lite qoladi, lekin uning bahosi
+    // "ishonchsiz" deb belgilanadi va interfeysda shunday ko'rsatiladi
+    // (lib/model-quality.js). Jim turib noto'g'ri ball qo'yish mumkin
+    // emas; xizmatni butunlay to'xtatish ham shart emas.
     const primaryModel = isTask1 ? TASK1_MODEL : TASK2_MODEL
-    const MODELS = [primaryModel, TASK2_MODEL, TASK1_MODEL, 'gemini-flash-latest']
+    const MODELS = [primaryModel, TASK2_MODEL, TASK1_MODEL, 'gemini-flash-latest', 'gemini-3.5-flash-lite']
       .filter((m, i, all) => all.indexOf(m) === i)
 
     let geminiJson: any = null
