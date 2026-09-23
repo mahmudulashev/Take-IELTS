@@ -316,11 +316,16 @@ Word count is ${wordCount}. Under 150 words is a Task Achievement penalty; state
 
 Coherence & Cohesion, Lexical Resource and Grammatical Range & Accuracy are assessed as in Task 2. For Lexical Resource, Task 1 specifically rewards precise language for describing data: trends (rose steadily, levelled off, fluctuated), comparison (twice as much as, by far the largest share) and approximation (roughly, just over a quarter). Repeating the same verbs throughout limits the ceiling. Inaccurate data is a Task Achievement matter — do NOT also deduct it from Lexical Resource or Grammar.
 
-Lexical Resource bands 6 and 6.5 describe a candidate who attempts less common vocabulary WITH SOME INACCURACY — wrong word choice, collocation, word form or spelling. If you found no such error (a "Xato emas — yaxshilash" note is not an error) and the response uses some less common data vocabulary accurately (e.g. expenditure, figure, gap, twice as high, slightly lower), Lexical Resource is at least 7.0. Repetition and plain wording decide between 7 and 8; on their own they do not push an accurate response below 7.
+Lexical Resource is decided by RANGE and PRECISION, not by the absence of errors. An error-free response is not automatically above 6.5.
+- Bands 6 and 6.5 cover two different candidates: one who attempts less common vocabulary WITH SOME INACCURACY, and one whose vocabulary is correct but plain, general and repetitive. Both are band 6.
+- Before awarding 7.0 or above, QUOTE in "evidence" at least three less common or precise data items the response actually uses — for example expenditure, the figure for, accounted for, the largest gap, levelled off, roughly a quarter, twice as high, marginally lower. If you cannot quote three, Lexical Resource is 6.0–6.5, however accurate the response is.
+- Count the repetition. If one everyday verb (spent, paid, showed, went up) carries most of the report, the range is adequate but limited — band 6.
+- Register: Academic Task 1 describes data neutrally. Evaluative or informal labels for the groups and items ("the rich group", "poor people", "a lot of money") are register slips; with one or more of them Lexical Resource cannot be above 6.5.
+- Do NOT go the other way either: plainness alone never drops an accurate response into band 5. Band 5 needs wrong word choices that make the reader work.
 
 === CALIBRATION ANCHORS — SCORE BY COMPARISON, NOT BY RULE ===
 
-Below are three real Task 1 responses with their agreed bands. Place the candidate's response against them BEFORE you commit to any number, criterion by criterion: "is this better or worse than anchor B in Task Achievement, and why exactly?"
+Below are four real Task 1 responses with their agreed bands. Place the candidate's response against them BEFORE you commit to any number, criterion by criterion: "is this better or worse than anchor B in Task Achievement, and why exactly?"
 
 --- ANCHOR A — overall 6.0 (TA 6.0 / CC 6.0 / LR 6.0 / GRA 6.5) ---
 Visual: bar chart, weekly hours on social media, watching TV, sport & exercise and reading, by age group (16–24, 25–34, 35–49, 50+), 2023.
@@ -358,11 +363,30 @@ For Lakeside, the number of tourists also raised slowly, from 0.8 million to 3.3
 """
 Why this is a 6 and NOT a 6.5 or a 7 — the second most important anchor: there is a real overview, the paragraphs are tidy and almost every figure is read correctly, and it is STILL a 6. The body narrates the graph city by city and year by year ("In 2000... After that... For Lakeside... However, in 2020..."); it follows the lines instead of selecting features. Neither crossover is mentioned (Northport passes Riverton between 2005 and 2010; Lakeside passes Riverton between 2015 and 2020), and no gap between the cities is ever quantified, so key features are only adequately covered — band 6, not 7. "also raised slowly" describes a rise from 0.8 to 3.3 million, more than a fourfold increase, as slow: an inaccurate trend claim, minor. Linking is basic and repeated (Also, After that, However, For Lakeside) and the overview is glued on with "Also". Vocabulary keeps returning to "went up", "went down", "the number of tourists", "million", with "a lot" and the errors "reached to" and "raised" for "rose" — an attempt at data language with noticeable inaccuracy, which is Lexical Resource 5.5. Sentences are mostly simple and compound with one or two relative clauses. AN ACCURATE, TIDY, CHRONOLOGICAL NARRATION OF EACH SERIES IN TURN IS BAND 6.
 
+--- ANCHOR D — overall 6.5 (TA 7.0 / CC 6.5 / LR 6.0 / GRA 6.5) ---
+Visual: table, average monthly household spending on housing, food, transport and leisure by three income groups, 2022, US dollars.
+"""
+The table shows how much money households in three income groups spent every month on four categories, which are housing, food, transport and leisure, in 2022.
+
+Overall, high income households spent more money than the other two groups in all categories. Also, housing was the biggest expense for every group, while leisure was the smallest.
+
+Looking at housing, low income families spent $420 per month, while middle income families spent $780. High income households spent much more, at $1,450, which is more than three times the amount of the low income group. Food was the second biggest category. The low income group paid $310 and the middle group paid $450, and the high income group spent $620 on it.
+
+Transport and leisure showed bigger differences between the groups. Low income households spent only $90 on transport, but high income households spent $510. Similarly, leisure spending was just $40 for low income people, compared to $480 for the rich group, which is twelve times more. Middle income households spent $240 on transport and $160 on leisure.
+"""
+Why this is 6.5 overall — the anchor that shows the criteria PULLING APART: every figure is correct, every superlative holds, and the response really does compare (three times the amount, twelve times more), so Task Achievement earns 7.0 — but that does not carry the other three criteria with it.
+- Task Achievement 7.0: clear overview naming the biggest and smallest category and the main contrast; comparisons are quantified as ratios, not just listed. It is not 7.5, because the middle-income figures are added mechanically at the end ("Middle income households spent $240 on transport and $160 on leisure") and nothing is extended beyond stating the gaps.
+- Coherence & Cohesion 6.5: the paragraphs are logical and "Similarly", "while", "compared to" are used correctly, but the overview is attached with "Also" and the last sentence is a leftover rather than a conclusion.
+- Lexical Resource 6.0: THE KEY POINT. There is not a single lexical error, and it is still a 6. "spent" appears nine times and "paid" twice; the rest is "money", "categories", "much more", "bigger differences". No less common data vocabulary at all — no expenditure, no figure, no accounted for, no gap. And "the rich group" is a register slip in an academic description. No errors + plain, repeated vocabulary = band 6.
+- Grammatical Range 6.5: correct throughout, with a few relative clauses, but nearly every sentence follows "X spent $Y, while Z spent $W". Accuracy without variety is 6.5, not 7.5.
+ACCURACY IS A TASK ACHIEVEMENT MATTER. IT MUST NOT BE PAID FOR A SECOND AND THIRD TIME IN LEXIS AND GRAMMAR.
+
 How to use the anchors:
 - A response that recounts figures one by one like anchor A, or narrates each series in turn like anchor C, has Task Achievement of 6.0–6.5, however accurate it is.
 - The test that separates 6 from 7 in Task Achievement: find a sentence in the BODY that puts two series side by side to make a point — a quantified gap, a crossover, a ratio, or two series grouped because they behave alike. A comparison that only appears in the overview does not count. If you cannot quote such a sentence, Task Achievement is 6.0–6.5 and you must say in "why" that the response reports the data rather than comparing it.
 - Plain, repeated but correct vocabulary like anchor A is Lexical Resource 6.0–6.5, not 7.
-- Award 7.5 or above in any criterion only when the response clearly beats anchor B in that criterion — say in which way in "why".
+- Award 7.5 or above in any criterion only when the response clearly beats anchor B in that criterion — say in which way in "why". "The data is accurate" is not such a way.
+- The four criteria are allowed to diverge, as in anchor D. Strong Task Achievement does not lift Lexical Resource or Grammatical Range with it; a response can be TA 7.0 and LR 6.0 at the same time.
 
 === FAIRNESS — DEDUCT ONLY WHAT THE DESCRIPTORS PENALISE ===
 
@@ -387,6 +411,8 @@ IELTS is reported in HALF bands and most real candidates land on them. Band 9 is
 - If the Task Achievement "to_improve" asks for a key feature that is missing from the response — a crossover, the largest gap, the main contrast — then key features were NOT fully covered, and Task Achievement cannot be above 6.5. Do not praise the response for accuracy in "why" and then ask for a missing feature in "to_improve" without that showing in the band.
 - A trend claim whose adverb you judged wrong belongs in "data_checks" as "inaccurate", not only in "annotations".
 - If "to_improve" names a real present weakness — no overview, a misreported figure, an uncovered key feature, formulaic linking — that weakness must be visible in the band.
+- Count how many criteria you put at 7.0 or above. For EACH of them, name the specific way it beats anchor B. If you cannot name one for a criterion, that criterion is below 7.0.
+- Data accuracy belongs to Task Achievement ALONE. If your "why" for Coherence, Lexical Resource or Grammatical Range rests on the figures being correct, the reason is wrong — rewrite it around cohesion, range or structures, and lower the band if nothing else supports it.
 - 8.5 and 9.0 mean you looked for a substantive weakness in that criterion and found none.
 - Do not invent a criticism merely to justify a low number.
 ${spellingList}
