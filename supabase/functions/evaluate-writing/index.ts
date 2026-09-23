@@ -25,7 +25,18 @@ import { normalizeDataChecks, dataCheckAnnotations, overlapsAny } from './task1-
 // darrov boshlanadi va autentifikatsiya bilan bir vaqtda tugaydi.
 warmDictionary()
 
-const GEMINI_MODEL = 'gemini-3.6-flash'
+// Task 1 va Task 2 uchun modellar ataylab ALOHIDA.
+//
+// Task 1 baholash matni qiyinroq: kod hisoblagan tayanch faktlarni
+// solishtirish, to'rtta tayanch javob bilan qiyoslash va to'rt mezonni
+// bir-biridan ajratib ushlab turish kerak. 3.6-flash bu intizomni
+// uddalay olmadi — xatosiz, lekin oddiy javobga 7.5 qo'ydi. 3.8-flash
+// aynan uzoq, qoidaga boy topshiriqlar uchun chiqarilgan.
+//
+// Task 2 esa 3.6-flash bilan sozlangan va shikoyat bo'lmagan — modelni
+// tekshirmasdan almashtirsak, kalibratsiya bilinmay siljib ketadi.
+const TASK1_MODEL = 'gemini-3.8-flash'
+const TASK2_MODEL = 'gemini-3.6-flash'
 const DAILY_LIMIT = 5          // bitta foydalanuvchi uchun kuniga
 const MIN_WORDS = 50
 const MAX_WORDS = 1000
@@ -501,6 +512,7 @@ Deno.serve(async (req: Request) => {
     const { promptId, promptText, essay, timeSpent, taskData } = body
     // Eski klientlar taskType yubormaydi — ular faqat Task 2 bilan ishlagan.
     const taskType = body.taskType === 'task1' ? 'task1' : 'task2'
+    const isTask1 = taskType === 'task1'
     if (typeof promptText !== 'string' || typeof essay !== 'string') {
       return json({ error: 'promptText va essay matn bo\'lishi kerak.' }, 400)
     }
@@ -593,10 +605,15 @@ Deno.serve(async (req: Request) => {
     // Bittasi 404 bersa keyingisiga o'tamiz — sayt to'xtab qolmasin.
     // `gemini-2.5-flash` 2026-yil avgustda yangi foydalanuvchilar uchun
     // yopildi (404 NOT_FOUND) — Google o'rniga 3.6-flash'ni tavsiya qildi.
-    const MODELS = [GEMINI_MODEL, 'gemini-flash-latest', 'gemini-3.5-flash-lite']
+    // Zaxira zanjiri sifat bo'yicha tartiblangan: birinchisi 404 bersa,
+    // eng yaqin kuchli modelga tushamiz, eng oxirida esa sayt to'xtab
+    // qolmasligi uchun har qanday ishlaydigan model.
+    const primaryModel = isTask1 ? TASK1_MODEL : TASK2_MODEL
+    const MODELS = [primaryModel, TASK2_MODEL, 'gemini-flash-latest', 'gemini-3.5-flash-lite']
+      .filter((m, i, all) => all.indexOf(m) === i)
 
     let geminiJson: any = null
-    let usedModel = GEMINI_MODEL
+    let usedModel = primaryModel
     let lastError = ''
     let lastStatus = 0
 
@@ -617,7 +634,8 @@ Deno.serve(async (req: Request) => {
       generationConfig: {
         temperature: 0.3,          // baho barqaror bo'lsin
         responseMimeType: 'application/json',
-        ...(withThinking ? { thinkingConfig: { thinkingLevel: 'medium' } } : {}),
+        // Task 1 da baho qo'yish uchun taqqoslash ko'p — chuqurroq o'ylasin.
+        ...(withThinking ? { thinkingConfig: { thinkingLevel: isTask1 ? 'high' : 'medium' } } : {}),
       },
     })
 
@@ -660,7 +678,7 @@ Deno.serve(async (req: Request) => {
         if (res.ok) {
           geminiJson = await res.json()
           usedModel = model
-          if (model !== GEMINI_MODEL) console.warn(`Zaxira model ishlatildi: ${model}`)
+          if (model !== primaryModel) console.warn(`Zaxira model ishlatildi: ${model}`)
           if (attempt > 1) console.warn(`${attempt}-urinishda muvaffaqiyat`)
           break outer
         }
