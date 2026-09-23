@@ -9,7 +9,13 @@
  * boshqalari bilan teng ko'rsatish mumkin emas — foydalanuvchi ballning
  * ishonchliligi pastroq ekanini bilib tursin.
  */
-const DEGRADED_MODELS = new Set(['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'])
+const DEGRADED_MODELS = new Set([
+  'gemini-3.5-flash-lite',
+  'gemini-3.1-flash-lite',
+  // Groq zaxirasi — ochiq modellar, bizning matnimizda Gemini'dan zaifroq
+  'openai/gpt-oss-120b',
+  'llama-3.3-70b-versatile',
+])
 
 export function isDegradedModel(model) {
   return typeof model === 'string' && DEGRADED_MODELS.has(model)

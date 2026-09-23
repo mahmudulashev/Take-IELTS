@@ -482,6 +482,69 @@ Return ONLY valid JSON, no markdown fences, exactly this shape — fill "data_ch
 "severity" in annotations must be one of: high, medium, low; in data_checks one of: minor, major.`
 }
 
+// Groq — provayderlar aro zaxira. Gemini'ning HAMMA modeli 503 ("high
+// demand") berganda ishga tushadi: Groq Google sig'imiga bog'liq emas,
+// shuning uchun Google band bo'lganda ham javob qaytaradi.
+//
+// DIQQAT: Groq ochiq modellarni beradi (gpt-oss, Llama). Ular bizning
+// og'ir baholash matnimizda Gemini'dan zaifroq — ball oshib ketishi
+// mumkin. Shuning uchun natija "ishonchsiz" deb belgilanadi
+// (frontend: lib/model-quality.js). Bu — oxirgi chora, sifat kafolati
+// emas; maqsad: Google band bo'lganda sayt umuman to'xtab qolmasin.
+//
+// API OpenAI-mos: /openai/v1/chat/completions. `reasoning_effort` faqat
+// gpt-oss modellarida bor; Llama uni rad etadi, shuning uchun shartli.
+const GROQ_MODELS = ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile']
+
+async function callGroq(
+  prompt: string,
+  apiKey: string,
+  isTask1: boolean,
+): Promise<{ raw: string; model: string } | null> {
+  for (const model of GROQ_MODELS) {
+    const body: Record<string, unknown> = {
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.3,
+      response_format: { type: 'json_object' },
+    }
+    // gpt-oss reasoning modellari uchun — Task 1 da chuqurroq o'ylasin.
+    if (model.startsWith('openai/gpt-oss')) {
+      body.reasoning_effort = isTask1 ? 'high' : 'medium'
+    }
+
+    let res: Response
+    try {
+      res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(body),
+      })
+    } catch (netErr) {
+      console.error(`Groq tarmoq xatosi [${model}]:`, netErr)
+      continue
+    }
+
+    if (!res.ok) {
+      const detail = await res.text()
+      console.error(`Groq xatosi [${model}]:`, res.status, detail.slice(0, 200))
+      continue   // keyingi Groq modeliga
+    }
+
+    const data = await res.json().catch(() => null)
+    const raw = data?.choices?.[0]?.message?.content
+    if (typeof raw === 'string' && raw.trim()) {
+      console.warn(`Groq zaxirasi ishlatildi: ${model}`)
+      return { raw, model }
+    }
+    console.error(`Groq bo'sh javob [${model}]:`, JSON.stringify(data).slice(0, 200))
+  }
+  return null
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (req.method !== 'POST') return json({ error: 'Faqat POST' }, 405)
@@ -579,6 +642,9 @@ Deno.serve(async (req: Request) => {
         error: "Server sozlanmagan: GEMINI_API_KEY o'rnatilmagan. Terminalda: supabase secrets set GEMINI_API_KEY=...",
       }, 500)
     }
+    // Ixtiyoriy: Gemini butunlay band bo'lganda provayderlar aro zaxira.
+    // O'rnatilmagan bo'lsa — zaxira yo'q, boshqa hech narsa buzilmaydi.
+    const groqApiKey = Deno.env.get('GROQ_API_KEY')
 
     // ---------------------------------------------------------------
     // 3.5. Imlo — modelga emas, lug'atga ishonamiz
@@ -738,7 +804,28 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    if (!geminiJson) {
+    // Gemini javobini matnga ajratamiz. Bo'sh bo'lsa (SAFETY'dan tashqari)
+    // Groq zaxirasiga tushamiz — quyida.
+    let raw: string | undefined
+    if (geminiJson) {
+      raw = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text
+      if (!raw && geminiJson?.candidates?.[0]?.finishReason === 'SAFETY') {
+        return json({ error: 'Insho mazmuni xavfsizlik filtridan o\'tmadi. Boshqa mavzuda yozib ko\'ring.' }, 400)
+      }
+    }
+
+    // Gemini natija bermadi (band yoki bo'sh javob) — Groq zaxirasi.
+    // Faqat kalit bo'lsa va Gemini xatosi vaqtinchalik bo'lsa urinamiz;
+    // kalit/ruxsat xatosida (400/403) Groq ham yordam bermaydi.
+    if (!raw && groqApiKey && lastStatus !== 400 && lastStatus !== 403) {
+      const groq = await callGroq(promptText_, groqApiKey, isTask1)
+      if (groq) {
+        raw = groq.raw
+        usedModel = groq.model
+      }
+    }
+
+    if (!raw) {
       if (lastStatus === 429) {
         return json({ error: "Kvota tugadi yoki juda ko'p so'rov yuborildi. Bir necha daqiqadan keyin urinib ko'ring." }, 429)
       }
@@ -759,16 +846,6 @@ Deno.serve(async (req: Request) => {
         : lastStatus === 404 ? ' — model nomi topilmadi'
         : ''
       return json({ error: `Baholash xizmati xatosi (${lastStatus}${hint}): ${lastError}` }, 502)
-    }
-
-    const raw = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text
-    if (!raw) {
-      const reason = geminiJson?.candidates?.[0]?.finishReason
-      if (reason === 'SAFETY') {
-        return json({ error: 'Insho mazmuni xavfsizlik filtridan o\'tmadi. Boshqa mavzuda yozib ko\'ring.' }, 400)
-      }
-      console.error('Bo\'sh javob:', JSON.stringify(geminiJson).slice(0, 400))
-      return json({ error: `Baholash natijasi bo'sh keldi${reason ? ` (${reason})` : ''}.` }, 502)
     }
 
     let assessment: any
