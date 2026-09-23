@@ -658,11 +658,18 @@ Deno.serve(async (req: Request) => {
     // Kutish vaqti oshib boradi: 1s, 2s, 4s — serverni yanada
     // yuklamaslik uchun (exponential backoff).
     const TRANSIENT = new Set([500, 502, 503, 504])
-    const MAX_ATTEMPTS = 3
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
+    // Birinchi model — "eng yaxshisi bormi?" degan bitta urinish, qayta
+    // urinishsiz. Bepul tierda `gemini-3.8-flash` doim 503 qaytaradi va
+    // uch marta kutish foydalanuvchini ~35 soniya bekorga ushlab turadi.
+    // Qolgan modellarga esa to'liq uch urinish beriladi: ular haqiqatan
+    // ishlaydi va vaqtinchalik tebranish ularni chetlab o'tmasin.
+    const attemptsFor = (i: number) => (i === 0 && MODELS.length > 1 ? 1 : 3)
+
     outer:
-    for (const model of MODELS) {
+    for (const [modelIndex, model] of MODELS.entries()) {
+      const MAX_ATTEMPTS = attemptsFor(modelIndex)
       for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
         let res: Response
         try {
