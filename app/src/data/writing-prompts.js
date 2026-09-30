@@ -1,5 +1,5 @@
 /**
- * IELTS Writing Task 2 — 16 ta belgilangan to'plam.
+ * IELTS Writing Task 2 — 17 ta belgilangan to'plam.
  *
  * Har bir to'plam o'zgarmas: foydalanuvchi
  * "Writing Practice 3" ni tanlasa, har safar aynan o'sha mavzu
@@ -163,6 +163,15 @@ export const WRITING_PACKS = [
     topic: 'Society & Work',
     difficulty: "O'rta",
     text: 'In many countries children are engaged in some kind of paid work. Some people regard this as completely wrong, while others consider it as valuable work experience, important for learning and taking responsibility. What is your opinion on this?',
+  },
+  {
+    id: 'writing-17',
+    number: 17,
+    title: 'Writing Practice 17',
+    type: 'Agree / Disagree',
+    topic: 'Business & Society',
+    difficulty: "O'rta",
+    text: 'The purpose of businesses is to make money and they should concentrate only on this. Do you agree or disagree?',
   },
 ]
 
