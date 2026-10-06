@@ -1,5 +1,5 @@
 /**
- * IELTS Writing Task 2 — 17 ta belgilangan to'plam.
+ * IELTS Writing Task 2 — 18 ta belgilangan to'plam.
  *
  * Har bir to'plam o'zgarmas: foydalanuvchi
  * "Writing Practice 3" ni tanlasa, har safar aynan o'sha mavzu
@@ -172,6 +172,15 @@ export const WRITING_PACKS = [
     topic: 'Business & Society',
     difficulty: "O'rta",
     text: 'The purpose of businesses is to make money and they should concentrate only on this. Do you agree or disagree?',
+  },
+  {
+    id: 'writing-18',
+    number: 18,
+    title: 'Writing Practice 18',
+    type: 'Discussion + Opinion',
+    topic: 'Education & Employment',
+    difficulty: "O'rta",
+    text: 'Some people believe that universities should focus on providing academic knowledge, while others think they should mainly prepare students for employment. Discuss both views and give your own opinion.',
   },
 ]
 
