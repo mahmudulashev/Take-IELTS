@@ -1,5 +1,5 @@
 /**
- * IELTS Writing Task 2 — 18 ta belgilangan to'plam.
+ * IELTS Writing Task 2 — 19 ta belgilangan to'plam.
  *
  * Har bir to'plam o'zgarmas: foydalanuvchi
  * "Writing Practice 3" ni tanlasa, har safar aynan o'sha mavzu
@@ -181,6 +181,15 @@ export const WRITING_PACKS = [
     topic: 'Education & Employment',
     difficulty: "O'rta",
     text: 'Some people believe that universities should focus on providing academic knowledge, while others think they should mainly prepare students for employment. Discuss both views and give your own opinion.',
+  },
+  {
+    id: 'writing-19',
+    number: 19,
+    title: 'Writing Practice 19',
+    type: 'Discussion + Opinion',
+    topic: 'Crime & Punishment',
+    difficulty: "O'rta",
+    text: 'Some people believe that the best way to reduce crime is to give longer prison sentences. Others, however, think there are better alternative ways of reducing crime. Discuss both views and give your own opinion.',
   },
 ]
 
