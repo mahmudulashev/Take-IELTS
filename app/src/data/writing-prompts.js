@@ -1,5 +1,5 @@
 /**
- * IELTS Writing Task 2 — 20 ta belgilangan to'plam.
+ * IELTS Writing Task 2 — 21 ta belgilangan to'plam.
  *
  * Har bir to'plam o'zgarmas: foydalanuvchi
  * "Writing Practice 3" ni tanlasa, har safar aynan o'sha mavzu
@@ -199,6 +199,15 @@ export const WRITING_PACKS = [
     topic: 'Arts & Government',
     difficulty: "O'rta",
     text: 'Some people think that the government should provide assistance to all kinds of artists including painters, musicians and poets, etc. However, other people think that is a waste of money. Consider these opposing views, and give your own opinion.',
+  },
+  {
+    id: 'writing-21',
+    number: 21,
+    title: 'Writing Practice 21',
+    type: 'Agree / Disagree',
+    topic: 'Culture & Technology',
+    difficulty: 'Qiyin',
+    text: 'It is inevitable that traditional cultures will be lost as technology develops. Technology and traditional cultures are incompatible. To what extent do you agree or disagree with this view?',
   },
 ]
 
