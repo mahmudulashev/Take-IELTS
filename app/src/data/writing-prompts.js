@@ -1,5 +1,5 @@
 /**
- * IELTS Writing Task 2 — 19 ta belgilangan to'plam.
+ * IELTS Writing Task 2 — 20 ta belgilangan to'plam.
  *
  * Har bir to'plam o'zgarmas: foydalanuvchi
  * "Writing Practice 3" ni tanlasa, har safar aynan o'sha mavzu
@@ -190,6 +190,15 @@ export const WRITING_PACKS = [
     topic: 'Crime & Punishment',
     difficulty: "O'rta",
     text: 'Some people believe that the best way to reduce crime is to give longer prison sentences. Others, however, think there are better alternative ways of reducing crime. Discuss both views and give your own opinion.',
+  },
+  {
+    id: 'writing-20',
+    number: 20,
+    title: 'Writing Practice 20',
+    type: 'Discussion + Opinion',
+    topic: 'Arts & Government',
+    difficulty: "O'rta",
+    text: 'Some people think that the government should provide assistance to all kinds of artists including painters, musicians and poets, etc. However, other people think that is a waste of money. Consider these opposing views, and give your own opinion.',
   },
 ]
 
