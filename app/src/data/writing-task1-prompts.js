@@ -1,5 +1,5 @@
 /**
- * IELTS Academic Writing Task 1 — 8 ta belgilangan to'plam.
+ * IELTS Academic Writing Task 1 — 9 ta belgilangan to'plam.
  *
  * Task 2 to'plamlaridan farqi: har birida `chart` bor. Grafik rasm emas,
  * shu ma'lumotdan chiziladi (components/writing/Task1Chart.jsx), AI
@@ -17,6 +17,15 @@
  *
  * Yangi to'plam qo'shganda shu sarlavhadagi sonni ham yangilang.
  */
+
+// Xarita ranglari darslikdagi xaritaga yaqin: bir xil rang — bir xil turdagi joy
+const MAP_COLORS = {
+  green: '#A9D063',
+  blue: '#8DB3E2',
+  pink: '#F19C9C',
+  orange: '#F6A33C',
+  cyan: '#9FDCEB',
+}
 
 const INSTRUCTION =
   'Summarise the information by selecting and reporting the main features, and make comparisons where relevant.'
@@ -215,6 +224,57 @@ export const WRITING_TASK1_PACKS = [
         { name: 'Riverton', values: [540, 700, 905] },
         { name: 'Lakeside', values: [480, 520, 610] },
         { name: 'Eastvale', values: [700, 690, 640] },
+      ],
+    },
+  },
+  {
+    id: 'writing-t1-9',
+    number: 9,
+    task: 'task1',
+    title: 'Task 1 Practice 9',
+    type: 'Maps',
+    topic: 'Urban Development',
+    difficulty: 'Qiyin',
+    text: `The maps below show the town of Frenton in 1990 and 2012. ${INSTRUCTION}`,
+    // Koordinatalar darslikdagi xaritadan olingan (900 × 570, shimol tepada).
+    // Bir xil joydagi obyektlar ikki xaritada bir xil to'rtburchakka ega —
+    // "nima nimaga aylandi" shundan hisoblanadi (lib/task1-chart.js).
+    chart: {
+      kind: 'map',
+      title: 'Frenton, 1990 and 2012',
+      road: { name: 'High Street', from: [615, 0], to: [290, 570], width: 50 },
+      maps: [
+        {
+          label: '1990',
+          features: [
+            { name: 'School', x: 4, y: 53, w: 248, h: 95, color: MAP_COLORS.blue, use: 'Public services' },
+            { name: 'Playing fields with trees', label: 'PLAYING\nFIELDS\nWITH TREES', x: 270, y: 0, w: 240, h: 132, color: MAP_COLORS.green, use: 'Public green space' },
+            { name: 'Bank', x: 36, y: 161, w: 177, h: 129, use: 'Shops and business' },
+            { name: 'Hospital', x: 290, y: 168, w: 148, h: 75, color: MAP_COLORS.pink, use: 'Public services' },
+            { name: 'Library', x: 200, y: 312, w: 177, h: 54, use: 'Public services' },
+            { name: 'Trees', x: 4, y: 418, w: 295, h: 86, color: MAP_COLORS.green, use: 'Public green space' },
+            { name: 'Café and park', label: 'CAFÉ AND\nPARK', x: 455, y: 160, w: 270, h: 260, shape: 'blob', color: MAP_COLORS.green, use: 'Public green space' },
+            { name: 'Houses', x: 727, y: 63, w: 146, h: 403, color: MAP_COLORS.orange, use: 'Housing' },
+            { name: 'Theatre', x: 419, y: 436, w: 209, h: 84, use: 'Leisure and entertainment' },
+            { name: 'Shops', x: 538, y: 513, w: 357, h: 55, color: MAP_COLORS.cyan, use: 'Shops and business' },
+          ],
+        },
+        {
+          label: '2012',
+          features: [
+            { name: 'School', x: 4, y: 53, w: 248, h: 95, color: MAP_COLORS.blue, use: 'Public services' },
+            { name: 'Blocks of flats', label: 'BLOCKS OF\nFLATS', x: 270, y: 0, w: 240, h: 132, use: 'Housing' },
+            { name: 'Flats', x: 618, y: 13, w: 112, h: 83, use: 'Housing' },
+            { name: 'Restaurant', x: 36, y: 160, w: 208, h: 130, use: 'Shops and business' },
+            { name: 'Hospital', x: 272, y: 138, w: 190, h: 164, color: MAP_COLORS.pink, use: 'Public services' },
+            { name: 'Library', x: 200, y: 312, w: 177, h: 54, use: 'Public services' },
+            { name: 'Technopark', x: 4, y: 418, w: 295, h: 86, use: 'Shops and business' },
+            { name: 'Hotel and golf course', label: 'HOTEL AND\nGOLF\nCOURSE', x: 455, y: 160, w: 270, h: 260, shape: 'blob', color: MAP_COLORS.green, use: 'Leisure and entertainment', note: 'still a green area, but now part of a hotel rather than a public park' },
+            { name: 'Blocks of flats', label: 'BLOCKS\nOF\nFLATS', x: 727, y: 63, w: 146, h: 403, use: 'Housing' },
+            { name: 'Cinema', x: 419, y: 436, w: 209, h: 84, use: 'Leisure and entertainment' },
+            { name: 'Supermarket', x: 538, y: 513, w: 357, h: 55, color: MAP_COLORS.cyan, use: 'Shops and business' },
+          ],
+        },
       ],
     },
   },

@@ -18,6 +18,17 @@
  *   ordered    — bar/line/table: categories ketma-ketlikmi (yillar, yosh guruhlari).
  *                Mahsulotlar kabi alohida narsalar uchun `false` — trend faktlari chiqmaydi
  *   pies       — faqat pie: [{ label, slices: [{ name, value }] }]
+ *
+ * Xarita (`kind: 'map'`) — raqam yo'q, joy va o'zgarish bor:
+ *   road  — { name, from: [x, y], to: [x, y], width } — barcha xaritalarda bir xil
+ *   maps  — [{ label, features: [...] }], odatda ikki yil
+ *   feature — { name, label?, x, y, w, h, shape?: 'blob', color?, use, note? }
+ *     koordinatalar MAP_W × MAP_H maydonida, shimol — tepada;
+ *     label — xaritadagi yozuv ('\n' bilan qatorlarga bo'linadi), berilmasa name;
+ *     use   — maqsad guruhi ('Housing', 'Public green space', ...) — umumiy
+ *             o'zgarishni (overview) tekshirish uchun faktlar shu bo'yicha guruhlanadi.
+ *   Qaysi joy nimaga aylangani nomdan emas, GEOMETRIYADAN hisoblanadi
+ *   (bir xil joydagi ikki obyekt — o'sha joyning o'zgarishi).
  */
 
 export const SERIES_COLORS = ['#FF3131', '#2563EB', '#F59E0B', '#10B981', '#8B5CF6', '#64748B']
@@ -29,7 +40,12 @@ const KIND_NAMES = {
   line: 'Line graph',
   pie: 'Pie charts',
   table: 'Table',
+  map: 'Maps',
 }
+
+/** Xarita maydoni o'lchami (SVG viewBox ham shu) */
+export const MAP_W = 900
+export const MAP_H = 570
 
 /** O'q uchun yumaloq yuqori chegara: 19 → 20, 5.2 → 6, 480 → 500 */
 export function niceMax(value) {
@@ -198,6 +214,132 @@ function pieFacts(chart) {
   return facts
 }
 
+// ---------------------------------------------------------------
+// Xaritalar
+// ---------------------------------------------------------------
+
+/** Obyekt markazining kompas yo'nalishi — xarita uchga bo'lingan har o'qda */
+function compass(cx, cy) {
+  const row = ['north', '', 'south'][Math.min(2, Math.floor((cy / MAP_H) * 3))]
+  const col = ['west', '', 'east'][Math.min(2, Math.floor((cx / MAP_W) * 3))]
+  if (row && col) return `${row}-${col}`
+  return row || col || 'centre'
+}
+
+/** Yo'l o'qining berilgan balandlikdagi x koordinatasi */
+function roadXAt(road, y) {
+  const [x0, y0] = road.from
+  const [x1, y1] = road.to
+  return x0 + ((y - y0) / (y1 - y0)) * (x1 - x0)
+}
+
+/** "north-west, west of High Street" */
+export function mapPlace(f, road) {
+  const cx = f.x + f.w / 2
+  const cy = f.y + f.h / 2
+  const where = compass(cx, cy)
+  if (!road) return where
+  return `${where}, ${cx < roadXAt(road, cy) ? 'west' : 'east'} of ${road.name}`
+}
+
+/** Ikki to'rtburchak kesishuvining kichigiga nisbati: 1 — biri ikkinchisi ichida */
+function overlapShare(a, b) {
+  const w = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)
+  const h = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y)
+  if (w <= 0 || h <= 0) return 0
+  return (w * h) / Math.min(a.w * a.h, b.w * b.h)
+}
+
+/**
+ * Birinchi va oxirgi xaritani joy bo'yicha solishtiradi. Joyning yarmidan
+ * ko'pi ustma-ust tushsa — bu bitta joy: nomi bir xil bo'lsa saqlangan,
+ * boshqa bo'lsa almashtirilgan.
+ */
+function mapFacts(chart) {
+  const first = chart.maps[0]
+  const last = chart.maps[chart.maps.length - 1]
+  const road = chart.road
+  const place = (f) => mapPlace(f, road)
+  const facts = []
+
+  const used = new Set()
+  const unchanged = []
+  for (const before of first.features) {
+    const candidates = last.features
+      .map((after) => ({ after, share: overlapShare(before, after) }))
+      .filter((c) => c.share >= 0.5 && !used.has(c.after))
+      .sort((a, b) => b.share - a.share)
+    const match = candidates[0]?.after
+
+    if (!match) {
+      facts.push(`Removed: ${before.name} (${place(before)}) — nothing stands on this site in ${last.label}`)
+      continue
+    }
+    used.add(match)
+
+    if (match.name === before.name) {
+      const ratio = (match.w * match.h) / (before.w * before.h)
+      if (ratio >= 1.3) {
+        facts.push(`Enlarged: ${before.name} (${place(before)}) — its site is about ${formatNumber(Math.round(ratio * 10) / 10)} times larger in ${last.label}`)
+      } else if (ratio <= 0.77) {
+        facts.push(`Reduced: ${before.name} (${place(before)}) — its site is smaller in ${last.label}`)
+      } else {
+        unchanged.push(`${before.name} (${place(before)})`)
+      }
+    } else {
+      facts.push(`Replaced: ${before.name} (${first.label}) → ${match.name} (${last.label}), ${place(match)}`)
+    }
+  }
+
+  for (const after of last.features) {
+    if (!used.has(after)) {
+      facts.push(`New: ${after.name} (${place(after)}) — built on land that was empty in ${first.label}`)
+    }
+  }
+
+  if (road) unchanged.push(`${road.name} (same route in both maps)`)
+  facts.unshift(`Unchanged: ${unchanged.length ? unchanged.join('; ') : 'nothing'}`)
+
+  // Maqsad bo'yicha guruhlar — overview ("yashil hudud yo'qoldi, uy-joy
+  // ko'paydi") shu yerdan tekshiriladi.
+  const uses = [...new Set(chart.maps.flatMap((m) => m.features.map((f) => f.use)).filter(Boolean))]
+  for (const use of uses) {
+    const list = (m) => {
+      const names = m.features.filter((f) => f.use === use).map((f) => f.name)
+      if (!names.length) return 'none'
+      return [...new Set(names)]
+        .map((n) => { const k = names.filter((x) => x === n).length; return k > 1 ? `${n} (×${k})` : n })
+        .join(', ')
+    }
+    facts.push(`${use}: ${first.label} — ${list(first)}; ${last.label} — ${list(last)}`)
+  }
+
+  return facts
+}
+
+function mapToText(chart) {
+  const lines = [`${KIND_NAMES.map}: ${chart.title}`, 'North is at the top of each map.']
+  if (chart.road) {
+    const [fx, fy] = chart.road.from
+    const [tx, ty] = chart.road.to
+    lines.push(`${chart.road.name} runs in a straight line from the ${compass(fx, fy)} edge to the ${compass(tx, ty)} edge.`)
+  }
+  for (const m of chart.maps) {
+    lines.push('', `${m.label}:`)
+    for (const f of m.features) {
+      lines.push(`- ${f.name} — ${mapPlace(f, chart.road)}${f.note ? ` (${f.note})` : ''}`)
+    }
+  }
+
+  lines.push('', 'REFERENCE FACTS (computed by code from the maps above — always correct):')
+  lines.push('- This visual is a pair of maps: there are no figures. In "data_checks" record every claim about LOCATION (compass direction, side of the street) and about CHANGE (built, demolished, replaced, converted, enlarged, unchanged), and check each against these facts.')
+  lines.push('- Compass positions divide each map into thirds, so they are approximate: a neighbouring direction ("in the north" for a north-west site) is an approximation, not an error. Placing a site on the wrong side of the street, or in the opposite part of town, is inaccurate.')
+  lines.push('- Key features for a map task are the main transformations, not every site. A clear overview states the overall direction of change, which the use groups below show.')
+  lines.push('- The precise vocabulary for maps is that of change and location: was replaced by, was demolished, was converted into, was extended, made way for, to the north of, opposite, alongside. It plays the role that trend and comparison vocabulary plays for charts.')
+  for (const fact of mapFacts(chart)) lines.push(`- ${fact}`)
+  return lines.join('\n')
+}
+
 /**
  * Grafikni AI uchun matnga aylantiradi: avval ma'lumot jadvali, keyin
  * kod hisoblagan tayanch faktlar.
@@ -210,6 +352,7 @@ function pieFacts(chart) {
  */
 export function chartToText(chart) {
   if (!chart) return ''
+  if (chart.kind === 'map') return mapToText(chart)
 
   const unit = chart.unit ? ` (${chart.unit})` : ''
   const lines = [`${KIND_NAMES[chart.kind] ?? chart.kind}: ${chart.title}${unit}`]
