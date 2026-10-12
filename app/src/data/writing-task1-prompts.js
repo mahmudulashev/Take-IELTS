@@ -1,5 +1,5 @@
 /**
- * IELTS Academic Writing Task 1 — 9 ta belgilangan to'plam.
+ * IELTS Academic Writing Task 1 — 11 ta belgilangan to'plam.
  *
  * Task 2 to'plamlaridan farqi: har birida `chart` bor. Grafik rasm emas,
  * shu ma'lumotdan chiziladi (components/writing/Task1Chart.jsx), AI
@@ -275,6 +275,55 @@ export const WRITING_TASK1_PACKS = [
             { name: 'Supermarket', x: 538, y: 513, w: 357, h: 55, color: MAP_COLORS.cyan, use: 'Shops and business' },
           ],
         },
+      ],
+    },
+  },
+  {
+    id: 'writing-t1-10',
+    number: 10,
+    task: 'task1',
+    title: 'Task 1 Practice 10',
+    type: 'Bar chart',
+    topic: 'Economy & Spending',
+    difficulty: "O'rta",
+    text: `The bar chart shows the proportion of household income spent on four categories in Westland in 2000 and 2020. ${INSTRUCTION}`,
+    chart: {
+      kind: 'bar',
+      title: 'Proportion of household income spent on four categories in Westland, 2000 and 2020',
+      unit: '%',
+      axisLabel: 'Year',
+      // Xarajat turlari ketma-ketlik emas, lekin seriyalar — yillar:
+      // asosiy trend har bir tur bo'yicha 2000 → 2020 o'zgarishi
+      ordered: false,
+      seriesOrdered: true,
+      // Darslikdagi grafikda har ustun ustida foiz yozilgan
+      valueLabels: true,
+      categories: ['Housing', 'Food', 'Transport', 'Entertainment'],
+      series: [
+        { name: '2000', values: [25, 30, 15, 8], color: '#7F9CC4' },
+        { name: '2020', values: [35, 20, 18, 12], color: '#204F78' },
+      ],
+    },
+  },
+  {
+    id: 'writing-t1-11',
+    number: 11,
+    task: 'task1',
+    title: 'Task 1 Practice 11',
+    type: 'Line graph',
+    topic: 'Transport',
+    difficulty: "O'rta",
+    text: `The graph shows the percentage of commuters in Greenfield city who used three main modes of transport to travel to work between 1990 and 2020. ${INSTRUCTION}`,
+    chart: {
+      kind: 'line',
+      title: 'Percentage of commuters in Greenfield city by main mode of transport, 1990–2020',
+      unit: '%',
+      axisLabel: 'Mode of transport',
+      categories: ['1990', '1995', '2000', '2005', '2010', '2015', '2020'],
+      series: [
+        { name: 'Car', values: [35, 42, 48, 55, 58, 57, 52], color: '#1F4E79' },
+        { name: 'Bus', values: [45, 40, 34, 28, 25, 22, 20], color: '#C55A11' },
+        { name: 'Bicycle', values: [10, 8, 8, 9, 12, 16, 24], color: '#548235' },
       ],
     },
   },

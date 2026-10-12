@@ -7,7 +7,8 @@ import { colorAt, niceMax, axisTicks, formatNumber, MAP_W, MAP_H } from '../../l
  * Sababi va ma'lumot shakli: lib/task1-chart.js
  *
  * Imtihondagi kabi grafikda aniq qiymat yozuvlari yo'q (pie va jadvaldan
- * tashqari) — nomzod qiymatni o'q bo'yicha taxminan o'qiydi.
+ * tashqari) — nomzod qiymatni o'q bo'yicha taxminan o'qiydi. Manba
+ * grafikda yozuv bo'lsa, bar uchun `valueLabels: true` beriladi.
  */
 export default function Task1Chart({ chart }) {
   if (!chart) return null
@@ -117,16 +118,17 @@ function BarChart({ chart }) {
             <g key={cat}>
               {series.map((s, si) => {
                 const y = yOf(s.values[ci], max)
+                const x = startX + si * barW + 1
+                const w = Math.max(barW - 2, 1)
                 return (
-                  <rect
-                    key={s.name}
-                    x={startX + si * barW + 1}
-                    y={y}
-                    width={Math.max(barW - 2, 1)}
-                    height={PAD.t + PLOT_H - y}
-                    rx="2"
-                    fill={seriesColor(s, si)}
-                  />
+                  <g key={s.name}>
+                    <rect x={x} y={y} width={w} height={PAD.t + PLOT_H - y} rx="2" fill={seriesColor(s, si)} />
+                    {chart.valueLabels && (
+                      <text x={x + w / 2} y={y - 4} textAnchor="middle" fontSize="11" fontWeight="600" fill="#374151">
+                        {formatNumber(s.values[ci])}{chart.unit === '%' ? '%' : ''}
+                      </text>
+                    )}
+                  </g>
                 )
               })}
               <CategoryLabel x={groupX + groupW / 2}>{cat}</CategoryLabel>

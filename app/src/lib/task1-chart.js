@@ -17,6 +17,11 @@
  *                color berilmasa SERIES_COLORS'dan olinadi
  *   ordered    — bar/line/table: categories ketma-ketlikmi (yillar, yosh guruhlari).
  *                Mahsulotlar kabi alohida narsalar uchun `false` — trend faktlari chiqmaydi
+ *   valueLabels — bar: har ustun ustida qiymat yozilgan (manba grafikda shunday
+ *                bo'lsa). Unda o'qish chetlanishi 0 — raqam aniq ko'rinadi
+ *   seriesOrdered — `ordered: false` bilan: SERIYALAR vaqt nuqtalari (2000, 2020).
+ *                Unda har kategoriya uchun birinchi → oxirgi seriya o'zgarishi
+ *                yo'nalishi bilan hisoblanadi (asosiy trend aynan shu)
  *   pies       — faqat pie: [{ label, slices: [{ name, value }] }]
  *
  * Xarita (`kind: 'map'`) — raqam yo'q, joy va o'zgarish bor:
@@ -82,6 +87,7 @@ const signed = (n) => (n > 0 ? '+' : '−') + formatNumber(Math.abs(n))
  */
 export function readingTolerance(chart) {
   if (chart.kind !== 'bar' && chart.kind !== 'line') return 0
+  if (chart.valueLabels) return 0
   const max = niceMax(Math.max(...chart.series.flatMap((s) => s.values)))
   return round(axisTicks(max)[1] / 4)
 }
@@ -119,6 +125,10 @@ function tabularFacts(chart) {
   if (chart.ordered === false) {
     for (const s of series) {
       facts.push(`${s.name} ranking across ${where === 'table' ? 'columns' : 'categories'}: ${rankingText(cats.map((c, i) => ({ name: c, value: s.values[i] })), suffix)}`)
+    }
+    if (chart.seriesOrdered && series.length > 1) {
+      facts.push(...seriesChangeFacts(chart))
+      return facts
     }
     if (series.length > 1 && suffix !== '%') {
       facts.push(`Combined total of all series, by category: ${rankingText(cats.map((c, i) => ({ name: c, value: round(series.reduce((sum, s) => sum + s.values[i], 0)) })), '')}`)
@@ -174,6 +184,53 @@ function tabularFacts(chart) {
       if (dirs.every((d) => d > 0)) facts.push(`From ${cats[i]} to ${cats[i + 1]} every ${unit} rose`)
       if (dirs.every((d) => d < 0)) facts.push(`From ${cats[i]} to ${cats[i + 1]} every ${unit} fell`)
     }
+  }
+
+  return facts
+}
+
+/**
+ * Seriyalar vaqt nuqtalari bo'lganda (masalan 2000 va 2020) — har
+ * kategoriyaning birinchi va oxirgi seriya orasidagi o'zgarishi.
+ *
+ * NIMA UCHUN "percentage points": 30% → 20% — bu 10 punktga kamayish,
+ * lekin nisbatan uchdan bir qism. Ishorasiz "gap 10%" berilsa, model
+ * "fell by 10%" ni ham, "fell by a third" ni ham tekshira olmaydi.
+ */
+function seriesChangeFacts(chart) {
+  const { categories: cats, series } = chart
+  const pct = chart.unit === '%'
+  const suffix = pct ? '%' : ''
+  const points = pct ? ' percentage points' : ''
+  const first = series[0]
+  const last = series[series.length - 1]
+  const facts = []
+
+  const changes = cats.map((c, i) => ({ name: c, from: first.values[i], to: last.values[i], d: round(last.values[i] - first.values[i]) }))
+  for (const c of changes) {
+    const rel = c.from !== 0 && c.d !== 0 ? `, a relative change of ${signed(Math.round((c.d / c.from) * 100))}%` : ''
+    facts.push(
+      `${c.name}: ${formatNumber(c.from)}${suffix} (${first.name}) → ${formatNumber(c.to)}${suffix} (${last.name}), `
+      + (c.d === 0 ? 'no change' : `${c.d > 0 ? 'rose' : 'fell'} by ${formatNumber(Math.abs(c.d))}${points}${rel}`),
+    )
+  }
+
+  const rose = changes.filter((c) => c.d > 0).map((c) => c.name)
+  const fell = changes.filter((c) => c.d < 0).map((c) => c.name)
+  facts.push(`Direction ${first.name} → ${last.name}: rose — ${rose.join(', ') || 'none'}; fell — ${fell.join(', ') || 'none'}`)
+
+  const maxUp = Math.max(...changes.map((c) => c.d))
+  const maxDown = Math.min(...changes.map((c) => c.d))
+  const names = (v) => changes.filter((c) => c.d === v).map((c) => c.name).join(' and ')
+  if (maxUp > 0) facts.push(`Largest increase: ${names(maxUp)} (${signed(maxUp)}${points})`)
+  if (maxDown < 0) facts.push(`Largest decrease: ${names(maxDown)} (${signed(maxDown)}${points})`)
+
+  const leader = (s) => {
+    const top = Math.max(...s.values)
+    return cats.filter((_, i) => s.values[i] === top).join(' and ')
+  }
+  if (leader(first) !== leader(last)) {
+    facts.push(`The largest category changes from ${leader(first)} (${first.name}) to ${leader(last)} (${last.name})`)
   }
 
   return facts
@@ -377,6 +434,9 @@ export function chartToText(chart) {
     : '- Reading tolerance: the figures were printed on the visual, so stated figures should match; sensible rounding with hedging words is still acceptable.')
   if (chart.kind !== 'pie' && chart.ordered === false) {
     lines.push('- The categories are separate items, not a sequence (not years or stages): there is no trend across them, so "rose", "fell" or "overtook" across categories is not a valid reading.')
+    if (chart.seriesOrdered) {
+      lines.push(`- The series ARE points in time (${chart.series.map((s) => s.name).join(', ')}): "rose", "fell", "doubled" for one category between them is a valid trend claim — check it against the change facts below.`)
+    }
   }
   for (const fact of chart.kind === 'pie' ? pieFacts(chart) : tabularFacts(chart)) {
     lines.push(`- ${fact}`)
