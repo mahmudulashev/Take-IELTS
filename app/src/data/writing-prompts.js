@@ -1,5 +1,5 @@
 /**
- * IELTS Writing Task 2 — 21 ta belgilangan to'plam.
+ * IELTS Writing Task 2 — 23 ta belgilangan to'plam.
  *
  * Har bir to'plam o'zgarmas: foydalanuvchi
  * "Writing Practice 3" ni tanlasa, har safar aynan o'sha mavzu
@@ -208,6 +208,24 @@ export const WRITING_PACKS = [
     topic: 'Culture & Technology',
     difficulty: 'Qiyin',
     text: 'It is inevitable that traditional cultures will be lost as technology develops. Technology and traditional cultures are incompatible. To what extent do you agree or disagree with this view?',
+  },
+  {
+    id: 'writing-22',
+    number: 22,
+    title: 'Writing Practice 22',
+    type: 'Agree / Disagree',
+    topic: 'Education & Technology',
+    difficulty: "O'rta",
+    text: 'Some people believe that students should not be allowed to use mobile phones at school. To what extent do you agree or disagree?',
+  },
+  {
+    id: 'writing-23',
+    number: 23,
+    title: 'Writing Practice 23',
+    type: 'Problem / Solution',
+    topic: 'Urban Life & Transport',
+    difficulty: "O'rta",
+    text: 'In many cities, traffic congestion is becoming a serious problem. What are the main causes of this problem, and what solutions can you suggest?',
   },
 ]
 
