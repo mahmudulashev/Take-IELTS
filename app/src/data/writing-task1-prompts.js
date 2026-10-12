@@ -1,5 +1,5 @@
 /**
- * IELTS Academic Writing Task 1 — 11 ta belgilangan to'plam.
+ * IELTS Academic Writing Task 1 — 14 ta belgilangan to'plam.
  *
  * Task 2 to'plamlaridan farqi: har birida `chart` bor. Grafik rasm emas,
  * shu ma'lumotdan chiziladi (components/writing/Task1Chart.jsx), AI
@@ -324,6 +324,100 @@ export const WRITING_TASK1_PACKS = [
         { name: 'Car', values: [35, 42, 48, 55, 58, 57, 52], color: '#1F4E79' },
         { name: 'Bus', values: [45, 40, 34, 28, 25, 22, 20], color: '#C55A11' },
         { name: 'Bicycle', values: [10, 8, 8, 9, 12, 16, 24], color: '#548235' },
+      ],
+    },
+  },
+  {
+    id: 'writing-t1-12',
+    number: 12,
+    task: 'task1',
+    title: 'Task 1 Practice 12',
+    type: 'Maps',
+    topic: 'Village Development',
+    difficulty: 'Qiyin',
+    text: `The maps below show the village of Westbury in 2005 and 2025. ${INSTRUCTION}`,
+    chart: {
+      kind: 'map',
+      title: 'Westbury, 2005 and 2025',
+      road: { name: 'Station Road', from: [0, 290], to: [900, 290], width: 50 },
+      maps: [
+        {
+          label: '2005',
+          features: [
+            { name: 'Farmland', x: 20, y: 20, w: 280, h: 220, color: MAP_COLORS.green, use: 'Farmland and green space' },
+            { name: 'Village hall', label: 'VILLAGE\nHALL', x: 340, y: 60, w: 160, h: 100, use: 'Public services' },
+            { name: 'Woodland', x: 560, y: 20, w: 300, h: 220, shape: 'blob', color: MAP_COLORS.green, use: 'Farmland and green space' },
+            { name: 'Houses', x: 20, y: 340, w: 220, h: 210, color: MAP_COLORS.orange, use: 'Housing' },
+            { name: 'Primary school', label: 'PRIMARY\nSCHOOL', x: 280, y: 340, w: 190, h: 100, color: MAP_COLORS.blue, use: 'Public services' },
+            { name: 'Post office', label: 'POST\nOFFICE', x: 280, y: 465, w: 190, h: 85, use: 'Shops and business' },
+            { name: 'Car park', x: 510, y: 340, w: 200, h: 110, use: 'Transport' },
+            { name: 'Shops', x: 510, y: 480, w: 370, h: 70, color: MAP_COLORS.cyan, use: 'Shops and business' },
+          ],
+        },
+        {
+          label: '2025',
+          features: [
+            { name: 'Housing estate', label: 'HOUSING\nESTATE', x: 20, y: 20, w: 280, h: 220, color: MAP_COLORS.orange, use: 'Housing' },
+            { name: 'Village hall', label: 'VILLAGE\nHALL', x: 340, y: 60, w: 160, h: 100, use: 'Public services' },
+            { name: 'Medical centre', label: 'MEDICAL\nCENTRE', x: 340, y: 175, w: 160, h: 70, color: MAP_COLORS.pink, use: 'Public services' },
+            { name: 'Woodland', x: 670, y: 20, w: 200, h: 220, shape: 'blob', color: MAP_COLORS.green, use: 'Farmland and green space' },
+            { name: 'Sports centre', label: 'SPORTS\nCENTRE', x: 540, y: 40, w: 125, h: 180, use: 'Leisure' },
+            { name: 'Houses', x: 20, y: 340, w: 220, h: 210, color: MAP_COLORS.orange, use: 'Housing' },
+            // Maktab kengayib, pochta joyini egallagan
+            { name: 'Primary school', label: 'PRIMARY\nSCHOOL', x: 280, y: 340, w: 190, h: 210, color: MAP_COLORS.blue, use: 'Public services' },
+            { name: 'Supermarket', x: 505, y: 340, w: 215, h: 110, color: MAP_COLORS.cyan, use: 'Shops and business' },
+            { name: 'Car park', label: 'CAR\nPARK', x: 745, y: 340, w: 135, h: 110, use: 'Transport' },
+            { name: 'Shops', x: 510, y: 480, w: 370, h: 70, color: MAP_COLORS.cyan, use: 'Shops and business' },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: 'writing-t1-13',
+    number: 13,
+    task: 'task1',
+    title: 'Task 1 Practice 13',
+    type: 'Bar chart',
+    topic: 'Reading & Culture',
+    difficulty: "O'rta",
+    text: `The bar chart below shows the number of books borrowed from a city library, by type of book, in 2015, 2019 and 2023. ${INSTRUCTION}`,
+    chart: {
+      kind: 'bar',
+      title: 'Books borrowed from a city library by type, 2015–2023',
+      unit: 'thousands of loans',
+      axisLabel: 'Year',
+      // Kitob turlari ketma-ketlik emas, seriyalar esa yillar
+      ordered: false,
+      seriesOrdered: true,
+      categories: ['Fiction', 'Non-fiction', "Children's books", 'E-books'],
+      series: [
+        { name: '2015', values: [95, 62, 40, 8] },
+        { name: '2019', values: [84, 58, 48, 30] },
+        { name: '2023', values: [70, 55, 64, 78] },
+      ],
+    },
+  },
+  {
+    id: 'writing-t1-14',
+    number: 14,
+    task: 'task1',
+    title: 'Task 1 Practice 14',
+    type: 'Table',
+    topic: 'Food & Health',
+    difficulty: "O'rta",
+    text: `The table below shows the average amount of four types of food eaten per person each week in one country in 1990, 2005 and 2020. ${INSTRUCTION}`,
+    chart: {
+      kind: 'table',
+      title: 'Average weekly consumption of four types of food per person, 1990–2020',
+      unit: 'grams per person per week',
+      axisLabel: 'Type of food',
+      categories: ['1990', '2005', '2020'],
+      series: [
+        { name: 'Red meat', values: [820, 690, 540] },
+        { name: 'Fish', values: [180, 210, 260] },
+        { name: 'Fresh vegetables', values: [1100, 1050, 1230] },
+        { name: 'Takeaway food', values: [300, 520, 610] },
       ],
     },
   },

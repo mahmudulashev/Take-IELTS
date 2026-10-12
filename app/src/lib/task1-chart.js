@@ -290,13 +290,28 @@ function roadXAt(road, y) {
   return x0 + ((y - y0) / (y1 - y0)) * (x1 - x0)
 }
 
-/** "north-west, west of High Street" */
+/** Yo'l o'qining berilgan gorizontal nuqtadagi y koordinatasi */
+function roadYAt(road, x) {
+  const [x0, y0] = road.from
+  const [x1, y1] = road.to
+  return y0 + ((x - x0) / (x1 - x0)) * (y1 - y0)
+}
+
+/**
+ * "north-west, west of High Street". Yo'l asosan shimoldan janubga
+ * ketsa — g'arbi/sharqi, asosan g'arbdan sharqqa ketsa — shimoli/janubi.
+ */
 export function mapPlace(f, road) {
   const cx = f.x + f.w / 2
   const cy = f.y + f.h / 2
   const where = compass(cx, cy)
   if (!road) return where
-  return `${where}, ${cx < roadXAt(road, cy) ? 'west' : 'east'} of ${road.name}`
+  const [x0, y0] = road.from
+  const [x1, y1] = road.to
+  const side = Math.abs(x1 - x0) > Math.abs(y1 - y0)
+    ? (cy < roadYAt(road, cx) ? 'north' : 'south')
+    : (cx < roadXAt(road, cy) ? 'west' : 'east')
+  return `${where}, ${side} of ${road.name}`
 }
 
 /** Ikki to'rtburchak kesishuvining kichigiga nisbati: 1 — biri ikkinchisi ichida */
@@ -311,6 +326,10 @@ function overlapShare(a, b) {
  * Birinchi va oxirgi xaritani joy bo'yicha solishtiradi. Joyning yarmidan
  * ko'pi ustma-ust tushsa — bu bitta joy: nomi bir xil bo'lsa saqlangan,
  * boshqa bo'lsa almashtirilgan.
+ *
+ * Avval BIR XIL NOMLI juftlar bog'lanadi, keyin qolganlari. Aks holda
+ * kengaygan maktab yonidagi pochta joyini "egallab", maktabning o'zi
+ * "buzilgan" bo'lib chiqardi.
  */
 function mapFacts(chart) {
   const first = chart.maps[0]
@@ -320,19 +339,38 @@ function mapFacts(chart) {
   const facts = []
 
   const used = new Set()
+  const matchOf = new Map()
+  const bestFor = (before, sameName) => last.features
+    .filter((after) => !used.has(after) && (!sameName || after.name === before.name))
+    .map((after) => ({ after, share: overlapShare(before, after) }))
+    .filter((c) => c.share >= 0.5)
+    .sort((a, b) => b.share - a.share)[0]?.after
+  for (const sameName of [true, false]) {
+    for (const before of first.features) {
+      if (matchOf.has(before)) continue
+      const m = bestFor(before, sameName)
+      if (m) { matchOf.set(before, m); used.add(m) }
+    }
+  }
+
+  // Joy boshqa obyekt tarkibiga kirib ketgan bo'lishi mumkin (kengaygan
+  // maktab) — "bo'sh qoldi" deyish noto'g'ri fakt bo'lardi.
+  const coveringIn = (f, features) => features
+    .map((g) => ({ g, share: overlapShare(f, g) }))
+    .filter((c) => c.share >= 0.5)
+    .sort((a, b) => b.share - a.share)[0]?.g
+
   const unchanged = []
   for (const before of first.features) {
-    const candidates = last.features
-      .map((after) => ({ after, share: overlapShare(before, after) }))
-      .filter((c) => c.share >= 0.5 && !used.has(c.after))
-      .sort((a, b) => b.share - a.share)
-    const match = candidates[0]?.after
+    const match = matchOf.get(before)
 
     if (!match) {
-      facts.push(`Removed: ${before.name} (${place(before)}) — nothing stands on this site in ${last.label}`)
+      const now = coveringIn(before, last.features)
+      facts.push(now
+        ? `Removed: ${before.name} (${place(before)}) — its site is now part of the ${now.name} in ${last.label}`
+        : `Removed: ${before.name} (${place(before)}) — nothing stands on this site in ${last.label}`)
       continue
     }
-    used.add(match)
 
     if (match.name === before.name) {
       const ratio = (match.w * match.h) / (before.w * before.h)
@@ -350,7 +388,10 @@ function mapFacts(chart) {
 
   for (const after of last.features) {
     if (!used.has(after)) {
-      facts.push(`New: ${after.name} (${place(after)}) — built on land that was empty in ${first.label}`)
+      const was = coveringIn(after, first.features)
+      facts.push(was
+        ? `New: ${after.name} (${place(after)}) — built on part of the former ${was.name} site`
+        : `New: ${after.name} (${place(after)}) — built on land that was empty in ${first.label}`)
     }
   }
 
