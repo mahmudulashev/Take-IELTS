@@ -333,7 +333,15 @@ export default function WritingTestPage() {
                     onFocus={() => !started && setStarted(true)}
                     disabled={evaluating || paused}
                     placeholder={task === 'task1' ? 'Javobingizni shu yerga yozing…' : 'Inshoyingizni shu yerga yozing…'}
+                    // Haqiqiy kompyuter IELTS'ida imlo tekshiruvi ham, so'z
+                    // taklifi ham yo'q. Brauzer so'zni oxirigacha yozib bersa
+                    // (macOS/Safari "inline predictions": "gover" → "government"),
+                    // imlo bahosi nomzodning emas, brauzerning bahosi bo'lib qoladi.
                     spellCheck={false}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    writingsuggestions="false"
                     className="w-full h-[420px] p-4 rounded-xl border border-gray-200 focus:border-[#FF3131] focus:ring-2 focus:ring-[#FF3131]/10 outline-none text-sm leading-relaxed resize-none font-sans disabled:bg-gray-50"
                   />
 
