@@ -1,5 +1,5 @@
 /**
- * IELTS Writing Task 2 — 23 ta belgilangan to'plam.
+ * IELTS Writing Task 2 — 24 ta belgilangan to'plam.
  *
  * Har bir to'plam o'zgarmas: foydalanuvchi
  * "Writing Practice 3" ni tanlasa, har safar aynan o'sha mavzu
@@ -226,6 +226,15 @@ export const WRITING_PACKS = [
     topic: 'Urban Life & Transport',
     difficulty: "O'rta",
     text: 'In many cities, traffic congestion is becoming a serious problem. What are the main causes of this problem, and what solutions can you suggest?',
+  },
+  {
+    id: 'writing-24',
+    number: 24,
+    title: 'Writing Practice 24',
+    type: 'Agree / Disagree',
+    topic: 'Health & Government',
+    difficulty: "O'rta",
+    text: 'Healthcare should always be funded by governments, and it should always be free for people to use. To what extent do you agree or disagree with this idea?',
   },
 ]
 
