@@ -1,5 +1,5 @@
 /**
- * IELTS Academic Writing Task 1 — 14 ta belgilangan to'plam.
+ * IELTS Academic Writing Task 1 — 15 ta belgilangan to'plam.
  *
  * Task 2 to'plamlaridan farqi: har birida `chart` bor. Grafik rasm emas,
  * shu ma'lumotdan chiziladi (components/writing/Task1Chart.jsx), AI
@@ -418,6 +418,30 @@ export const WRITING_TASK1_PACKS = [
         { name: 'Fish', values: [180, 210, 260] },
         { name: 'Fresh vegetables', values: [1100, 1050, 1230] },
         { name: 'Takeaway food', values: [300, 520, 610] },
+      ],
+    },
+  },
+  {
+    id: 'writing-t1-15',
+    number: 15,
+    task: 'task1',
+    title: 'Task 1 Practice 15',
+    type: 'Bar chart',
+    topic: 'Work & Employment',
+    difficulty: "O'rta",
+    text: `The bar chart below shows the percentage of workers employed in agriculture, industry and services in one country between 1960 and 2000. ${INSTRUCTION}`,
+    // Qiymatlar manba grafikdan o'qilgan (unda sarlavha yo'q edi, savol shu
+    // ma'lumotga qarab tuzilgan). Har yil yig'indisi taxminan 100.
+    chart: {
+      kind: 'bar',
+      title: 'Percentage of workers employed in three sectors, 1960–2000',
+      unit: '%',
+      axisLabel: 'Sector',
+      categories: ['1960', '1970', '1980', '1990', '2000'],
+      series: [
+        { name: 'Agriculture', values: [63, 54, 46, 31, 14], color: '#8E4440' },
+        { name: 'Industry', values: [16, 21, 25, 25, 25], color: '#B0534D' },
+        { name: 'Services', values: [17, 24, 28, 45, 63], color: '#D4A9A6' },
       ],
     },
   },
