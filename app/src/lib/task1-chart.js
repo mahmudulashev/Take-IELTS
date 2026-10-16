@@ -62,11 +62,20 @@ export function niceMax(value) {
 }
 
 /**
- * O'q belgilari. Butun qadam beradigan bo'linishni tanlaymiz —
- * 0, 1.2, 2.4 kabi belgilar grafikdan qiymat o'qishni qiyinlashtiradi.
+ * O'q belgilari. Imtihon grafiklaridagidek "yumaloq" qadam tanlanadi —
+ * 1, 2, 2.5 yoki 5 × 10ⁿ (0, 10, 20… yoki 0, 20, 40…). Faqat butun son
+ * talab qilinganda 0, 16, 32, 48 kabi o'q chiqardi: undan qiymat o'qish
+ * noqulay va haqiqiy imtihonda bunday o'q bo'lmaydi.
  */
+const isNiceStep = (step) => {
+  const exp = Math.pow(10, Math.floor(Math.log10(step)))
+  return [1, 2, 2.5, 5].includes(Math.round((step / exp) * 1e6) / 1e6)
+}
+
 export function axisTicks(max) {
-  const n = [5, 4, 6, 3].find((k) => Number.isInteger(Math.round((max / k) * 1e6) / 1e6)) ?? 5
+  const n = [5, 4, 6, 8, 7, 3].find((k) => isNiceStep(max / k))
+    ?? [5, 4, 6, 3].find((k) => Number.isInteger(Math.round((max / k) * 1e6) / 1e6))
+    ?? 5
   const step = max / n
   return Array.from({ length: n + 1 }, (_, i) => Math.round(i * step * 1e6) / 1e6)
 }

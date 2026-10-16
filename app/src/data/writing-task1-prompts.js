@@ -1,5 +1,5 @@
 /**
- * IELTS Academic Writing Task 1 — 15 ta belgilangan to'plam.
+ * IELTS Academic Writing Task 1 — 16 ta belgilangan to'plam.
  *
  * Task 2 to'plamlaridan farqi: har birida `chart` bor. Grafik rasm emas,
  * shu ma'lumotdan chiziladi (components/writing/Task1Chart.jsx), AI
@@ -442,6 +442,32 @@ export const WRITING_TASK1_PACKS = [
         { name: 'Agriculture', values: [63, 54, 46, 31, 14], color: '#8E4440' },
         { name: 'Industry', values: [16, 21, 25, 25, 25], color: '#B0534D' },
         { name: 'Services', values: [17, 24, 28, 45, 63], color: '#D4A9A6' },
+      ],
+    },
+  },
+  {
+    id: 'writing-t1-16',
+    number: 16,
+    task: 'task1',
+    title: 'Task 1 Practice 16',
+    type: 'Line graph',
+    topic: 'Environment & Recycling',
+    difficulty: "O'rta",
+    text: `The graph below shows the amount of four types of household waste recycled in one city between 2000 and 2020. ${INSTRUCTION}`,
+    // Imtihondagi line graph'larga xos xususiyatlar ataylab kiritilgan:
+    // cho'qqidan keyin pasayish (Paper), tez o'sish va ikki kesishish
+    // (Plastic), barqarorlik (Glass), davr o'rtasida noldan boshlanish (Food).
+    chart: {
+      kind: 'line',
+      title: 'Household waste recycled in one city, 2000–2020',
+      unit: 'thousand tonnes',
+      axisLabel: 'Type of waste',
+      categories: ['2000', '2004', '2008', '2012', '2016', '2020'],
+      series: [
+        { name: 'Paper', values: [44, 50, 55, 58, 51, 43] },
+        { name: 'Plastic', values: [6, 11, 20, 31, 42, 52] },
+        { name: 'Glass', values: [24, 27, 23, 26, 24, 25] },
+        { name: 'Food waste', values: [0, 0, 5, 14, 22, 29] },
       ],
     },
   },
