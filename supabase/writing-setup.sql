@@ -93,7 +93,7 @@ as $$
     and created_at >= date_trunc('day', now());
 $$;
 
-revoke all on function public.writing_attempts_today(uuid, text) from public, anon;
+revoke all on function public.writing_attempts_today(uuid, text) from public, anon, authenticated;
 grant execute on function public.writing_attempts_today(uuid, text) to service_role;
 
 
