@@ -41,6 +41,19 @@ const DAILY_LIMIT = 5          // bitta foydalanuvchi uchun kuniga
 const MIN_WORDS = 50
 const MAX_WORDS = 1000
 
+// Vaqt chegaralari. Supabase worker'ni o'z limitida (546 WORKER_LIMIT)
+// to'xtatadi va brauzer tushunarli xabar o'rniga "non-2xx" oladi.
+// 2026-10-07 da 3.6-flash 503 berdi, keyingi model esa umuman javob
+// bermay osilib qoldi — brauzer ulanishni yo'qotdi, worker 150 soniyada
+// o'ldirildi va Groq zaxirasi hech qachon sinalmadi. Shuning uchun:
+//   - har bir model so'rovi alohida timeout bilan cheklanadi;
+//   - Gemini bosqichi umumiy byudjetdan oshmaydi, qolgan vaqt Groq'ga;
+//   - butun funksiya worker limitidan ancha oldin javob qaytaradi.
+const CALL_TIMEOUT_MS = 45_000     // bitta Gemini so'rovi
+const GEMINI_BUDGET_MS = 50_000    // so'rov boshidan Gemini bosqichi tugashigacha
+const TOTAL_BUDGET_MS = 70_000     // so'rov boshidan Groq zaxirasi tugashigacha
+const MIN_CALL_MS = 5_000          // bundan kam vaqt qolsa, yangi so'rov boshlamaymiz
+
 /**
  * Kunlik limitdan ozod foydalanuvchilar (sinov va administratsiya uchun).
  *
@@ -500,8 +513,14 @@ async function callGroq(
   prompt: string,
   apiKey: string,
   isTask1: boolean,
+  remainingMs: () => number,
 ): Promise<{ raw: string; model: string } | null> {
   for (const model of GROQ_MODELS) {
+    const budget = remainingMs()
+    if (budget < MIN_CALL_MS) {
+      console.error(`Groq [${model}]: vaqt qolmadi (${budget}ms)`)
+      break
+    }
     const body: Record<string, unknown> = {
       model,
       messages: [{ role: 'user', content: prompt }],
@@ -522,14 +541,16 @@ async function callGroq(
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify(body),
+        signal: AbortSignal.timeout(budget),
       })
     } catch (netErr) {
+      // Timeout ham shu yerga tushadi (TimeoutError)
       console.error(`Groq tarmoq xatosi [${model}]:`, netErr)
       continue
     }
 
     if (!res.ok) {
-      const detail = await res.text()
+      const detail = await res.text().catch((e) => String(e))
       console.error(`Groq xatosi [${model}]:`, res.status, detail.slice(0, 200))
       continue   // keyingi Groq modeliga
     }
@@ -548,6 +569,9 @@ async function callGroq(
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (req.method !== 'POST') return json({ error: 'Faqat POST' }, 405)
+
+  const startedAt = Date.now()
+  const elapsed = () => Date.now() - startedAt
 
   try {
     // ---------------------------------------------------------------
@@ -733,10 +757,20 @@ Deno.serve(async (req: Request) => {
     // ishlaydi va vaqtinchalik tebranish ularni chetlab o'tmasin.
     const attemptsFor = (i: number) => (i === 0 && MODELS.length > 1 ? 1 : 3)
 
+    // Gemini bosqichida qolgan vaqt. Tugasa — qolgan modellarni sinamay
+    // Groq zaxirasiga o'tamiz (yoki tushunarli 503 qaytaramiz).
+    const geminiLeft = () => GEMINI_BUDGET_MS - elapsed()
+    // Backoff kutishi byudjetni yeb qo'ymasin.
+    const canWait = (ms: number) => geminiLeft() - ms >= MIN_CALL_MS
+
     outer:
     for (const [modelIndex, model] of MODELS.entries()) {
       const MAX_ATTEMPTS = attemptsFor(modelIndex)
       for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        if (geminiLeft() < MIN_CALL_MS) {
+          console.warn(`Gemini vaqt byudjeti tugadi (${elapsed()}ms) — ${model} sinalmadi`)
+          break outer
+        }
         let res: Response
         try {
           res = await fetch(
@@ -745,19 +779,31 @@ Deno.serve(async (req: Request) => {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
               body: geminiBody,
+              signal: AbortSignal.timeout(Math.min(CALL_TIMEOUT_MS, geminiLeft())),
             },
           )
         } catch (netErr) {
-          // Tarmoq uzilishi ham vaqtinchalik — qayta urinamiz
           lastStatus = 0
           lastError = String(netErr)
           console.error(`Tarmoq xatosi [${model}] urinish ${attempt}:`, netErr)
-          if (attempt < MAX_ATTEMPTS) { await sleep(1000 * 2 ** (attempt - 1)); continue }
+          // Javob bermay osilib qolgan model — shu modelni qayta sinash
+          // byudjetni yana yeydi. Keyingi modelga o'tamiz.
+          if ((netErr as Error)?.name === 'TimeoutError') break
+          // Oddiy tarmoq uzilishi vaqtinchalik — qayta urinamiz
+          const wait = 1000 * 2 ** (attempt - 1)
+          if (attempt < MAX_ATTEMPTS && canWait(wait)) { await sleep(wait); continue }
           break
         }
 
         if (res.ok) {
-          geminiJson = await res.json()
+          // Tana ham timeout signali ostida o'qiladi — osilib qolsa xato beradi
+          geminiJson = await res.json().catch((e) => {
+            lastStatus = 0
+            lastError = String(e)
+            console.error(`Gemini javobini o'qib bo'lmadi [${model}]:`, e)
+            return null
+          })
+          if (!geminiJson) break
           usedModel = model
           if (model !== primaryModel) console.warn(`Zaxira model ishlatildi: ${model}`)
           if (attempt > 1) console.warn(`${attempt}-urinishda muvaffaqiyat`)
@@ -765,7 +811,7 @@ Deno.serve(async (req: Request) => {
         }
 
         lastStatus = res.status
-        const detail = await res.text()
+        const detail = await res.text().catch((e) => String(e))
         console.error(`Gemini xatosi [${model}] urinish ${attempt}:`, res.status, detail)
 
         // Google xato JSON'idan tushunarli sababni ajratamiz
@@ -789,8 +835,9 @@ Deno.serve(async (req: Request) => {
         // (ilgari bu yerda `break outer` bo'lib, zaxira modellar
         // umuman sinalmay qolar edi — 503 to'g'ridan-to'g'ri qaytardi).
         if (TRANSIENT.has(res.status)) {
-          if (attempt < MAX_ATTEMPTS) {
-            await sleep(1000 * 2 ** (attempt - 1))
+          const wait = 1000 * 2 ** (attempt - 1)
+          if (attempt < MAX_ATTEMPTS && canWait(wait)) {
+            await sleep(wait)
             continue
           }
           break
@@ -818,7 +865,7 @@ Deno.serve(async (req: Request) => {
     // Faqat kalit bo'lsa va Gemini xatosi vaqtinchalik bo'lsa urinamiz;
     // kalit/ruxsat xatosida (400/403) Groq ham yordam bermaydi.
     if (!raw && groqApiKey && lastStatus !== 400 && lastStatus !== 403) {
-      const groq = await callGroq(promptText_, groqApiKey, isTask1)
+      const groq = await callGroq(promptText_, groqApiKey, isTask1, () => TOTAL_BUDGET_MS - elapsed())
       if (groq) {
         raw = groq.raw
         usedModel = groq.model
