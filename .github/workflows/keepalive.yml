@@ -2,16 +2,24 @@ name: Supabase keepalive
 
 # Bepul tarifdagi Supabase loyihasi bir necha kun so'rovsiz tursa avtomatik
 # to'xtaydi. O'shanda sayt "natija yo'q" holatiga tushadi va foydalanuvchiga
-# ma'lumotlari o'chgandek ko'rinadi. Shu ish kuniga bir marta bazaga haqiqiy
-# so'rov yuborib, loyihani uyg'oq tutadi.
+# ma'lumotlari o'chgandek ko'rinadi. Shu ish bazaga haqiqiy so'rovlar
+# yuborib, loyihani uyg'oq tutadi.
+#
+# NIMA UCHUN KUNIGA 4 MARTA VA BIR NECHTA SO'ROV:
+# 2026-10-26 da Supabase "faollik yetarli emas, loyiha to'xtatiladi" deb
+# xat yubordi — holbuki bu ish har kuni muvaffaqiyatli ishlagan edi. U
+# kuniga BITTA so'rov yuborardi va RLS tufayli bo'sh ro'yxat olardi.
+# Supabase hujjati "odatda kuniga bir nechta foydalanuvchi so'rovi
+# yetarli" deydi, shuning uchun endi har 6 soatda uchta so'rov ketadi,
+# ulardan biri haqiqiy qator qaytaradi (`stamps`, tasdiqlanganlari ochiq).
 #
 # DIQQAT: GitHub jadval bo'yicha ishlarni repo 60 kun tinch tursa o'chiradi.
 # Repoda muntazam commit bo'lsa muammo yo'q.
 
 on:
   schedule:
-    - cron: '17 3 * * *'   # har kuni 03:17 UTC
-  workflow_dispatch:        # qo'lda ham ishga tushirish mumkin
+    - cron: '17 */6 * * *'  # har 6 soatda (00:17, 06:17, 12:17, 18:17 UTC)
+  workflow_dispatch:         # qo'lda ham ishga tushirish mumkin
 
 jobs:
   ping:
@@ -29,18 +37,26 @@ jobs:
             exit 1
           fi
 
-          # Haqiqiy jadval so'rovi kerak: shunda so'rov bazagacha yetib boradi.
-          # RLS tufayli anon kalit bo'sh ro'yxat oladi — bu kutilgan natija.
-          code=$(curl -sS -o /tmp/response.txt -w '%{http_code}' --max-time 30 \
-            -H "apikey: $SUPABASE_ANON_KEY" \
-            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
-            "$SUPABASE_URL/rest/v1/writing_results?select=id&limit=1")
+          # Haqiqiy jadval so'rovlari kerak: shunda so'rov bazagacha yetib
+          # boradi. `stamps` dagi tasdiqlangan yozuvlar anon uchun ochiq —
+          # bu so'rov haqiqiy qator o'qiydi. Qolgan ikkitasi RLS tufayli bo'sh
+          # ro'yxat oladi — bu kutilgan natija.
+          failed=0
+          for path in \
+            "stamps?select=approved&approved=eq.true&limit=1" \
+            "writing_results?select=id&limit=1" \
+            "profiles?select=id&limit=1"; do
+            code=$(curl -sS -o /tmp/response.txt -w '%{http_code}' --max-time 30 \
+              -H "apikey: $SUPABASE_ANON_KEY" \
+              -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+              "$SUPABASE_URL/rest/v1/$path") || code=000
+            echo "$path -> HTTP $code: $(head -c 120 /tmp/response.txt || true)"
+            case "$code" in 2*) ;; *) failed=1 ;; esac
+            sleep 2
+          done
 
-          echo "HTTP $code"
-          head -c 200 /tmp/response.txt || true
-          echo
-
-          case "$code" in
-            2*) echo "Baza javob berdi — loyiha uyg'oq." ;;
-            *)  echo "Baza javob bermadi. Loyiha to'xtagan bo'lishi mumkin."; exit 1 ;;
-          esac
+          if [ "$failed" -ne 0 ]; then
+            echo "Baza javob bermadi. Loyiha to'xtagan bo'lishi mumkin."
+            exit 1
+          fi
+          echo "Baza javob berdi — loyiha uyg'oq."
